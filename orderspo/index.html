@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sheinspo — بەدواداچوونی داواکاری</title>
+<meta name="description" content="بەدواداچوونی داواکاریەکەت لە Sheinspo">
+<meta name="theme-color" content="#172B31">
+<link rel="icon" href="/logo.png">
+<link rel="apple-touch-icon" href="/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Noto+Kufi+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#172B31;
+  --ink-deep:#0F1F24;
+  --ink-line:#2C4249;
+  --teal:#2AADA5;
+  --teal-dark:#248782;
+  --white:#FFFFFF;
+  --mute:#8FA3A8;
+  --faint:#5C7178;
+  --radius:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--ink);
+  color:var(--white);
+  font-family:"Noto Kufi Arabic","Archivo",system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  min-height:100dvh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:24px 18px 40px;
+}
+.num{font-family:"Archivo",sans-serif;direction:ltr;unicode-bidi:isolate;font-variant-numeric:tabular-nums}
+.wrap{width:100%;max-width:420px;margin:auto 0}
+
+.langbar{width:100%;max-width:420px;display:flex;justify-content:flex-end;gap:4px;margin-bottom:20px}
+.langbar button{
+  background:none;border:0;color:var(--faint);font:500 12px "Archivo",sans-serif;
+  padding:6px 10px;border-radius:6px;cursor:pointer;font-family:inherit;
+}
+.langbar button[aria-pressed="true"]{color:var(--teal);background:var(--ink-deep)}
+
+.brand{text-align:center;padding:18px 0 26px}
+.brand h1{font:600 21px "Archivo",sans-serif;letter-spacing:1.5px;color:var(--white)}
+.brand .rule{width:30px;height:2px;background:var(--teal);margin:11px auto 0}
+
+h2{font-size:17px;font-weight:500;text-align:center;margin-bottom:7px;line-height:1.5}
+.sub{color:var(--mute);font-size:13px;text-align:center;line-height:1.8;margin-bottom:26px}
+
+label{display:block;color:var(--mute);font-size:12px;margin-bottom:6px}
+input{
+  width:100%;height:46px;background:var(--ink-deep);
+  border:1px solid var(--ink-line);border-radius:var(--radius);
+  color:var(--white);font:500 16px "Archivo",sans-serif;
+  padding:0 14px;direction:ltr;text-align:right;outline:none;
+  transition:border-color .15s;
+}
+input:focus{border-color:var(--teal)}
+input::placeholder{color:#3E545B}
+.field{margin-bottom:16px}
+
+button.go{
+  width:100%;height:48px;background:var(--teal);border:0;border-radius:var(--radius);
+  color:#06282B;font:600 15px inherit;cursor:pointer;transition:background .15s;
+  font-family:inherit;
+}
+button.go:hover:not(:disabled){background:var(--teal-dark)}
+button.go:disabled{opacity:.5;cursor:default}
+
+.hint{color:var(--faint);font-size:12px;text-align:center;margin-top:16px;line-height:1.8}
+.err{
+  background:rgba(226,75,74,.1);border:1px solid rgba(226,75,74,.35);
+  color:#F09595;font-size:13px;border-radius:var(--radius);
+  padding:12px 14px;margin-bottom:16px;line-height:1.7;
+}
+.hidden{display:none}
+@keyframes spo-fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes spo-dr{0%{transform:translateX(0)}100%{transform:translateX(400px)}}
+@keyframes spo-rl{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+@keyframes spo-ps{0%,100%{opacity:.35}50%{opacity:1}}
+@keyframes spo-ld{0%{transform:translateY(-36px);opacity:0}55%{transform:translateY(0);opacity:1}100%{transform:translateY(0);opacity:1}}
+@keyframes spo-gw{0%,100%{r:3}50%{r:7}}
+.scene{background:var(--ink-deep);border-radius:12px;height:148px;margin-bottom:18px;overflow:hidden}
+.scene svg{width:100%;height:100%;display:block}
+@media (prefers-reduced-motion:reduce){.scene *{animation:none!important}}
+
+
+.head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.head .user{font-size:14px;font-weight:500}
+.head .code{color:var(--teal);font-size:13px}
+
+.money{background:var(--ink-deep);border-radius:14px;padding:16px;margin-bottom:20px}
+.money .row{display:flex;justify-content:space-between;font-size:13px;color:var(--mute);margin-bottom:9px}
+.money .row span:last-child{color:#C9D6D9}
+.money .sep{border-bottom:1px solid var(--ink-line);padding-bottom:11px;margin-bottom:11px}
+.money .due{display:flex;justify-content:space-between;align-items:baseline}
+.money .due .lbl{font-size:14px;font-weight:500;color:var(--white)}
+.money .due .val{font-size:23px;font-weight:600;color:var(--teal)}
+.money .note{color:var(--faint);font-size:11.5px;margin-top:4px}
+
+.tl{padding-inline-start:3px}
+.step{display:flex;gap:13px}
+.step .gut{display:flex;flex-direction:column;align-items:center;width:14px;flex-shrink:0}
+.dot{width:9px;height:9px;border-radius:50%;background:transparent;border:1px solid var(--ink-line);margin-top:5px}
+.step.done .dot{background:var(--teal);border-color:var(--teal)}
+.step.now .dot{width:14px;height:14px;background:var(--teal);border-color:var(--teal);margin-top:3px;
+  display:flex;align-items:center;justify-content:center}
+.step.now .dot::after{content:"";width:5px;height:5px;border-radius:50%;background:var(--ink)}
+.line{width:1px;flex:1;min-height:17px;background:var(--ink-line)}
+.step.done .line{background:var(--teal-dark)}
+.step .body{padding-bottom:15px}
+.step .t{font-size:13px;color:var(--faint)}
+.step.done .t{color:#C9D6D9}
+.step.now .t{color:var(--white);font-size:14px;font-weight:500}
+.step .d{font-size:11.5px;color:var(--faint);margin-top:2px}
+.step.now .d{color:var(--teal)}
+.step:last-child .line{display:none}
+.step:last-child .body{padding-bottom:0}
+
+.foot{border-top:1px solid var(--ink-line);margin-top:20px;padding-top:14px;
+  display:flex;justify-content:space-between;align-items:center}
+.foot .upd{color:var(--faint);font-size:11.5px}
+.foot button{background:none;border:0;color:var(--teal);font:500 13px inherit;cursor:pointer;font-family:inherit}
+
+.spin{display:inline-block;width:15px;height:15px;border:2px solid rgba(6,40,43,.3);
+  border-top-color:#06282B;border-radius:50%;animation:sp .7s linear infinite;vertical-align:-3px}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation-duration:2s}}
+</style>
+</head>
+<body>
+
+<div class="langbar">
+  <button id="ku" aria-pressed="true">کوردی</button>
+  <button id="ar" aria-pressed="false">عربي</button>
+</div>
+
+<div class="wrap">
+  <div class="brand">
+    <h1>SHEINSPO</h1>
+    <div class="rule"></div>
+  </div>
+
+  <section id="form-view">
+    <h2 data-t="title"></h2>
+    <p class="sub" data-t="sub"></p>
+    <div id="err" class="err hidden"></div>
+    <div class="field">
+      <label for="code" data-t="codeLabel"></label>
+      <input id="code" inputmode="numeric" autocomplete="off" placeholder="312">
+    </div>
+    <div class="field">
+      <label for="last4" data-t="phoneLabel"></label>
+      <input id="last4" inputmode="numeric" autocomplete="off" maxlength="4" placeholder="1234">
+    </div>
+    <button class="go" id="submit" data-t="cta"></button>
+    <p class="hint" data-t="hint"></p>
+    <p style="text-align:center;color:#3E545B;font-size:10px;margin-top:22px;font-family:Archivo,sans-serif">v8</p>
+  </section>
+
+  <section id="result-view" class="hidden">
+    <div class="head">
+      <span class="user" id="r-user"></span>
+      <span class="code num" id="r-code"></span>
+    </div>
+    <div class="money">
+      <div class="row"><span data-t="total"></span><span class="num" id="r-total"></span></div>
+      <div class="row sep"><span data-t="paid"></span><span class="num" id="r-paid"></span></div>
+      <div class="due">
+        <span class="lbl" data-t="due"></span>
+        <span class="val num" id="r-due"></span>
+      </div>
+      <p class="note" id="r-note"></p>
+    </div>
+    <div class="scene" id="r-scene"></div>
+  <div class="tl" id="r-timeline"></div>
+    <div class="foot">
+      <span class="upd" id="r-upd"></span>
+      <button id="again" data-t="again"></button>
+    </div>
+  </section>
+</div>
+
+<script>
+const SUPABASE_URL = "https://bucrapapzgyqxfqdnyaz.supabase.co";
+const SUPABASE_KEY = "sb_publishable_bf3Rs0aaLbxji2WHfy9A7Q_jSw20oma";
+
+
+const SCENES = {
+received:`<svg viewBox="0 0 340 170" preserveAspectRatio="xMidYMid meet"><rect x="132" y="30" width="76" height="112" rx="9" fill="#172B31" stroke="#2C4249"/><rect x="140" y="46" width="60" height="8" rx="4" fill="#2C4249"/><g style="animation:spo-ld 2.4s ease-out infinite"><rect x="142" y="64" width="24" height="24" rx="3" fill="#2AADA5"/></g><g style="animation:spo-ld 2.4s ease-out .5s infinite"><rect x="174" y="64" width="24" height="24" rx="3" fill="#248782"/></g><g style="animation:spo-ld 2.4s ease-out 1s infinite"><rect x="142" y="96" width="24" height="24" rx="3" fill="#3E6B70"/></g><g style="animation:spo-ld 2.4s ease-out 1.5s infinite"><rect x="174" y="96" width="24" height="24" rx="3" fill="#2AADA5" opacity=".55"/></g><circle cx="170" cy="134" r="3" fill="#2AADA5" style="animation:spo-ps 1.6s infinite"/></svg>`,
+purchased:`<svg viewBox="0 0 340 170" preserveAspectRatio="xMidYMid meet"><path d="M120 66h92l8 78h-108z" fill="#172B31" stroke="#2C4249"/><path d="M144 66c0-16 8-24 22-24s22 8 22 24" fill="none" stroke="#2AADA5" stroke-width="3"/><g style="animation:spo-fl 2.6s ease-in-out infinite"><rect x="134" y="94" width="64" height="38" rx="5" fill="#0F1F24" stroke="#2AADA5"/><rect x="134" y="104" width="64" height="7" fill="#2AADA5"/></g><circle cx="232" cy="54" r="17" fill="#2AADA5" style="animation:spo-ps 2s infinite"/><path d="M224 54l6 6 12-13" fill="none" stroke="#06282B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+at_dubai:`<svg viewBox="0 0 340 170" preserveAspectRatio="xMidYMid meet"><path d="M138 20l9 28 5 88h-28l5-88z" fill="#1E3A40" stroke="#2C4249"/><path d="M138 20l9 28 4 88h-13z" fill="#2C4249"/><rect x="92" y="66" width="20" height="70" fill="#1E3A40" stroke="#2C4249"/><rect x="164" y="80" width="18" height="56" fill="#1E3A40" stroke="#2C4249"/><rect x="68" y="92" width="16" height="44" fill="#1E3A40" stroke="#2C4249"/><rect x="190" y="98" width="14" height="38" fill="#1E3A40" stroke="#2C4249"/><circle cx="138" cy="30" r="3" fill="#2AADA5" style="animation:spo-ps 1.4s infinite"/><rect x="222" y="96" width="72" height="40" fill="#172B31" stroke="#2C4249"/><path d="M222 96l36-16 36 16" fill="#1E3A40" stroke="#2C4249"/><rect x="238" y="112" width="16" height="16" fill="#2AADA5" style="animation:spo-ld 3s ease-out infinite"/><rect x="260" y="112" width="16" height="16" fill="#248782" style="animation:spo-ld 3s ease-out .7s infinite"/><rect x="40" y="136" width="264" height="2" fill="#2C4249"/></svg>`,
+in_transit:`<svg viewBox="0 0 340 170" preserveAspectRatio="xMidYMid meet"><circle cx="286" cy="40" r="14" fill="#1E3A40"/><circle cx="280" cy="36" r="12" fill="#172B31"/><path d="M0 136h340" stroke="#2C4249" stroke-width="2"/><g style="animation:spo-dr 3.6s linear infinite"><rect x="-130" y="82" width="76" height="48" rx="3" fill="#172B31" stroke="#2AADA5"/><rect x="-54" y="100" width="34" height="30" rx="3" fill="#1E3A40" stroke="#2C4249"/><rect x="-49" y="105" width="22" height="12" rx="2" fill="#0F1F24" stroke="#2C4249"/><circle cx="-108" cy="136" r="8" fill="#0F1F24" stroke="#2AADA5" stroke-width="2" style="animation:spo-rl .5s linear infinite"/><circle cx="-72" cy="136" r="8" fill="#0F1F24" stroke="#2AADA5" stroke-width="2" style="animation:spo-rl .5s linear infinite"/><circle cx="-34" cy="136" r="8" fill="#0F1F24" stroke="#2AADA5" stroke-width="2" style="animation:spo-rl .5s linear infinite"/></g><rect x="24" y="132" width="30" height="3" fill="#2C4249"/><rect x="104" y="132" width="30" height="3" fill="#2C4249"/><rect x="184" y="132" width="30" height="3" fill="#2C4249"/><rect x="264" y="132" width="30" height="3" fill="#2C4249"/></svg>`,
+at_erbil:`<svg viewBox="0 0 340 170" preserveAspectRatio="xMidYMid meet"><path d="M18 146l16-34h146l16 34z" fill="#1E3A40" stroke="#2C4249" stroke-width="0.5"/><path d="M34 112h146v-6H34z" fill="#24454B"/><rect x="36" y="68" width="18" height="38" fill="#172B31" stroke="#2C4249" stroke-width="0.5"/><rect x="56" y="62" width="18" height="44" fill="#172B31" stroke="#2C4249" stroke-width="0.5"/><rect x="76" y="66" width="16" height="40" fill="#172B31" stroke="#2C4249" stroke-width="0.5"/><rect x="122" y="66" width="16" height="40" fill="#172B31" stroke="#2C4249" stroke-width="0.5"/><rect x="140" y="62" width="18" height="44" fill="#172B31" stroke="#2C4249" stroke-width="0.5"/><rect x="160" y="68" width="18" height="38" fill="#172B31" stroke="#2C4249" stroke-width="0.5"/><path d="M42 80a5 5 0 0110 0v14H42z" fill="#2AADA5" opacity=".55"/><path d="M60 74a5 5 0 0110 0v20H60z" fill="#2AADA5" opacity=".75"/><path d="M79 78a5 5 0 0110 0v16H79z" fill="#2AADA5" opacity=".5"/><path d="M125 78a5 5 0 0110 0v16h-10z" fill="#2AADA5" opacity=".75"/><path d="M144 74a5 5 0 0110 0v20h-10z" fill="#2AADA5" opacity=".5"/><path d="M164 80a5 5 0 0110 0v14h-10z" fill="#2AADA5" opacity=".7"/><rect x="92" y="48" width="30" height="58" fill="#172B31" stroke="#2AADA5" stroke-width="0.5"/><path d="M99 92a8 12 0 0116 0v14H99z" fill="#0F1F24" stroke="#2AADA5" stroke-width="1.5"/><path d="M100 66a7 7 0 0114 0v12h-14z" fill="#2AADA5" opacity=".8"/><rect x="105" y="34" width="2" height="14" fill="#2C4249"/><circle cx="106" cy="34" r="2.5" fill="#2AADA5" style="animation:spo-ps 2.2s infinite"/><path d="M99 106l-14 40h44l-14-40z" fill="#24454B" stroke="#2C4249" stroke-width="0.5"/><path d="M95 118h28M91 128h36M87 138h44" stroke="#2C4249" stroke-width="0.5"/><rect x="228" y="94" width="88" height="52" fill="#172B31" stroke="#2C4249" stroke-width="0.5"/><path d="M228 94l44-18 44 18" fill="#1E3A40" stroke="#2C4249" stroke-width="0.5"/><rect x="244" y="116" width="18" height="18" fill="#2AADA5" style="animation:spo-ld 2.8s ease-out infinite"/><rect x="268" y="116" width="18" height="18" fill="#248782" style="animation:spo-ld 2.8s ease-out .7s infinite"/><rect x="292" y="124" width="14" height="10" fill="#3E6B70" style="animation:spo-ld 2.8s ease-out 1.4s infinite"/><rect x="10" y="146" width="320" height="2" fill="#2C4249"/></svg>`,
+out_for_delivery:`<svg viewBox="0 0 340 170" preserveAspectRatio="xMidYMid meet"><circle cx="86" cy="48" r="7" fill="#2AADA5"/><circle cx="86" cy="48" r="3" fill="#2AADA5" style="animation:spo-gw 2s ease-out infinite"/><path d="M86 48C124 60 144 88 148 122" fill="none" stroke="#2AADA5" stroke-width="1.5" opacity=".8"/><path d="M86 48C132 52 166 68 198 92" fill="none" stroke="#2AADA5" stroke-width="1.5" opacity=".55"/><path d="M86 48C104 84 104 112 94 138" fill="none" stroke="#2AADA5" stroke-width="1.5" opacity=".55"/><circle cx="148" cy="122" r="4" fill="#248782" style="animation:spo-ps 2.2s infinite"/><circle cx="198" cy="92" r="4" fill="#248782" style="animation:spo-ps 2.2s .7s infinite"/><circle cx="94" cy="138" r="4" fill="#248782" style="animation:spo-ps 2.2s 1.4s infinite"/><rect x="238" y="58" width="60" height="78" rx="3" fill="#172B31" stroke="#2C4249"/><circle cx="249" cy="98" r="3" fill="#2AADA5"/><g style="animation:spo-fl 2.4s ease-in-out infinite"><rect x="256" y="106" width="26" height="22" fill="#2AADA5"/><path d="M269 106v22" stroke="#06282B" stroke-width="2"/></g></svg>`,
+delivered:`<svg viewBox="0 0 340 170" preserveAspectRatio="xMidYMid meet"><rect x="126" y="74" width="88" height="62" rx="4" fill="#172B31" stroke="#2AADA5"/><path d="M170 74v62" stroke="#2C4249" stroke-width="2"/><path d="M126 96h88" stroke="#2C4249" stroke-width="2"/><path d="M144 74c0-14 10-22 26-14 16-8 26 0 26 14" fill="none" stroke="#2AADA5" stroke-width="2.5"/><circle cx="170" cy="46" r="20" fill="#2AADA5" style="animation:spo-ps 2.4s infinite"/><path d="M161 46l6 7 13-14" fill="none" stroke="#06282B" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="86" cy="126" r="3" fill="#2AADA5" opacity=".5" style="animation:spo-fl 2.8s ease-in-out infinite"/><circle cx="258" cy="114" r="3" fill="#2AADA5" opacity=".5" style="animation:spo-fl 2.8s ease-in-out .8s infinite"/></svg>`
+};
+
+const FLOW = ["received","purchased","at_dubai","in_transit","at_erbil","out_for_delivery","delivered"];
+
+const T = {
+  ku: {
+    title:"بەدواداچوونی داواکاریەکەت",
+    sub:"کۆدەکەت بنووسە و ببینە لە کوێیە",
+    codeLabel:"کۆدی داواکاری",
+    phoneLabel:"٤ ژمارەی کۆتایی مۆبایلەکەت",
+    cta:"بینینی داواکاری",
+    hint:"کۆدەکەت لە پەیامەکەماندا نێردراوە",
+    total:"کۆی گشتی",
+    paid:"پارەی پێشەکی",
+    due:"بڕی ماوە",
+    cash:"کاش لە کاتی گەیاندن",
+    settled:"هیچ بڕێک نەماوە",
+    again:"گەڕان بۆ داواکارییەکی تر",
+    updated:"نوێکرایەوە",
+    notfound:"کۆد یان ژمارەکە هەڵەیە. تکایە دووبارە هەوڵ بدەرەوە.",
+    empty:"تکایە کۆد و ٤ ژمارەی کۆتایی مۆبایلەکەت بنووسە.",
+    neterr:"کێشەیەک ڕوویدا. تکایە دواتر هەوڵ بدەرەوە.",
+    cancelled:"ئەم داواکارییە هەڵوەشێنراوەتەوە",
+    st:{
+      received:"داواکاری وەرگیرا",
+      purchased:"کڕدرا لە شەین",
+      at_dubai:"گەیشتە دوبەی",
+      in_transit:"لە ڕێگادایە بۆ هەولێر",
+      at_erbil:"گەیشتە هەولێر",
+      out_for_delivery:"لە ڕێگای گەیاندندایە",
+      delivered:"گەیەندرا"
+    },
+    now:"ئێستا"
+  },
+  ar: {
+    title:"تتبع طلبك",
+    sub:"اكتب رمزك وشوف وين وصل طلبك",
+    codeLabel:"رمز الطلب",
+    phoneLabel:"آخر ٤ أرقام من موبايلك",
+    cta:"شوف طلبك",
+    hint:"رمزك انرسل بالرسالة مالتنا",
+    total:"المجموع",
+    paid:"المبلغ المدفوع",
+    due:"المبلغ المتبقي",
+    cash:"نقداً عند التسليم",
+    settled:"ما بقى شي عليك",
+    again:"دور على طلب ثاني",
+    updated:"آخر تحديث",
+    notfound:"الرمز أو الرقم غلط. جرب مرة ثانية.",
+    empty:"اكتب الرمز وآخر ٤ أرقام من موبايلك.",
+    neterr:"صارت مشكلة. جرب بعدين.",
+    cancelled:"هذا الطلب ملغي",
+    st:{
+      received:"تم استلام الطلب",
+      purchased:"تم الشراء من شي إن",
+      at_dubai:"وصل إلى دبي",
+      in_transit:"بالطريق إلى أربيل",
+      at_erbil:"وصل إلى أربيل",
+      out_for_delivery:"قيد التوصيل",
+      delivered:"تم التسليم"
+    },
+    now:"الآن"
+  }
+};
+
+let lang = localStorage.getItem("spo_lang") === "ar" ? "ar" : "ku";
+
+const $ = id => document.getElementById(id);
+const iqd = n => Number(n).toLocaleString("en-US");
+
+function applyLang(){
+  const t = T[lang];
+  document.documentElement.lang = lang === "ar" ? "ar" : "ckb";
+  document.querySelectorAll("[data-t]").forEach(el => {
+    const v = t[el.dataset.t];
+    if (v) el.textContent = v;
+  });
+  $("ku").setAttribute("aria-pressed", lang === "ku");
+  $("ar").setAttribute("aria-pressed", lang === "ar");
+  if (!$("result-view").classList.contains("hidden") && window._last) render(window._last);
+}
+
+function fmtDate(iso){
+  if (!iso) return "";
+  const d = new Date(iso);
+  return d.toLocaleDateString(lang === "ar" ? "ar-IQ" : "en-GB",
+    {day:"numeric", month:"short"});
+}
+
+function showError(msg){
+  const e = $("err");
+  e.textContent = msg;
+  e.classList.remove("hidden");
+}
+
+function render(o){
+  window._last = o;
+  const t = T[lang];
+
+  $("r-user").textContent = o.username || "";
+  $("r-code").textContent = o.order_code;
+  $("r-total").textContent = iqd(o.total_iqd);
+  $("r-paid").textContent = "− " + iqd(o.deposit_iqd);
+  $("r-due").textContent = iqd(o.balance_iqd);
+  $("r-note").textContent = o.balance_iqd > 0 ? t.cash : t.settled;
+
+  const seen = {};
+  (o.history || []).forEach(h => { if (!seen[h.status]) seen[h.status] = h.at; });
+
+  $("r-scene").innerHTML = SCENES[o.status] || SCENES.received;
+
+  const reached = FLOW.indexOf(o.status);
+  const tl = $("r-timeline");
+  tl.innerHTML = "";
+
+  FLOW.forEach((s, i) => {
+    const div = document.createElement("div");
+    div.className = "step" + (i < reached ? " done" : i === reached ? " now" : "");
+    const meta = i === reached ? t.now : "";
+
+    const gut = document.createElement("div");
+    gut.className = "gut";
+    const dot = document.createElement("div"); dot.className = "dot";
+    const line = document.createElement("div"); line.className = "line";
+    gut.append(dot, line);
+
+    const body = document.createElement("div");
+    body.className = "body";
+    const title = document.createElement("div");
+    title.className = "t"; title.textContent = t.st[s];
+    body.append(title);
+    if (meta){
+      const d = document.createElement("div");
+      d.className = "d"; d.textContent = meta;
+      body.append(d);
+    }
+
+    div.append(gut, body);
+    tl.append(div);
+  });
+
+  $("r-upd").textContent = "";
+  $("form-view").classList.add("hidden");
+  $("result-view").classList.remove("hidden");
+  window.scrollTo(0, 0);
+}
+
+async function lookup(){
+  const t = T[lang];
+  $("err").classList.add("hidden");
+
+  const AR = "٠١٢٣٤٥٦٧٨٩", FA = "۰۱۲۳۴۵۶۷۸۹";
+  const en = t => String(t).replace(/[٠-٩۰-۹]/g, d => {
+    const i = AR.indexOf(d); return i > -1 ? i : FA.indexOf(d);
+  });
+  let code = en($("code").value.trim());
+  let last4 = en($("last4").value.trim());
+
+  if (!code || last4.length !== 4){ showError(t.empty); return; }
+
+  const btn = $("submit");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span>';
+
+  try {
+    const res = await fetch(SUPABASE_URL + "/rest/v1/rpc/track_order", {
+      method: "POST",
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Authorization": "Bearer " + SUPABASE_KEY,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ p_code: code, p_last4: last4 })
+    });
+    if (!res.ok) throw new Error(res.status);
+    const rows = await res.json();
+    if (!rows || !rows.length){ showError(t.notfound); return; }
+    render(rows[0]);
+  } catch (e) {
+    showError(t.neterr);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = t.cta;
+  }
+}
+
+$("submit").addEventListener("click", lookup);
+$("last4").addEventListener("keydown", e => { if (e.key === "Enter") lookup(); });
+$("code").addEventListener("keydown", e => { if (e.key === "Enter") $("last4").focus(); });
+$("again").addEventListener("click", () => {
+  $("result-view").classList.add("hidden");
+  $("form-view").classList.remove("hidden");
+  $("code").value = ""; $("last4").value = "";
+  $("code").focus();
+});
+["ku","ar"].forEach(l => $(l).addEventListener("click", () => {
+  lang = l; localStorage.setItem("spo_lang", l); applyLang();
+}));
+
+applyLang();
+</script>
+</body>
+</html>
