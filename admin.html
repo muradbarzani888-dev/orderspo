@@ -77,6 +77,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 .tile .v{font-size:19px;font-weight:600}
 .tile.wide{grid-column:1/-1}
 .tile.wide .v{color:var(--teal);font-size:22px}
+.tile .sub{color:var(--mute);font-size:11px;font-weight:400;margin-top:5px}
 
 .nav{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
 .nav button{background:var(--deep);border:1px solid var(--line);border-radius:12px;
@@ -138,7 +139,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v26</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v27</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -268,7 +269,8 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
         <div class="tile"><div class="k" data-t="avgOrder"></div><div class="v num" id="dh-avg">—</div></div>
         <div class="tile"><div class="k" data-t="billed"></div><div class="v num" id="dh-billed">—</div></div>
         <div class="tile"><div class="k" data-t="paidUp"></div><div class="v num" id="dh-paid">—</div></div>
-        <div class="tile wide"><div class="k" data-t="cod"></div><div class="v num" id="dh-cod">—</div></div>
+        <div class="tile"><div class="k" data-t="cod"></div><div class="v num" id="dh-cod" style="color:var(--teal)">—</div></div>
+        <div class="tile"><div class="k" data-t="codPending"></div><div class="v num" id="dh-cod-pending" style="color:var(--teal)">—</div><div class="sub" id="dh-cod-pending-sub"></div></div>
       </div>
 
       <div id="dh-status" style="margin-bottom:18px"></div>
@@ -374,7 +376,7 @@ db.rpc = async (fn, args, opts) => {
 
 const FLOW = ["received","purchased","at_dubai","in_transit","at_erbil","out_for_delivery","delivered"];
 const T = {
- ku:{cycle:"مانگ",orders:"داواکاری",cod:"پارەی ماوە بۆ کۆکردنەوە",billed:"کۆی گشتی مانگ",paidUp:"پێشەکی وەرگیراو",
+ ku:{cycle:"مانگ",orders:"داواکاری",cod:"پارەی ماوە بۆ کۆکردنەوە",codPending:"ماوە بۆ کۆکردنەوە (بێ گەیەندراوەکان)",billed:"کۆی گشتی مانگ",paidUp:"پێشەکی وەرگیراو",
   saveCustomer:"تۆمارکردنی زانیاری کڕیار",newOrder:"داواکاری نوێ",
   pasteMany:"زیادکردنی کۆمەڵ",refresh:"نوێکردنەوە",
   pasteHelp:"ڕیزەکان لە شیتەکە کۆپی بکە و لێرە بیانلکێنە. بەم ڕیزبەندییە: کۆد، ناو، بڕ، ناونیشان، مۆبایل",
@@ -404,7 +406,7 @@ const T = {
   saved:"تۆمارکرا",need:"ناو و کۆی گشتی پێویستە",moved:"داواکاری گوازرایەوە",
   st:{received:"وەرگیرا",purchased:"کڕدرا",at_dubai:"لە دوبەی",in_transit:"لە ڕێگادایە",
    at_erbil:"لە هەولێر",out_for_delivery:"لە گەیاندندایە",delivered:"گەیەندرا",cancelled:"هەڵوەشێنراوە"}},
- ar:{cycle:"الشهر",orders:"الطلبات",cod:"المبلغ المتبقي للتحصيل",billed:"مجموع الشهر",paidUp:"المدفوع مقدماً",
+ ar:{cycle:"الشهر",orders:"الطلبات",cod:"المبلغ المتبقي للتحصيل",codPending:"المتبقي للتحصيل (بدون المسلَّم)",billed:"مجموع الشهر",paidUp:"المدفوع مقدماً",
   saveCustomer:"حفظ معلومات الزبون",newOrder:"طلب جديد",
   pasteMany:"إضافة مجموعة",refresh:"تحديث",
   pasteHelp:"انسخ الصفوف من الشيت والصقها هنا. بهذا الترتيب: الرمز، الاسم، المبلغ، العنوان، الموبايل",
@@ -896,6 +898,12 @@ function paintTotals(){
   $("dh-billed").textContent = iqd(sum("total_iqd"));
   $("dh-paid").textContent = iqd(sum("deposit_iqd"));
   $("dh-cod").textContent = iqd(sum("balance_iqd"));
+  // Money still on the street: delivered orders are already collected, so drop them.
+  const pend = live.filter(r => r.status !== "delivered");
+  const pendSum = pend.reduce((a,r)=>a+Number(r.balance_iqd||0),0);
+  const delivSum = sum("balance_iqd") - pendSum;
+  $("dh-cod-pending").textContent = iqd(pendSum);
+  $("dh-cod-pending-sub").textContent = `${pend.length} ${t().orders} · ${t().st.delivered}: ${iqd(delivSum)}`;
   $("dh-avg").textContent = live.length ? iqd(Math.round(sum("total_iqd")/live.length)) : "0";
 
   const tally = {};
