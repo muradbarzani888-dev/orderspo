@@ -138,7 +138,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v23</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v24</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -306,6 +306,8 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
       <div id="sc-results"></div>
 
+      <div id="sc-review" class="hide"></div>
+
       <div id="sc-manual" class="f hide">
         <label data-t="typeMissing"></label>
         <textarea id="sc-extra" dir="ltr" style="min-height:110px;
@@ -359,6 +361,10 @@ const T = {
   typeMissing:"ئەوانەی نەخوێنرانەوە بنووسە — کۆدی جانتا و کۆدی کڕیار لە هەر ڕیزێک",
   applyBags:"تۆمارکردنی جانتاکان",reading:"دەخوێنرێتەوە",
   scFound:"دۆزرایەوە",scFailed:"نەخوێنرایەوە",scNoOrder:"کۆدی کڕیار نەدۆزرایەوە",avgOrder:"ناوەندی داواکاری",
+  revTitle:"بەدەست نووسینەوە",revOf:"لە",revBag:"کۆدی جانتا",revSeq:"کۆدی کڕیار",
+  revSave:"تۆمار و دواتر",revSkip:"بازدان",revDone:"هەموویان تەواوبوون",
+  revBad:"کۆد دروست نییە — ٦ پیتی وەک یەک و ژمارەیەک",revFixed:"چاککرا",
+  scOther:"لەم مانگەدا نییە، بەڵام لە مانگی پێشوودا هەیە",scSwitch:"گۆڕین بۆ",
   exportCsv:"داگرتنی Excel",noOrders:"هیچ داواکاریەک نییە",
   colCode:"کۆد",colUser:"ناو",colPhone:"مۆبایل",colTotal:"کۆی گشتی",
   colDep:"پێشەکی",colBal:"ماوە",colStatus:"دۆخ",colItems:"بەرهەم",linked:"لەگەڵ کڕیارێکی هەبوو بەستراوە",
@@ -385,6 +391,10 @@ const T = {
   typeMissing:"اكتب اللي ما انقرا — رمز الكيس ورمز الزبون بكل سطر",
   applyBags:"حفظ الأكياس",reading:"يقرا",
   scFound:"انلكى",scFailed:"ما انقرا",scNoOrder:"رمز الزبون مو موجود",avgOrder:"متوسط الطلب",
+  revTitle:"كتابة يدوية",revOf:"من",revBag:"رمز الكيس",revSeq:"رمز الزبون",
+  revSave:"احفظ وكمّل",revSkip:"تخطي",revDone:"خلصت كلها",
+  revBad:"الرمز مو صحيح — ٦ حروف نفسها ورقم",revFixed:"انصلح",
+  scOther:"مو بهذا الشهر، بس موجود بالشهر اللي قبله",scSwitch:"غيّر إلى",
   exportCsv:"تحميل Excel",noOrders:"ما في طلبات",
   colCode:"الرمز",colUser:"الاسم",colPhone:"الموبايل",colTotal:"المجموع",
   colDep:"المقدم",colBal:"المتبقي",colStatus:"الحالة",colItems:"القطع",linked:"انربط بزبون موجود",
@@ -944,7 +954,26 @@ function exportDash(){
 
 // ---------- Bag scanning ----------
 // Reads GC-340 <BAGCODE>-<CUSTOMERID> from label photos, entirely in the browser.
-let scanRows = [], scanFails = [];
+let scanRows = [], scanFails = [], revIdx = 0, revUrl = null;
+
+// Otsu: pick the greyscale cutoff that best separates ink from paper.
+// Phone photos have uneven light, so one fixed number never fits every photo.
+function otsu(hist, total){
+  let sum = 0;
+  for (let i = 0; i < 256; i++) sum += i * hist[i];
+  let sumB = 0, wB = 0, best = 0, level = 128;
+  for (let i = 0; i < 256; i++){
+    wB += hist[i];
+    if (!wB) continue;
+    const wF = total - wB;
+    if (!wF) break;
+    sumB += i * hist[i];
+    const mB = sumB / wB, mF = (sum - sumB) / wF;
+    const between = wB * wF * (mB - mF) * (mB - mF);
+    if (between > best){ best = between; level = i; }
+  }
+  return level;
+}
 
 async function initScan(){
   const sel = $("sc-cycle");
@@ -955,38 +984,98 @@ async function initScan(){
     const { data } = await db.from("cycles").select("code,label")
       .in("code", have).order("code",{ascending:false});
     sel.innerHTML = (data||[]).map(c=>`<option value="${c.code}">${c.label||c.code}</option>`).join("");
-    sel.value = cycle;
+    // Bags arrive a month after they are bought, so the last cycle Xurshid
+    // chose is a better default than today's cycle.
+    const lastCyc = localStorage.getItem("spo_sc_cycle");
+    sel.value = (lastCyc && [...sel.options].some(o=>o.value===lastCyc)) ? lastCyc : cycle;
+    sel.addEventListener("change", () => localStorage.setItem("spo_sc_cycle", sel.value));
 
-    $("sc-status").innerHTML = ["at_dubai","in_transit","at_erbil","out_for_delivery","delivered"]
+    const st = $("sc-status");
+    st.innerHTML = ["at_dubai","in_transit","at_erbil","out_for_delivery","delivered"]
       .map(v=>`<option value="${v}">${t().st[v]}</option>`).join("");
+    const lastSt = localStorage.getItem("spo_sc_status");
+    if (lastSt && [...st.options].some(o=>o.value===lastSt)) st.value = lastSt;
+    st.addEventListener("change", () => localStorage.setItem("spo_sc_status", st.value));
 
     $("sc-files").addEventListener("change", runScan);
     $("sc-apply").addEventListener("click", applyScan);
   }
 }
 
+// A bag code is six identical letters then one digit: DDDDDD9. The letter I is
+// never used. Anything that does not clean up to that shape is NOT a code —
+// it goes to manual review. A wrong code saved silently is worse than no code.
+const BAG_LETTERS = 6;
+
+// Characters Tesseract habitually swaps for digits, applied only to the last slot.
+const AS_DIGIT = { I:"1", L:"1", T:"7", O:"0", Q:"0", D:"0", S:"5", Z:"2",
+                   B:"8", G:"6", A:"4", E:"3", J:"1" };
+// ...and the reverse, for the letter block.
+const AS_LETTER = { "1":null, "0":"O", "5":"S", "8":"B", "2":"Z", "6":"G" };
+
+// Fold a messy read into the canonical shape, or return null if it can't be
+// trusted. LLLLL13 -> LLLLLL3.  HHHHHI -> HHHHHH1.  DBO1 -> null (ambiguous).
+function normalizeCode(raw){
+  const s = String(raw || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (s.length < 4 || s.length > 9) return null;
+
+  let tail = s.slice(-1);
+  if (!/\d/.test(tail)) tail = AS_DIGIT[tail] || null;
+  if (tail === null) return null;
+
+  const body = s.slice(0, -1);
+  const votes = {};
+  let letters = 0;
+  for (const ch of body){
+    const L = /[A-Z]/.test(ch) ? ch : AS_LETTER[ch];
+    if (!L || L === "I") continue;      // I is not a valid card letter
+    votes[L] = (votes[L] || 0) + 1;
+    letters++;
+  }
+  if (letters < 3) return null;
+
+  let best = null, bestN = 0;
+  for (const L in votes) if (votes[L] > bestN){ best = L; bestN = votes[L]; }
+  // Needs a clear majority. A three-way tie like D/B/O means we guessed wrong.
+  if (!best || bestN / letters < 0.6) return null;
+
+  return best.repeat(BAG_LETTERS) + tail;
+}
+
+const isCanonical = c => new RegExp(`^([A-HJ-Z])\\1{${BAG_LETTERS-1}}\\d$`).test(c || "");
+
 // Pull the code pair out of whatever OCR returned.
 function extractCode(txt){
-  const up = txt.toUpperCase().replace(/[|]/g, "1").replace(/\s+/g, " ");
-  // GC-340 <code> - <id>
-  let m = up.match(/G\s*C\s*[-–—]?\s*3\s*4\s*0\s+([A-Z0-9]{1,10})\s*[-–—]\s*(\d{1,4})/);
-  if (m) return { code: m[1], seq: parseInt(m[2], 10) };
-  // GC line where the dash was lost in the scan
-  m = up.match(/G\s*C\s*[-–—]?\s*3\s*4\s*0\s+([A-Z]{1,6}\d{0,2})\s+(\d{1,4})\b/);
-  if (m) return { code: m[1], seq: parseInt(m[2], 10) };
-  // any short letter-number code followed by a dash and an order number
-  m = up.match(/\b([A-Z]{1,6}\d{1,2})\s*[-–—]\s*(\d{1,4})\b/);
-  if (m) return { code: m[1], seq: parseInt(m[2], 10) };
-  return null;
+  const up = String(txt || "").toUpperCase().replace(/[|]/g, "1");
+  const out = [];
+  const push = (raw, seqTxt) => {
+    const code = normalizeCode(raw);
+    const seq = parseInt(seqTxt, 10);
+    if (code && seq > 0 && seq < 10000) out.push({ code, seq, raw: String(raw) });
+  };
+  const sweep = re => { let m; while ((m = re.exec(up)) !== null) push(m[1], m[2]); };
+
+  // GC-340 <code>-<id>, the printed format
+  sweep(/G\s*C\s*[-–—]?\s*3\s*4\s*0\s+([A-Z0-9]{3,9})\s*[-–—\s]\s*(\d{1,4})\b/g);
+  if (out.length) return out[0];
+  // code and id separated by a dash, GC prefix lost
+  sweep(/\b([A-Z0-9]{4,9})\s*[-–—]\s*(\d{1,4})\b/g);
+  if (out.length) return out[0];
+  // last resort: code and id separated by whitespace only
+  sweep(/\b([A-Z0-9]{4,9})\s+(\d{1,4})\b/g);
+  return out[0] || null;
 }
 
 async function runScan(e){
   const files = [...e.target.files];
   if (!files.length) return;
 
-  scanRows = []; scanFails = [];
+  scanRows = []; scanFails = []; revIdx = 0;
+  if (revUrl){ URL.revokeObjectURL(revUrl); revUrl = null; }
   $("sc-progress").classList.remove("hide");
   $("sc-results").innerHTML = "";
+  $("sc-review").innerHTML = "";
+  $("sc-review").classList.add("hide");
   $("sc-apply").classList.add("hide");
   $("sc-manual").classList.add("hide");
 
@@ -995,48 +1084,67 @@ async function runScan(e){
     tessedit_char_whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-+ ",
   });
 
+  // top, bottom, threshold ("otsu" | "gray" | number), zoom, page-seg mode
+  // 6 = one uniform block of text, 11 = sparse text anywhere in the frame.
+  const PASSES = [
+    [0.00, 1.00, "otsu", 1.6, "6"],
+    [0.10, 0.50, "otsu", 2.2, "6"],
+    [0.00, 1.00, "gray", 1.6, "11"],
+    [0.10, 0.50,    130, 2.2, "6"],
+    [0.35, 0.85, "otsu", 2.2, "6"],
+    [0.00, 0.55,    150, 2.6, "6"],
+    [0.00, 1.00, "otsu", 2.6, "11"]
+  ];
+  const MAX_W = 2400;   // canvases past this are slow and no more accurate
+  let psmNow = null;
+
   for (let i = 0; i < files.length; i++){
     $("sc-bar").style.width = `${(i / files.length) * 100}%`;
     $("sc-count").textContent = `${t().reading} ${i + 1} / ${files.length}`;
     try {
       const bmp = await createImageBitmap(files[i]);
-      // Several crop bands and contrast levels; stop at the first clean read.
-      const passes = [
-        [0.10, 0.50, 130, 2],
-        [0.14, 0.34, 140, 3],
-        [0.00, 1.00, 130, 1.5], // whole frame — label may sit anywhere
-        [0.05, 0.60, 115, 2],
-        [0.35, 0.80, 130, 2],   // label lower in the frame
-        [0.00, 0.45, 150, 3],
-        [0.00, 1.00,   0, 1.5], // whole frame, greyscale only
-        [0.10, 0.50,   0, 2]
-      ];
       let hit = null;
-      for (const [top, bot, cut, zoom] of passes){
+      for (const [top, bot, cut, zoom, psm] of PASSES){
         const cv = document.createElement("canvas");
         const sy = Math.round(bmp.height * top);
         const sh = Math.round(bmp.height * (bot - top));
-        cv.width = Math.round(bmp.width * zoom);
-        cv.height = Math.round(sh * zoom);
-        const cx = cv.getContext("2d");
+        const scale = Math.min(zoom, MAX_W / bmp.width);
+        cv.width  = Math.max(320, Math.round(bmp.width * scale));
+        cv.height = Math.max(120, Math.round(sh * scale));
+        const cx = cv.getContext("2d", { willReadFrequently: true });
         cx.drawImage(bmp, 0, sy, bmp.width, sh, 0, 0, cv.width, cv.height);
         const im = cx.getImageData(0, 0, cv.width, cv.height);
         const d = im.data;
+
+        // Greyscale first, building a histogram as we go.
+        const hist = new Uint32Array(256);
         for (let q = 0; q < d.length; q += 4){
-          let g = d[q]*0.299 + d[q+1]*0.587 + d[q+2]*0.114;
-          if (cut) g = g < cut ? 0 : 255;
+          const g = (d[q]*0.299 + d[q+1]*0.587 + d[q+2]*0.114) | 0;
           d[q] = d[q+1] = d[q+2] = g;
+          hist[g]++;
+        }
+        // A fixed cutoff dies on uneven phone lighting; Otsu picks its own.
+        let level = 0;
+        if (cut === "otsu") level = otsu(hist, cv.width * cv.height);
+        else if (typeof cut === "number") level = cut;
+        if (level > 0){
+          for (let q = 0; q < d.length; q += 4){
+            const v = d[q] < level ? 0 : 255;
+            d[q] = d[q+1] = d[q+2] = v;
+          }
         }
         cx.putImageData(im, 0, 0);
+
+        if (psm !== psmNow){ await worker.setParameters({ tessedit_pageseg_mode: psm }); psmNow = psm; }
         const { data } = await worker.recognize(cv);
         hit = extractCode(data.text);
         if (hit) break;
       }
       if (hit) scanRows.push({ ...hit, file: files[i].name });
-      else scanFails.push(files[i].name);
+      else scanFails.push({ file: files[i], name: files[i].name });
       bmp.close();
     } catch (err){
-      scanFails.push(files[i].name);
+      scanFails.push({ file: files[i], name: files[i].name });
     }
   }
 
@@ -1046,33 +1154,60 @@ async function runScan(e){
   await showScan();
 }
 
+// 2608 -> 2607. Bags bought in one cycle physically arrive during the next one,
+// so a batch of photos routinely contains last month's customer IDs.
+function prevCycle(code){
+  const y = parseInt(String(code).slice(0, 2), 10);
+  const m = parseInt(String(code).slice(2), 10);
+  if (isNaN(y) || isNaN(m)) return null;
+  return m === 1 ? String(y - 1).padStart(2, "0") + "12"
+                 : String(y).padStart(2, "0") + String(m - 1).padStart(2, "0");
+}
+
 async function showScan(){
-  // Look up which orders these customer IDs belong to.
+  const cyc = $("sc-cycle").value;
   const seqs = [...new Set(scanRows.map(r => r.seq))];
+
+  // Look up which orders these customer IDs belong to.
   const { data: orders } = await db.from("orders")
     .select("seq,order_code,customers(instagram_username)")
-    .eq("cycle_code", $("sc-cycle").value).in("seq", seqs.length ? seqs : [-1]);
+    .eq("cycle_code", cyc).in("seq", seqs.length ? seqs : [-1]);
   const byseq = {};
   (orders || []).forEach(o => byseq[o.seq] = o);
 
+  // Anything missing here may simply belong to the previous cycle.
+  const missing = seqs.filter(s => !byseq[s]);
+  const prev = prevCycle(cyc);
+  let inPrev = {};
+  if (missing.length && prev){
+    const { data: po } = await db.from("orders")
+      .select("seq,order_code").eq("cycle_code", prev).in("seq", missing);
+    (po || []).forEach(o => inPrev[o.seq] = o);
+  }
+  const prevN = Object.keys(inPrev).length;
+
   const rows = scanRows.map(r => {
     const o = byseq[r.seq];
+    const p = !o && inPrev[r.seq];
+    const label = o ? (o.customers?.instagram_username || "—")
+      : p ? `<span style="color:#EF9F27">${t().scOther}</span>`
+          : `<span style="color:#F09595">${t().scNoOrder}</span>`;
     return `<div class="row" style="cursor:default">
       <div class="l">
         <div class="c num">${r.code}</div>
-        <div class="u">${o ? (o.customers?.instagram_username || "—") : `<span style="color:#F09595">${t().scNoOrder}</span>`}</div>
+        <div class="u">${label}</div>
       </div>
       <div class="b num" style="font-size:13px">${o ? o.order_code : r.seq}</div>
     </div>`;
   }).join("");
 
-  const failList = scanFails.length
-    ? `<div style="background:rgba(226,75,74,.08);border:1px solid rgba(226,75,74,.3);
+  const prevBox = prevN
+    ? `<div style="background:rgba(239,159,39,.10);border:1px solid rgba(239,159,39,.35);
          border-radius:12px;padding:14px;margin-bottom:14px">
-         <div style="color:#F09595;font-size:13px;margin-bottom:8px">
-           ${t().scFailed}: ${scanFails.length}</div>
-         ${scanFails.map(f=>`<div class="num" style="color:var(--mute);font-size:11.5px;
-           direction:ltr;text-align:left;padding:3px 0">${f}</div>`).join("")}
+         <div style="color:#EF9F27;font-size:13px;line-height:1.8;margin-bottom:10px">
+           ${prevN} × ${t().scOther} (${prev})</div>
+         <button class="btn" id="sc-switch" style="margin:0;padding:10px">
+           ${t().scSwitch} ${prev}</button>
        </div>`
     : "";
 
@@ -1080,18 +1215,108 @@ async function showScan(){
     `<div class="sbar" style="margin-bottom:14px">
        <button class="on">${t().scFound}<b>${scanRows.length}</b></button>
        ${scanFails.length ? `<button>${t().scFailed}<b>${scanFails.length}</b></button>` : ""}
-     </div>` + failList + rows;
+     </div>` + prevBox + rows;
 
+  if (prevN) $("sc-switch").addEventListener("click", () => {
+    $("sc-cycle").value = prev;
+    localStorage.setItem("spo_sc_cycle", prev);
+    showScan();
+  });
+
+  revIdx = 0;
+  renderReview();
   $("sc-manual").classList.remove("hide");
   $("sc-apply").classList.remove("hide");
 }
 
+// ---------- Manual review of the photos OCR could not read ----------
+// One photo on screen at a time with the code box already focused.
+// Type, press Enter, the next photo loads. No hunting through Finder.
+function renderReview(){
+  const box = $("sc-review");
+  if (revUrl){ URL.revokeObjectURL(revUrl); revUrl = null; }
+
+  if (!scanFails.length){ box.classList.add("hide"); box.innerHTML = ""; return; }
+  box.classList.remove("hide");
+
+  if (revIdx >= scanFails.length){
+    box.innerHTML = `<div style="background:rgba(29,158,117,.10);border:1px solid rgba(29,158,117,.35);
+      border-radius:12px;padding:16px;text-align:center;color:var(--teal);font-size:13px">
+      ${t().revDone}</div>`;
+    return;
+  }
+
+  const item = scanFails[revIdx];
+  revUrl = URL.createObjectURL(item.file);
+  box.innerHTML = `
+    <div style="background:rgba(226,75,74,.06);border:1px solid rgba(226,75,74,.28);
+      border-radius:12px;padding:14px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span style="color:#F09595;font-size:13px">${t().revTitle}</span>
+        <span class="num" style="color:var(--mute);font-size:12px">
+          ${revIdx + 1} ${t().revOf} ${scanFails.length}</span>
+      </div>
+      <img src="${revUrl}" alt="" style="width:100%;max-height:340px;object-fit:contain;
+        background:#000;border-radius:8px;margin-bottom:12px">
+      <div style="display:flex;gap:10px">
+        <div class="f" style="flex:1;margin-bottom:8px"><label>${t().revBag}</label>
+          <input id="rv-code" dir="ltr" autocomplete="off" spellcheck="false"
+            style="font-family:Archivo,monospace;text-transform:uppercase" placeholder="DDDDDD9"></div>
+        <div class="f" style="flex:1;margin-bottom:8px"><label>${t().revSeq}</label>
+          <input id="rv-seq" dir="ltr" inputmode="numeric" autocomplete="off" placeholder="446"></div>
+      </div>
+      <div id="rv-err" style="color:#F09595;font-size:12px;min-height:16px;margin-bottom:8px"></div>
+      <div style="display:flex;gap:10px">
+        <button class="btn" id="rv-save" style="margin:0;flex:2">${t().revSave}</button>
+        <button class="btn" id="rv-skip" style="margin:0;flex:1;background:transparent;
+          border:1px solid var(--line);color:var(--mute)">${t().revSkip}</button>
+      </div>
+    </div>`;
+
+  const code = $("rv-code"), seq = $("rv-seq"), err = $("rv-err");
+  const clear = () => { err.textContent = ""; };
+  code.addEventListener("input", clear);
+  seq.addEventListener("input", clear);
+
+  const next = () => { revIdx++; renderReview(); };
+
+  const save = () => {
+    const fixed = normalizeCode(toEn(code.value));
+    const n = parseInt(toEn(seq.value).replace(/[^\d]/g, ""), 10);
+    if (!fixed || !isCanonical(fixed)){ err.textContent = t().revBad; code.focus(); return; }
+    if (!n || n < 1){ err.textContent = t().revBad; seq.focus(); return; }
+    scanRows.push({ code: fixed, seq: n, file: scanFails[revIdx].name });
+    scanFails.splice(revIdx, 1);
+    renderReview();
+    showScanCounts();
+  };
+
+  $("rv-save").addEventListener("click", save);
+  $("rv-skip").addEventListener("click", next);
+  [code, seq].forEach(el => el.addEventListener("keydown", ev => {
+    if (ev.key === "Enter"){ ev.preventDefault(); save(); }
+  }));
+  code.focus();
+}
+
+// Keep the found/failed pills honest as rows move out of the review queue.
+function showScanCounts(){
+  const bar = $("sc-results").querySelector(".sbar");
+  if (!bar) return;
+  bar.innerHTML = `<button class="on">${t().scFound}<b>${scanRows.length}</b></button>` +
+    (scanFails.length ? `<button>${t().scFailed}<b>${scanFails.length}</b></button>` : "");
+}
+
 async function applyScan(){
-  const extra = [];
+  const extra = [], bad = [];
   $("sc-extra").value.split(/\n/).forEach(line => {
+    if (!line.trim()) return;
     const m = toEn(line).toUpperCase().match(/([A-Z0-9]{1,10})[\s,\-]+(\d{1,4})/);
-    if (m) extra.push({ code: m[1], seq: parseInt(m[2], 10) });
+    const code = m && normalizeCode(m[1]);
+    if (code && isCanonical(code)) extra.push({ code, seq: parseInt(m[2], 10) });
+    else bad.push(line.trim());
   });
+  if (bad.length) return say("sc-msg", `${t().revBad}: ${bad.join(" · ")}`, "err");
 
   const all = [...scanRows.map(r=>({code:r.code, seq:r.seq})), ...extra];
   if (!all.length) return;
@@ -1108,8 +1333,11 @@ async function applyScan(){
   if (error) return say("sc-msg", error.message, "err");
   const r = data[0];
   say("sc-msg", `${r.applied} ✓` + (r.missing ? ` · ${t().scNoOrder}: ${r.missing}` : ""), "ok");
-  scanRows = []; scanFails = [];
+  scanRows = []; scanFails = []; revIdx = 0;
+  if (revUrl){ URL.revokeObjectURL(revUrl); revUrl = null; }
   $("sc-results").innerHTML = "";
+  $("sc-review").innerHTML = "";
+  $("sc-review").classList.add("hide");
   $("sc-extra").value = "";
   $("sc-files").value = "";
   $("sc-apply").classList.add("hide");
