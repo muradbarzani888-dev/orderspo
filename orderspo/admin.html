@@ -77,8 +77,6 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 .tile .v{font-size:19px;font-weight:600}
 .tile.wide{grid-column:1/-1}
 .tile.wide .v{color:var(--teal);font-size:22px}
-.tile .sub{color:var(--mute);font-size:11px;font-weight:400;margin-top:5px}
-.note{background:var(--deep);border-radius:12px;padding:13px;color:var(--mute);font-size:12.5px;margin-bottom:18px}
 
 .nav{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
 .nav button{background:var(--deep);border:1px solid var(--line);border-radius:12px;
@@ -140,7 +138,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v22</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v24</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -154,6 +152,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
       <div class="tiles hide" id="h-money">
         <div class="tile"><div class="k" data-t="billed"></div><div class="v num" id="h-billed">—</div></div>
         <div class="tile"><div class="k" data-t="paidUp"></div><div class="v num" id="h-paid">—</div></div>
+        <div class="tile wide"><div class="k" data-t="cod"></div><div class="v num" id="h-cash">—</div></div>
       </div>
       <div class="nav">
         <button data-go="new" data-t="newOrder"></button>
@@ -269,32 +268,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
         <div class="tile"><div class="k" data-t="avgOrder"></div><div class="v num" id="dh-avg">—</div></div>
         <div class="tile"><div class="k" data-t="billed"></div><div class="v num" id="dh-billed">—</div></div>
         <div class="tile"><div class="k" data-t="paidUp"></div><div class="v num" id="dh-paid">—</div></div>
-        <div class="tile"><div class="k" data-t="collected"></div><div class="v num" id="dh-collected">—</div></div>
-        <div class="tile"><div class="k" data-t="outstanding"></div><div class="v num" id="dh-outstanding" style="color:var(--teal)">—</div><div class="sub" id="dh-out-sub"></div></div>
-      </div>
-      <div class="tiles hide" id="dh-pnl">
-        <div class="tile"><div class="k" data-t="goodsCost"></div><div class="v num" id="dh-goods">—</div><div class="sub" id="dh-goods-sub"></div></div>
-        <div class="tile"><div class="k" data-t="grossProfit"></div><div class="v num" id="dh-gross" style="color:var(--teal)">—</div><div class="sub" id="dh-gross-sub"></div></div>
-      </div>
-      <div class="tiles hide" id="dh-net">
-        <div class="tile hide" id="dh-opex-card"><div class="k" data-t="opexTotal"></div><div class="v num" id="dh-opex">—</div></div>
-        <div class="tile hide" id="dh-net-card"><div class="k" data-t="netProfit"></div><div class="v num" id="dh-netv" style="color:var(--teal)">—</div></div>
-      </div>
-      <div class="note hide" id="dh-pnl-note" data-t="notShipped"></div>
-
-      <div id="dh-costs" style="margin-bottom:18px">
-        <div style="color:var(--mute);font-size:12px;margin-bottom:8px" data-t="opCosts"></div>
-        <div style="display:flex;gap:10px">
-          <div class="f" style="flex:1"><label data-t="cPost"></label><input id="c-post" inputmode="numeric" dir="ltr"></div>
-          <div class="f" style="flex:1"><label data-t="cLog"></label><input id="c-log" inputmode="numeric" dir="ltr"></div>
-        </div>
-        <div style="display:flex;gap:10px">
-          <div class="f" style="flex:1"><label data-t="cEmp"></label><input id="c-emp" inputmode="numeric" dir="ltr"></div>
-          <div class="f" style="flex:1"><label data-t="cAds"></label><input id="c-ads" inputmode="numeric" dir="ltr"></div>
-        </div>
-        <div class="f"><label data-t="cOther"></label><input id="c-other" inputmode="numeric" dir="ltr"></div>
-        <button class="btn ghost" id="c-save" data-t="saveCosts"></button>
-        <div id="c-msg"></div>
+        <div class="tile wide"><div class="k" data-t="cod"></div><div class="v num" id="dh-cod">—</div></div>
       </div>
 
       <div id="dh-status" style="margin-bottom:18px"></div>
@@ -331,6 +305,8 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
       </div>
 
       <div id="sc-results"></div>
+
+      <div id="sc-review" class="hide"></div>
 
       <div id="sc-manual" class="f hide">
         <label data-t="typeMissing"></label>
@@ -372,9 +348,6 @@ const db = window.supabase.createClient(URL_, KEY_);
 const FLOW = ["received","purchased","at_dubai","in_transit","at_erbil","out_for_delivery","delivered"];
 const T = {
  ku:{cycle:"مانگ",orders:"داواکاری",cod:"پارەی ماوە بۆ کۆکردنەوە",billed:"کۆی گشتی مانگ",paidUp:"پێشەکی وەرگیراو",
-  collected:"کۆکراوە",outstanding:"ماوە بۆ کۆکردنەوە",goodsCost:"تێچووی کاڵا",grossProfit:"قازانجی سەرەکی",cards:"کارت",margin:"مارجن",
-  opCosts:"تێچووی مانگ",cPost:"تێچووی پۆست",cLog:"تێچووی گەیاندن",cEmp:"تێچووی کارمەند",cAds:"تێچووی ڕیکلام",cOther:"تێچووی تر",saveCosts:"تۆمارکردنی تێچووەکان",opexTotal:"کۆی تێچوو",netProfit:"قازانجی ڕەها",
-  notShipped:"ئەم مانگە هێشتا نەگەیشتووە — تێچووی کاڵا و قازانج دوای گەیاندن دیار دەبن.",
   saveCustomer:"تۆمارکردنی زانیاری کڕیار",newOrder:"داواکاری نوێ",
   pasteMany:"زیادکردنی کۆمەڵ",refresh:"نوێکردنەوە",
   pasteHelp:"ڕیزەکان لە شیتەکە کۆپی بکە و لێرە بیانلکێنە. بەم ڕیزبەندییە: کۆد، ناو، بڕ، ناونیشان، مۆبایل",
@@ -388,6 +361,10 @@ const T = {
   typeMissing:"ئەوانەی نەخوێنرانەوە بنووسە — کۆدی جانتا و کۆدی کڕیار لە هەر ڕیزێک",
   applyBags:"تۆمارکردنی جانتاکان",reading:"دەخوێنرێتەوە",
   scFound:"دۆزرایەوە",scFailed:"نەخوێنرایەوە",scNoOrder:"کۆدی کڕیار نەدۆزرایەوە",avgOrder:"ناوەندی داواکاری",
+  revTitle:"بەدەست نووسینەوە",revOf:"لە",revBag:"کۆدی جانتا",revSeq:"کۆدی کڕیار",
+  revSave:"تۆمار و دواتر",revSkip:"بازدان",revDone:"هەموویان تەواوبوون",
+  revBad:"کۆد دروست نییە — ٦ پیتی وەک یەک و ژمارەیەک",revFixed:"چاککرا",
+  scOther:"لەم مانگەدا نییە، بەڵام لە مانگی پێشوودا هەیە",scSwitch:"گۆڕین بۆ",
   exportCsv:"داگرتنی Excel",noOrders:"هیچ داواکاریەک نییە",
   colCode:"کۆد",colUser:"ناو",colPhone:"مۆبایل",colTotal:"کۆی گشتی",
   colDep:"پێشەکی",colBal:"ماوە",colStatus:"دۆخ",colItems:"بەرهەم",linked:"لەگەڵ کڕیارێکی هەبوو بەستراوە",
@@ -401,9 +378,6 @@ const T = {
   st:{received:"وەرگیرا",purchased:"کڕدرا",at_dubai:"لە دوبەی",in_transit:"لە ڕێگادایە",
    at_erbil:"لە هەولێر",out_for_delivery:"لە گەیاندندایە",delivered:"گەیەندرا",cancelled:"هەڵوەشێنراوە"}},
  ar:{cycle:"الشهر",orders:"الطلبات",cod:"المبلغ المتبقي للتحصيل",billed:"مجموع الشهر",paidUp:"المدفوع مقدماً",
-  collected:"المحصّل",outstanding:"المتبقي للتحصيل",goodsCost:"تكلفة البضاعة",grossProfit:"الربح الإجمالي",cards:"كارت",margin:"الهامش",
-  opCosts:"مصاريف الشهر",cPost:"تكلفة البريد",cLog:"تكلفة التوصيل",cEmp:"تكلفة الموظفين",cAds:"تكلفة الإعلانات",cOther:"تكاليف أخرى",saveCosts:"حفظ المصاريف",opexTotal:"إجمالي المصاريف",netProfit:"صافي الربح",
-  notShipped:"هذا الشهر ما انشحن بعد — تكلفة البضاعة والربح تظهر بعد التوصيل.",
   saveCustomer:"حفظ معلومات الزبون",newOrder:"طلب جديد",
   pasteMany:"إضافة مجموعة",refresh:"تحديث",
   pasteHelp:"انسخ الصفوف من الشيت والصقها هنا. بهذا الترتيب: الرمز، الاسم، المبلغ، العنوان، الموبايل",
@@ -417,6 +391,10 @@ const T = {
   typeMissing:"اكتب اللي ما انقرا — رمز الكيس ورمز الزبون بكل سطر",
   applyBags:"حفظ الأكياس",reading:"يقرا",
   scFound:"انلكى",scFailed:"ما انقرا",scNoOrder:"رمز الزبون مو موجود",avgOrder:"متوسط الطلب",
+  revTitle:"كتابة يدوية",revOf:"من",revBag:"رمز الكيس",revSeq:"رمز الزبون",
+  revSave:"احفظ وكمّل",revSkip:"تخطي",revDone:"خلصت كلها",
+  revBad:"الرمز مو صحيح — ٦ حروف نفسها ورقم",revFixed:"انصلح",
+  scOther:"مو بهذا الشهر، بس موجود بالشهر اللي قبله",scSwitch:"غيّر إلى",
   exportCsv:"تحميل Excel",noOrders:"ما في طلبات",
   colCode:"الرمز",colUser:"الاسم",colPhone:"الموبايل",colTotal:"المجموع",
   colDep:"المقدم",colBal:"المتبقي",colStatus:"الحالة",colItems:"القطع",linked:"انربط بزبون موجود",
@@ -445,8 +423,7 @@ const toEn = t => String(t == null ? "" : t).replace(/[٠-٩۰-۹]/g, d => {
 
 // Convert in place as the person types, so they see what was stored.
 ["n-phone","n-total","n-dep","n-items","d-c-phone","d-e-total","d-e-dep",
- "d-f-items","d-f-qty","d-f-kg","b-lo","b-hi","code","last4",
- "c-post","c-log","c-emp","c-ads","c-other"].forEach(id => {
+ "d-f-items","d-f-qty","d-f-kg","b-lo","b-hi","code","last4"].forEach(id => {
   document.addEventListener("input", e => {
     if (e.target && e.target.id === id){
       const v = toEn(e.target.value);
@@ -486,7 +463,7 @@ async function loadHome(){
   if (c) cycle = c.code;
   $("h-cycle").textContent = cycle || "—";
   const { data: rows } = await db.from("orders")
-    .select("total_iqd,deposit_iqd,status").eq("cycle_code", cycle);
+    .select("balance_iqd,total_iqd,deposit_iqd,status").eq("cycle_code", cycle);
   const live = (rows || []).filter(r => r.status !== "cancelled");
   $("h-count").textContent = live.length;
   const sum = k => live.reduce((a, r) => a + Number(r[k] || 0), 0);
@@ -497,6 +474,7 @@ async function loadHome(){
   if (me.role === "admin"){
     $("h-billed").textContent = iqd(sum("total_iqd"));
     $("h-paid").textContent   = iqd(sum("deposit_iqd"));
+    $("h-cash").textContent   = iqd(sum("balance_iqd"));
   }
 }
 
@@ -660,7 +638,6 @@ $("out").addEventListener("click", async () => { await db.auth.signOut(); locati
 ["ku","ar"].forEach(l => $("l-" + l).addEventListener("click", () => {
   lang = l; localStorage.setItem("spo_a", l); paintLang();
   if (current && !$("v-detail").classList.contains("hide")) openOrder(current.id);
-  if (!$("v-dash").classList.contains("hide") && $("dh-cycle").value) loadCycleFinance($("dh-cycle").value);
 }));
 document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => {
   const g = b.dataset.go;
@@ -828,24 +805,6 @@ $("d-save").addEventListener("click", async () => {
   if (!error) openOrder(current.id);
 });
 
-$("c-save").addEventListener("click", async () => {
-  const code = $("dh-cycle").value;
-  if (!code) return;
-  const money = id => Number(toEn($(id).value).replace(/\D/g, "")) || 0;
-  const b = $("c-save"); b.disabled = true;
-  const { error } = await db.from("cycle_costs").upsert({
-    cycle_code: code,
-    post_iqd: money("c-post"),
-    logistic_iqd: money("c-log"),
-    employee_iqd: money("c-emp"),
-    ads_iqd: money("c-ads"),
-    other_iqd: money("c-other")
-  }, { onConflict: "cycle_code" });
-  b.disabled = false;
-  say("c-msg", error ? error.message : t().saved, error ? "err" : "ok");
-  if (!error) loadCycleFinance(code);
-});
-
 $("b-go").addEventListener("click", async () => {
   const n = $("b-n").textContent;
   if (!Number(n)) return;
@@ -901,59 +860,6 @@ async function loadDash(){
   dashFilter = null;
   paintTotals();
   renderDash();
-  loadCycleFinance($("dh-cycle").value);
-}
-
-// Collection + P&L cards come from the cycle views, keyed by the picked month.
-// Fetched once per cycle load — the status-filter clicks only re-run paintTotals.
-async function loadCycleFinance(code){
-  const { data: s } = await db.from("v_cycle_summary")
-    .select("collected,outstanding,pending_dubai,pending_erbil")
-    .eq("cycle_code", code).maybeSingle();
-  $("dh-collected").textContent   = iqd(s?.collected);
-  $("dh-outstanding").textContent = iqd(s?.outstanding);
-  $("dh-out-sub").innerHTML =
-    `${t().st.at_dubai} <span class="num">${iqd(s?.pending_dubai)}</span> · ` +
-    `${t().st.at_erbil} <span class="num">${iqd(s?.pending_erbil)}</span>`;
-
-  // Only meaningful once the cycle has shipped (cards > 0); before that
-  // gross_profit == revenue and reads as pure profit, so show a note instead.
-  const { data: p } = await db.from("v_cycle_pnl")
-    .select("goods_cost,gross_profit,revenue,cards,opex,net_profit")
-    .eq("cycle_code", code).maybeSingle();
-  const cards = Number(p?.cards || 0);
-  const shipped = cards > 0;
-  $("dh-pnl").classList.toggle("hide", !shipped);
-  $("dh-pnl-note").classList.toggle("hide", shipped);
-  if (shipped){
-    $("dh-goods").textContent = iqd(p.goods_cost);
-    $("dh-goods-sub").innerHTML = `<span class="num">${cards}</span> ${t().cards}`;
-    $("dh-gross").textContent = iqd(p.gross_profit);
-    const rev = Number(p.revenue || 0);
-    const margin = rev ? Math.round(Number(p.gross_profit || 0) / rev * 100) : 0;
-    $("dh-gross-sub").innerHTML = `${t().margin} <span class="num">${margin}%</span>`;
-  }
-
-  // Both come straight from the view. Opex is valid on its own (show when set);
-  // net profit only makes sense once shipped — before that goods_cost is 0, so
-  // net_profit == revenue − opex and reads as a huge fake profit.
-  const opex = Number(p?.opex || 0);
-  const showOpex = opex > 0;
-  $("dh-opex-card").classList.toggle("hide", !showOpex);
-  $("dh-net-card").classList.toggle("hide", !shipped);
-  $("dh-net").classList.toggle("hide", !(showOpex || shipped));
-  if (showOpex) $("dh-opex").textContent = iqd(opex);
-  if (shipped)  $("dh-netv").textContent = iqd(p.net_profit);
-
-  // Prefill the costs form from the stored row so edits are against what's there.
-  const { data: cst } = await db.from("cycle_costs")
-    .select("post_iqd,logistic_iqd,employee_iqd,ads_iqd,other_iqd")
-    .eq("cycle_code", code).maybeSingle();
-  $("c-post").value  = cst?.post_iqd     ?? "";
-  $("c-log").value   = cst?.logistic_iqd ?? "";
-  $("c-emp").value   = cst?.employee_iqd ?? "";
-  $("c-ads").value   = cst?.ads_iqd      ?? "";
-  $("c-other").value = cst?.other_iqd    ?? "";
 }
 
 function paintTotals(){
@@ -962,6 +868,7 @@ function paintTotals(){
   $("dh-n").textContent = live.length;
   $("dh-billed").textContent = iqd(sum("total_iqd"));
   $("dh-paid").textContent = iqd(sum("deposit_iqd"));
+  $("dh-cod").textContent = iqd(sum("balance_iqd"));
   $("dh-avg").textContent = live.length ? iqd(Math.round(sum("total_iqd")/live.length)) : "0";
 
   const tally = {};
@@ -1047,7 +954,26 @@ function exportDash(){
 
 // ---------- Bag scanning ----------
 // Reads GC-340 <BAGCODE>-<CUSTOMERID> from label photos, entirely in the browser.
-let scanRows = [], scanFails = [];
+let scanRows = [], scanFails = [], revIdx = 0, revUrl = null;
+
+// Otsu: pick the greyscale cutoff that best separates ink from paper.
+// Phone photos have uneven light, so one fixed number never fits every photo.
+function otsu(hist, total){
+  let sum = 0;
+  for (let i = 0; i < 256; i++) sum += i * hist[i];
+  let sumB = 0, wB = 0, best = 0, level = 128;
+  for (let i = 0; i < 256; i++){
+    wB += hist[i];
+    if (!wB) continue;
+    const wF = total - wB;
+    if (!wF) break;
+    sumB += i * hist[i];
+    const mB = sumB / wB, mF = (sum - sumB) / wF;
+    const between = wB * wF * (mB - mF) * (mB - mF);
+    if (between > best){ best = between; level = i; }
+  }
+  return level;
+}
 
 async function initScan(){
   const sel = $("sc-cycle");
@@ -1058,38 +984,98 @@ async function initScan(){
     const { data } = await db.from("cycles").select("code,label")
       .in("code", have).order("code",{ascending:false});
     sel.innerHTML = (data||[]).map(c=>`<option value="${c.code}">${c.label||c.code}</option>`).join("");
-    sel.value = cycle;
+    // Bags arrive a month after they are bought, so the last cycle Xurshid
+    // chose is a better default than today's cycle.
+    const lastCyc = localStorage.getItem("spo_sc_cycle");
+    sel.value = (lastCyc && [...sel.options].some(o=>o.value===lastCyc)) ? lastCyc : cycle;
+    sel.addEventListener("change", () => localStorage.setItem("spo_sc_cycle", sel.value));
 
-    $("sc-status").innerHTML = ["at_dubai","in_transit","at_erbil","out_for_delivery","delivered"]
+    const st = $("sc-status");
+    st.innerHTML = ["at_dubai","in_transit","at_erbil","out_for_delivery","delivered"]
       .map(v=>`<option value="${v}">${t().st[v]}</option>`).join("");
+    const lastSt = localStorage.getItem("spo_sc_status");
+    if (lastSt && [...st.options].some(o=>o.value===lastSt)) st.value = lastSt;
+    st.addEventListener("change", () => localStorage.setItem("spo_sc_status", st.value));
 
     $("sc-files").addEventListener("change", runScan);
     $("sc-apply").addEventListener("click", applyScan);
   }
 }
 
+// A bag code is six identical letters then one digit: DDDDDD9. The letter I is
+// never used. Anything that does not clean up to that shape is NOT a code —
+// it goes to manual review. A wrong code saved silently is worse than no code.
+const BAG_LETTERS = 6;
+
+// Characters Tesseract habitually swaps for digits, applied only to the last slot.
+const AS_DIGIT = { I:"1", L:"1", T:"7", O:"0", Q:"0", D:"0", S:"5", Z:"2",
+                   B:"8", G:"6", A:"4", E:"3", J:"1" };
+// ...and the reverse, for the letter block.
+const AS_LETTER = { "1":null, "0":"O", "5":"S", "8":"B", "2":"Z", "6":"G" };
+
+// Fold a messy read into the canonical shape, or return null if it can't be
+// trusted. LLLLL13 -> LLLLLL3.  HHHHHI -> HHHHHH1.  DBO1 -> null (ambiguous).
+function normalizeCode(raw){
+  const s = String(raw || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (s.length < 4 || s.length > 9) return null;
+
+  let tail = s.slice(-1);
+  if (!/\d/.test(tail)) tail = AS_DIGIT[tail] || null;
+  if (tail === null) return null;
+
+  const body = s.slice(0, -1);
+  const votes = {};
+  let letters = 0;
+  for (const ch of body){
+    const L = /[A-Z]/.test(ch) ? ch : AS_LETTER[ch];
+    if (!L || L === "I") continue;      // I is not a valid card letter
+    votes[L] = (votes[L] || 0) + 1;
+    letters++;
+  }
+  if (letters < 3) return null;
+
+  let best = null, bestN = 0;
+  for (const L in votes) if (votes[L] > bestN){ best = L; bestN = votes[L]; }
+  // Needs a clear majority. A three-way tie like D/B/O means we guessed wrong.
+  if (!best || bestN / letters < 0.6) return null;
+
+  return best.repeat(BAG_LETTERS) + tail;
+}
+
+const isCanonical = c => new RegExp(`^([A-HJ-Z])\\1{${BAG_LETTERS-1}}\\d$`).test(c || "");
+
 // Pull the code pair out of whatever OCR returned.
 function extractCode(txt){
-  const up = txt.toUpperCase().replace(/[|]/g, "1").replace(/\s+/g, " ");
-  // GC-340 <code> - <id>
-  let m = up.match(/G\s*C\s*[-–—]?\s*3\s*4\s*0\s+([A-Z0-9]{1,10})\s*[-–—]\s*(\d{1,4})/);
-  if (m) return { code: m[1], seq: parseInt(m[2], 10) };
-  // GC line where the dash was lost in the scan
-  m = up.match(/G\s*C\s*[-–—]?\s*3\s*4\s*0\s+([A-Z]{1,6}\d{0,2})\s+(\d{1,4})\b/);
-  if (m) return { code: m[1], seq: parseInt(m[2], 10) };
-  // any short letter-number code followed by a dash and an order number
-  m = up.match(/\b([A-Z]{1,6}\d{1,2})\s*[-–—]\s*(\d{1,4})\b/);
-  if (m) return { code: m[1], seq: parseInt(m[2], 10) };
-  return null;
+  const up = String(txt || "").toUpperCase().replace(/[|]/g, "1");
+  const out = [];
+  const push = (raw, seqTxt) => {
+    const code = normalizeCode(raw);
+    const seq = parseInt(seqTxt, 10);
+    if (code && seq > 0 && seq < 10000) out.push({ code, seq, raw: String(raw) });
+  };
+  const sweep = re => { let m; while ((m = re.exec(up)) !== null) push(m[1], m[2]); };
+
+  // GC-340 <code>-<id>, the printed format
+  sweep(/G\s*C\s*[-–—]?\s*3\s*4\s*0\s+([A-Z0-9]{3,9})\s*[-–—\s]\s*(\d{1,4})\b/g);
+  if (out.length) return out[0];
+  // code and id separated by a dash, GC prefix lost
+  sweep(/\b([A-Z0-9]{4,9})\s*[-–—]\s*(\d{1,4})\b/g);
+  if (out.length) return out[0];
+  // last resort: code and id separated by whitespace only
+  sweep(/\b([A-Z0-9]{4,9})\s+(\d{1,4})\b/g);
+  return out[0] || null;
 }
 
 async function runScan(e){
   const files = [...e.target.files];
   if (!files.length) return;
 
-  scanRows = []; scanFails = [];
+  scanRows = []; scanFails = []; revIdx = 0;
+  if (revUrl){ URL.revokeObjectURL(revUrl); revUrl = null; }
   $("sc-progress").classList.remove("hide");
   $("sc-results").innerHTML = "";
+  $("sc-review").innerHTML = "";
+  $("sc-review").classList.add("hide");
   $("sc-apply").classList.add("hide");
   $("sc-manual").classList.add("hide");
 
@@ -1098,45 +1084,67 @@ async function runScan(e){
     tessedit_char_whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-+ ",
   });
 
+  // top, bottom, threshold ("otsu" | "gray" | number), zoom, page-seg mode
+  // 6 = one uniform block of text, 11 = sparse text anywhere in the frame.
+  const PASSES = [
+    [0.00, 1.00, "otsu", 1.6, "6"],
+    [0.10, 0.50, "otsu", 2.2, "6"],
+    [0.00, 1.00, "gray", 1.6, "11"],
+    [0.10, 0.50,    130, 2.2, "6"],
+    [0.35, 0.85, "otsu", 2.2, "6"],
+    [0.00, 0.55,    150, 2.6, "6"],
+    [0.00, 1.00, "otsu", 2.6, "11"]
+  ];
+  const MAX_W = 2400;   // canvases past this are slow and no more accurate
+  let psmNow = null;
+
   for (let i = 0; i < files.length; i++){
     $("sc-bar").style.width = `${(i / files.length) * 100}%`;
     $("sc-count").textContent = `${t().reading} ${i + 1} / ${files.length}`;
     try {
       const bmp = await createImageBitmap(files[i]);
-      // Several crop bands and contrast levels; stop at the first clean read.
-      const passes = [
-        [0.10, 0.50, 130, 2],
-        [0.14, 0.34, 140, 3],
-        [0.05, 0.60, 115, 2],
-        [0.00, 0.45, 150, 3],
-        [0.10, 0.50,   0, 2]   // 0 = no threshold, greyscale only
-      ];
       let hit = null;
-      for (const [top, bot, cut, zoom] of passes){
+      for (const [top, bot, cut, zoom, psm] of PASSES){
         const cv = document.createElement("canvas");
         const sy = Math.round(bmp.height * top);
         const sh = Math.round(bmp.height * (bot - top));
-        cv.width = Math.round(bmp.width * zoom);
-        cv.height = Math.round(sh * zoom);
-        const cx = cv.getContext("2d");
+        const scale = Math.min(zoom, MAX_W / bmp.width);
+        cv.width  = Math.max(320, Math.round(bmp.width * scale));
+        cv.height = Math.max(120, Math.round(sh * scale));
+        const cx = cv.getContext("2d", { willReadFrequently: true });
         cx.drawImage(bmp, 0, sy, bmp.width, sh, 0, 0, cv.width, cv.height);
         const im = cx.getImageData(0, 0, cv.width, cv.height);
         const d = im.data;
+
+        // Greyscale first, building a histogram as we go.
+        const hist = new Uint32Array(256);
         for (let q = 0; q < d.length; q += 4){
-          let g = d[q]*0.299 + d[q+1]*0.587 + d[q+2]*0.114;
-          if (cut) g = g < cut ? 0 : 255;
+          const g = (d[q]*0.299 + d[q+1]*0.587 + d[q+2]*0.114) | 0;
           d[q] = d[q+1] = d[q+2] = g;
+          hist[g]++;
+        }
+        // A fixed cutoff dies on uneven phone lighting; Otsu picks its own.
+        let level = 0;
+        if (cut === "otsu") level = otsu(hist, cv.width * cv.height);
+        else if (typeof cut === "number") level = cut;
+        if (level > 0){
+          for (let q = 0; q < d.length; q += 4){
+            const v = d[q] < level ? 0 : 255;
+            d[q] = d[q+1] = d[q+2] = v;
+          }
         }
         cx.putImageData(im, 0, 0);
+
+        if (psm !== psmNow){ await worker.setParameters({ tessedit_pageseg_mode: psm }); psmNow = psm; }
         const { data } = await worker.recognize(cv);
         hit = extractCode(data.text);
         if (hit) break;
       }
       if (hit) scanRows.push({ ...hit, file: files[i].name });
-      else scanFails.push(files[i].name);
+      else scanFails.push({ file: files[i], name: files[i].name });
       bmp.close();
     } catch (err){
-      scanFails.push(files[i].name);
+      scanFails.push({ file: files[i], name: files[i].name });
     }
   }
 
@@ -1146,33 +1154,60 @@ async function runScan(e){
   await showScan();
 }
 
+// 2608 -> 2607. Bags bought in one cycle physically arrive during the next one,
+// so a batch of photos routinely contains last month's customer IDs.
+function prevCycle(code){
+  const y = parseInt(String(code).slice(0, 2), 10);
+  const m = parseInt(String(code).slice(2), 10);
+  if (isNaN(y) || isNaN(m)) return null;
+  return m === 1 ? String(y - 1).padStart(2, "0") + "12"
+                 : String(y).padStart(2, "0") + String(m - 1).padStart(2, "0");
+}
+
 async function showScan(){
-  // Look up which orders these customer IDs belong to.
+  const cyc = $("sc-cycle").value;
   const seqs = [...new Set(scanRows.map(r => r.seq))];
+
+  // Look up which orders these customer IDs belong to.
   const { data: orders } = await db.from("orders")
     .select("seq,order_code,customers(instagram_username)")
-    .eq("cycle_code", $("sc-cycle").value).in("seq", seqs.length ? seqs : [-1]);
+    .eq("cycle_code", cyc).in("seq", seqs.length ? seqs : [-1]);
   const byseq = {};
   (orders || []).forEach(o => byseq[o.seq] = o);
 
+  // Anything missing here may simply belong to the previous cycle.
+  const missing = seqs.filter(s => !byseq[s]);
+  const prev = prevCycle(cyc);
+  let inPrev = {};
+  if (missing.length && prev){
+    const { data: po } = await db.from("orders")
+      .select("seq,order_code").eq("cycle_code", prev).in("seq", missing);
+    (po || []).forEach(o => inPrev[o.seq] = o);
+  }
+  const prevN = Object.keys(inPrev).length;
+
   const rows = scanRows.map(r => {
     const o = byseq[r.seq];
+    const p = !o && inPrev[r.seq];
+    const label = o ? (o.customers?.instagram_username || "—")
+      : p ? `<span style="color:#EF9F27">${t().scOther}</span>`
+          : `<span style="color:#F09595">${t().scNoOrder}</span>`;
     return `<div class="row" style="cursor:default">
       <div class="l">
         <div class="c num">${r.code}</div>
-        <div class="u">${o ? (o.customers?.instagram_username || "—") : `<span style="color:#F09595">${t().scNoOrder}</span>`}</div>
+        <div class="u">${label}</div>
       </div>
       <div class="b num" style="font-size:13px">${o ? o.order_code : r.seq}</div>
     </div>`;
   }).join("");
 
-  const failList = scanFails.length
-    ? `<div style="background:rgba(226,75,74,.08);border:1px solid rgba(226,75,74,.3);
+  const prevBox = prevN
+    ? `<div style="background:rgba(239,159,39,.10);border:1px solid rgba(239,159,39,.35);
          border-radius:12px;padding:14px;margin-bottom:14px">
-         <div style="color:#F09595;font-size:13px;margin-bottom:8px">
-           ${t().scFailed}: ${scanFails.length}</div>
-         ${scanFails.map(f=>`<div class="num" style="color:var(--mute);font-size:11.5px;
-           direction:ltr;text-align:left;padding:3px 0">${f}</div>`).join("")}
+         <div style="color:#EF9F27;font-size:13px;line-height:1.8;margin-bottom:10px">
+           ${prevN} × ${t().scOther} (${prev})</div>
+         <button class="btn" id="sc-switch" style="margin:0;padding:10px">
+           ${t().scSwitch} ${prev}</button>
        </div>`
     : "";
 
@@ -1180,18 +1215,108 @@ async function showScan(){
     `<div class="sbar" style="margin-bottom:14px">
        <button class="on">${t().scFound}<b>${scanRows.length}</b></button>
        ${scanFails.length ? `<button>${t().scFailed}<b>${scanFails.length}</b></button>` : ""}
-     </div>` + failList + rows;
+     </div>` + prevBox + rows;
 
+  if (prevN) $("sc-switch").addEventListener("click", () => {
+    $("sc-cycle").value = prev;
+    localStorage.setItem("spo_sc_cycle", prev);
+    showScan();
+  });
+
+  revIdx = 0;
+  renderReview();
   $("sc-manual").classList.remove("hide");
   $("sc-apply").classList.remove("hide");
 }
 
+// ---------- Manual review of the photos OCR could not read ----------
+// One photo on screen at a time with the code box already focused.
+// Type, press Enter, the next photo loads. No hunting through Finder.
+function renderReview(){
+  const box = $("sc-review");
+  if (revUrl){ URL.revokeObjectURL(revUrl); revUrl = null; }
+
+  if (!scanFails.length){ box.classList.add("hide"); box.innerHTML = ""; return; }
+  box.classList.remove("hide");
+
+  if (revIdx >= scanFails.length){
+    box.innerHTML = `<div style="background:rgba(29,158,117,.10);border:1px solid rgba(29,158,117,.35);
+      border-radius:12px;padding:16px;text-align:center;color:var(--teal);font-size:13px">
+      ${t().revDone}</div>`;
+    return;
+  }
+
+  const item = scanFails[revIdx];
+  revUrl = URL.createObjectURL(item.file);
+  box.innerHTML = `
+    <div style="background:rgba(226,75,74,.06);border:1px solid rgba(226,75,74,.28);
+      border-radius:12px;padding:14px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span style="color:#F09595;font-size:13px">${t().revTitle}</span>
+        <span class="num" style="color:var(--mute);font-size:12px">
+          ${revIdx + 1} ${t().revOf} ${scanFails.length}</span>
+      </div>
+      <img src="${revUrl}" alt="" style="width:100%;max-height:340px;object-fit:contain;
+        background:#000;border-radius:8px;margin-bottom:12px">
+      <div style="display:flex;gap:10px">
+        <div class="f" style="flex:1;margin-bottom:8px"><label>${t().revBag}</label>
+          <input id="rv-code" dir="ltr" autocomplete="off" spellcheck="false"
+            style="font-family:Archivo,monospace;text-transform:uppercase" placeholder="DDDDDD9"></div>
+        <div class="f" style="flex:1;margin-bottom:8px"><label>${t().revSeq}</label>
+          <input id="rv-seq" dir="ltr" inputmode="numeric" autocomplete="off" placeholder="446"></div>
+      </div>
+      <div id="rv-err" style="color:#F09595;font-size:12px;min-height:16px;margin-bottom:8px"></div>
+      <div style="display:flex;gap:10px">
+        <button class="btn" id="rv-save" style="margin:0;flex:2">${t().revSave}</button>
+        <button class="btn" id="rv-skip" style="margin:0;flex:1;background:transparent;
+          border:1px solid var(--line);color:var(--mute)">${t().revSkip}</button>
+      </div>
+    </div>`;
+
+  const code = $("rv-code"), seq = $("rv-seq"), err = $("rv-err");
+  const clear = () => { err.textContent = ""; };
+  code.addEventListener("input", clear);
+  seq.addEventListener("input", clear);
+
+  const next = () => { revIdx++; renderReview(); };
+
+  const save = () => {
+    const fixed = normalizeCode(toEn(code.value));
+    const n = parseInt(toEn(seq.value).replace(/[^\d]/g, ""), 10);
+    if (!fixed || !isCanonical(fixed)){ err.textContent = t().revBad; code.focus(); return; }
+    if (!n || n < 1){ err.textContent = t().revBad; seq.focus(); return; }
+    scanRows.push({ code: fixed, seq: n, file: scanFails[revIdx].name });
+    scanFails.splice(revIdx, 1);
+    renderReview();
+    showScanCounts();
+  };
+
+  $("rv-save").addEventListener("click", save);
+  $("rv-skip").addEventListener("click", next);
+  [code, seq].forEach(el => el.addEventListener("keydown", ev => {
+    if (ev.key === "Enter"){ ev.preventDefault(); save(); }
+  }));
+  code.focus();
+}
+
+// Keep the found/failed pills honest as rows move out of the review queue.
+function showScanCounts(){
+  const bar = $("sc-results").querySelector(".sbar");
+  if (!bar) return;
+  bar.innerHTML = `<button class="on">${t().scFound}<b>${scanRows.length}</b></button>` +
+    (scanFails.length ? `<button>${t().scFailed}<b>${scanFails.length}</b></button>` : "");
+}
+
 async function applyScan(){
-  const extra = [];
+  const extra = [], bad = [];
   $("sc-extra").value.split(/\n/).forEach(line => {
+    if (!line.trim()) return;
     const m = toEn(line).toUpperCase().match(/([A-Z0-9]{1,10})[\s,\-]+(\d{1,4})/);
-    if (m) extra.push({ code: m[1], seq: parseInt(m[2], 10) });
+    const code = m && normalizeCode(m[1]);
+    if (code && isCanonical(code)) extra.push({ code, seq: parseInt(m[2], 10) });
+    else bad.push(line.trim());
   });
+  if (bad.length) return say("sc-msg", `${t().revBad}: ${bad.join(" · ")}`, "err");
 
   const all = [...scanRows.map(r=>({code:r.code, seq:r.seq})), ...extra];
   if (!all.length) return;
@@ -1208,8 +1333,11 @@ async function applyScan(){
   if (error) return say("sc-msg", error.message, "err");
   const r = data[0];
   say("sc-msg", `${r.applied} ✓` + (r.missing ? ` · ${t().scNoOrder}: ${r.missing}` : ""), "ok");
-  scanRows = []; scanFails = [];
+  scanRows = []; scanFails = []; revIdx = 0;
+  if (revUrl){ URL.revokeObjectURL(revUrl); revUrl = null; }
   $("sc-results").innerHTML = "";
+  $("sc-review").innerHTML = "";
+  $("sc-review").classList.add("hide");
   $("sc-extra").value = "";
   $("sc-files").value = "";
   $("sc-apply").classList.add("hide");
