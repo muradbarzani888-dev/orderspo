@@ -138,7 +138,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v25</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v26</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -344,6 +344,33 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 const URL_ = "https://bucrapapzgyqxfqdnyaz.supabase.co";
 const KEY_ = "sb_publishable_bf3Rs0aaLbxji2WHfy9A7Q_jSw20oma";
 const db = window.supabase.createClient(URL_, KEY_);
+
+// The tab sits open for hours while orders are typed in; when the phone sleeps
+// the access token can expire before supabase-js gets to refresh it, and the
+// next save fails with "JWT expired". So: refresh just before every write, and
+// if a write still comes back with an expired token, refresh once and retry.
+async function freshSession(){
+  const { data: { session } } = await db.auth.getSession();
+  if (!session) return null;
+  if ((session.expires_at || 0) * 1000 - Date.now() < 90_000){
+    const { data, error } = await db.auth.refreshSession();
+    if (error){ await db.auth.signOut(); return null; }
+    return data.session;
+  }
+  return session;
+}
+const isJwtErr = e => e && /jwt|expired|401|invalid.*token/i.test(String(e.message || e.code || ""));
+const rawRpc = db.rpc.bind(db);
+db.rpc = async (fn, args, opts) => {
+  await freshSession();
+  let r = await rawRpc(fn, args, opts);
+  if (r.error && isJwtErr(r.error)){
+    const { error } = await db.auth.refreshSession();
+    if (error){ await db.auth.signOut(); return r; }
+    r = await rawRpc(fn, args, opts);
+  }
+  return r;
+};
 
 const FLOW = ["received","purchased","at_dubai","in_transit","at_erbil","out_for_delivery","delivered"];
 const T = {
