@@ -139,7 +139,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v28</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v29</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -392,7 +392,7 @@ const T = {
   scFound:"دۆزرایەوە",scFailed:"نەخوێنرایەوە",scNoOrder:"کۆدی کڕیار نەدۆزرایەوە",avgOrder:"ناوەندی داواکاری",
   revTitle:"بەدەست نووسینەوە",revOf:"لە",revBag:"کۆدی جانتا",revSeq:"کۆدی کڕیار",
   revSave:"تۆمار و دواتر",revSkip:"بازدان",revDone:"هەموویان تەواوبوون",
-  revBad:"کۆد دروست نییە — ٦ پیتی وەک یەک و ژمارەیەک",revFixed:"چاککرا",
+  scRestored:"دووبارە هێنرایەوە",revBad:"کۆد دروست نییە — ٦ پیتی وەک یەک و ژمارەیەک",revFixed:"چاککرا",
   scOther:"لەم مانگەدا نییە، بەڵام لە مانگی پێشوودا هەیە",scSwitch:"گۆڕین بۆ",
   exportCsv:"داگرتنی Excel",noOrders:"هیچ داواکاریەک نییە",
   colCode:"کۆد",colUser:"ناو",colPhone:"مۆبایل",colTotal:"کۆی گشتی",
@@ -422,7 +422,7 @@ const T = {
   scFound:"انلكى",scFailed:"ما انقرا",scNoOrder:"رمز الزبون مو موجود",avgOrder:"متوسط الطلب",
   revTitle:"كتابة يدوية",revOf:"من",revBag:"رمز الكيس",revSeq:"رمز الزبون",
   revSave:"احفظ وكمّل",revSkip:"تخطي",revDone:"خلصت كلها",
-  revBad:"الرمز مو صحيح — ٦ حروف نفسها ورقم",revFixed:"انصلح",
+  scRestored:"رجعت البيانات",revBad:"الرمز مو صحيح — ٦ حروف نفسها ورقم",revFixed:"انصلح",
   scOther:"مو بهذا الشهر، بس موجود بالشهر اللي قبله",scSwitch:"غيّر إلى",
   exportCsv:"تحميل Excel",noOrders:"ما في طلبات",
   colCode:"الرمز",colUser:"الاسم",colPhone:"الموبايل",colTotal:"المجموع",
@@ -991,6 +991,39 @@ function exportDash(){
 // Reads GC-340 <BAGCODE>-<CUSTOMERID> from label photos, entirely in the browser.
 let scanRows = [], scanFails = [], revIdx = 0, revUrl = null;
 
+// Reading 100 photos takes minutes. A dropped session, a failed save or an
+// accidental refresh used to throw all of it away and mean re-uploading the
+// lot, so the finished rows live in localStorage until they are safely applied.
+// The photos themselves cannot be stored, but once read they are not needed.
+const SC_KEY = "spo_scan_draft";
+function saveScanDraft(){
+  try {
+    if (!scanRows.length) return clearScanDraft();
+    localStorage.setItem(SC_KEY, JSON.stringify({
+      cycle: $("sc-cycle").value,
+      status: $("sc-status").value,
+      rows: scanRows.map(r => ({ code: r.code, seq: r.seq })),
+      extra: $("sc-extra").value || ""
+    }));
+  } catch (e){ /* private mode / quota — not worth interrupting the scan */ }
+}
+function clearScanDraft(){ try { localStorage.removeItem(SC_KEY); } catch (e){} }
+
+async function restoreScanDraft(){
+  if (scanRows.length) return;               // work in progress wins over the draft
+  let d = null;
+  try { d = JSON.parse(localStorage.getItem(SC_KEY) || "null"); } catch (e){}
+  if (!d || !Array.isArray(d.rows) || !d.rows.length) return;
+  const pick = (sel, v) => { if (v && [...sel.options].some(o => o.value === v)) sel.value = v; };
+  pick($("sc-cycle"), d.cycle);
+  pick($("sc-status"), d.status);
+  scanRows = d.rows.map(r => ({ code: r.code, seq: r.seq }));
+  scanFails = []; revIdx = 0;
+  if (d.extra) $("sc-extra").value = d.extra;
+  await showScan();
+  say("sc-msg", `${t().scRestored}: ${scanRows.length}`, "ok");
+}
+
 // Otsu: pick the greyscale cutoff that best separates ink from paper.
 // Phone photos have uneven light, so one fixed number never fits every photo.
 function otsu(hist, total){
@@ -1034,7 +1067,9 @@ async function initScan(){
 
     $("sc-files").addEventListener("change", runScan);
     $("sc-apply").addEventListener("click", applyScan);
+    $("sc-extra").addEventListener("input", saveScanDraft);
   }
+  await restoreScanDraft();
 }
 
 // A bag code is six identical letters then one digit: DDDDDD9. The letter I is
@@ -1255,6 +1290,7 @@ async function runScan(e){
   $("sc-bar").style.width = "100%";
   $("sc-progress").classList.add("hide");
   await showScan();
+  saveScanDraft();
 }
 
 // 2608 -> 2607. Bags bought in one cycle physically arrive during the next one,
@@ -1397,6 +1433,7 @@ function renderReview(){
     scanFails.splice(revIdx, 1);
     renderReview();
     showScanCounts();
+    saveScanDraft();
   };
 
   $("rv-save").addEventListener("click", save);
@@ -1430,19 +1467,40 @@ async function applyScan(){
 
   const all = [...scanRows.map(r=>({code:r.code, seq:r.seq})), ...extra];
   if (!all.length) return;
-  if (!confirm(`${all.length}?`)) return;
+
+  // Scrub the payload before it leaves the browser. A stray value here comes
+  // back from Postgres as something unreadable like «malformed array literal»,
+  // which says nothing about which row was at fault.
+  const rows = [], junk = [];
+  all.forEach(r => {
+    const code = String(r.code == null ? "" : r.code).toUpperCase().trim();
+    const seq = Number(r.seq);
+    if (/^[A-Z]{1,8}\d{1,3}$/.test(code) && Number.isInteger(seq) && seq > 0 && seq <= MAX_SEQ)
+      rows.push({ code, seq });
+    else junk.push(`${r.code == null ? "?" : r.code}·${r.seq == null ? "?" : r.seq}`);
+  });
+  if (junk.length){
+    console.error("apply_bag_scan: rejected rows", junk);
+    return say("sc-msg", `${t().revBad}: ${junk.slice(0, 8).join(" · ")}`, "err");
+  }
+
+  const p_cycle = $("sc-cycle").value, p_status = $("sc-status").value;
+  if (!p_cycle || !p_status) return say("sc-msg", `${t().revBad}: ${t().cycle} / ${t().setStatus}`, "err");
+  if (!confirm(`${rows.length}?`)) return;
 
   const b = $("sc-apply"); b.disabled = true; b.innerHTML = '<span class="spin"></span>';
-  const { data, error } = await db.rpc("apply_bag_scan", {
-    p_cycle: $("sc-cycle").value,
-    p_status: $("sc-status").value,
-    p_rows: all
-  });
+  const { data, error } = await db.rpc("apply_bag_scan", { p_cycle, p_status, p_rows: rows });
   b.disabled = false; b.textContent = t().applyBags;
 
-  if (error) return say("sc-msg", error.message, "err");
+  // Keep everything on screen when the save fails — the OCR work is expensive.
+  if (error){
+    console.error("apply_bag_scan failed", { p_cycle, p_status, p_rows: rows }, error);
+    saveScanDraft();
+    return say("sc-msg", error.message, "err");
+  }
   const r = data[0];
   say("sc-msg", `${r.applied} ✓` + (r.missing ? ` · ${t().scNoOrder}: ${r.missing}` : ""), "ok");
+  clearScanDraft();
   scanRows = []; scanFails = []; revIdx = 0;
   if (revUrl){ URL.revokeObjectURL(revUrl); revUrl = null; }
   $("sc-results").innerHTML = "";
