@@ -139,7 +139,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v27</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v28</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -1091,16 +1091,33 @@ function typedBagCode(raw){
 
 // One bag can hold several customers' items; the label then reads
 // GC-340 D4-14-18. Split "14-18", "14+18", "14,18", "14 18" into [14, 18].
+// Customer ids run in the hundreds, so anything past MAX_SEQ is not an id —
+// it is a stray piece of a phone or invoice number.
+const MAX_SEQ = 1999;
 function parseSeqs(txt){
   const nums = toEn(String(txt || "")).split(/[^\d]+/).filter(Boolean)
-    .map(n => parseInt(n, 10)).filter(n => n > 0 && n < 10000);
+    .map(n => parseInt(n, 10)).filter(n => n > 0 && n <= MAX_SEQ);
   return [...new Set(nums)];
 }
 
+// The label also carries phone numbers (+971507208201) and an invoice barcode
+// (6080326267394). OCR happily hands those to us and "971" looks exactly like a
+// customer id, so blank them out before we go looking. Line-bounded on purpose:
+// \s would let a match run across the newline and swallow the GC-340 line.
+function maskNoise(up){
+  return up
+    .replace(/[+][ \t]*\d[\d \t\-–—]{5,}/g, " ")            // +971 50 720 8201
+    .replace(/\b0?0?9[ \t]*6[ \t]*4[\d \t\-–—]{5,}/g, " ")  // 00964 / 964 …
+    .replace(/\b9[ \t]*7[ \t]*1[ \t]*\d[\d \t]{4,}/g, " ")  // 971 507 208 201
+    .replace(/\d[\d \t]*\d/g, m =>                          // any 8+ digit run
+      m.replace(/\D/g, "").length >= 8 ? " " : m)
+    .replace(/\d{5,}/g, " ");                               // invoice / barcode
+}
+
 // Pull the code + customer id(s) out of whatever OCR returned.
-// Returns { code, seqs:[...] } or null.
+// Returns every candidate it can see, best pattern first.
 function extractCode(txt){
-  const up = String(txt || "").toUpperCase().replace(/[|]/g, "1");
+  const up = maskNoise(String(txt || "").toUpperCase().replace(/[|]/g, "1"));
   const out = [];
   const push = (raw, seqTxt, allowShort) => {
     // Right after "GC-340" a short sheet-style code (D4, AB12) is trusted as-is;
@@ -1111,17 +1128,41 @@ function extractCode(txt){
     if (code && seqs.length) out.push({ code, seqs, raw: s });
   };
   const sweep = (re, allowShort) => { let m; while ((m = re.exec(up)) !== null) push(m[1], m[2], allowShort); };
-  const IDS = "(\\d{1,4}(?:\\s*[-–—+,]\\s*\\d{1,4})*)\\b";
+  // \b ... (?!\d): an id must stand alone, never be a slice of a longer number.
+  // (Lookbehind would read better but old iOS Safari throws on it.)
+  const IDS = "(\\b\\d{1,4}(?:[ \\t]*[-–—+,][ \\t]*\\d{1,4})*(?!\\d))";
 
   // GC-340 <code>-<id>[-<id>...], the printed format
   sweep(new RegExp("G\\s*C\\s*[-–—]?\\s*3\\s*4\\s*0\\s+([A-Z0-9]{2,9})\\s*[-–—\\s]\\s*" + IDS, "g"), true);
-  if (out.length) return out[0];
   // code and id separated by a dash, GC prefix lost
   sweep(new RegExp("\\b([A-Z0-9]{4,9})\\s*[-–—]\\s*" + IDS, "g"));
-  if (out.length) return out[0];
   // last resort: code and id separated by whitespace only
-  sweep(new RegExp("\\b([A-Z0-9]{4,9})\\s+" + IDS, "g"));
-  return out[0] || null;
+  sweep(new RegExp("\\b([A-Z0-9]{4,9})[ \\t]+" + IDS, "g"));
+  return out;
+}
+
+// Of everything OCR offered, take the reading whose customer ids are real
+// orders. Without that check a phone fragment like 971 sails through looking
+// perfectly valid. If nothing matches we still return the best guess, but
+// flagged unsure so the photo goes to manual review instead of the save list.
+function pickCandidate(cands, valid){
+  if (!cands.length) return null;
+  if (!valid || !valid.size) return { ...cands[0], sure: true };
+  const all = cands.find(c => c.seqs.every(s => valid.has(s)));
+  if (all) return { ...all, sure: true };
+  const some = cands.find(c => c.seqs.some(s => valid.has(s)));
+  if (some) return { ...some, seqs: some.seqs.filter(s => valid.has(s)), sure: true };
+  return { ...cands[0], sure: false };
+}
+
+// Customer ids that actually exist, this cycle and the one before (bags arrive
+// a month late, so last month's ids show up in every batch).
+async function loadValidSeqs(cyc){
+  const set = new Set();
+  const codes = [cyc, prevCycle(cyc)].filter(Boolean);
+  const { data } = await db.from("orders").select("seq").in("cycle_code", codes);
+  (data || []).forEach(o => set.add(Number(o.seq)));
+  return set;
 }
 
 async function runScan(e){
@@ -1136,6 +1177,9 @@ async function runScan(e){
   $("sc-review").classList.add("hide");
   $("sc-apply").classList.add("hide");
   $("sc-manual").classList.add("hide");
+
+  await freshSession();
+  const valid = await loadValidSeqs($("sc-cycle").value);
 
   const worker = await Tesseract.createWorker("eng");
   await worker.setParameters({
@@ -1161,7 +1205,7 @@ async function runScan(e){
     $("sc-count").textContent = `${t().reading} ${i + 1} / ${files.length}`;
     try {
       const bmp = await createImageBitmap(files[i]);
-      let hit = null;
+      let hit = null, guess = null;
       for (const [top, bot, cut, zoom, psm] of PASSES){
         const cv = document.createElement("canvas");
         const sy = Math.round(bmp.height * top);
@@ -1195,11 +1239,12 @@ async function runScan(e){
 
         if (psm !== psmNow){ await worker.setParameters({ tessedit_pageseg_mode: psm }); psmNow = psm; }
         const { data } = await worker.recognize(cv);
-        hit = extractCode(data.text);
-        if (hit) break;
+        const pick = pickCandidate(extractCode(data.text), valid);
+        if (pick && pick.sure){ hit = pick; break; }
+        if (pick && !guess) guess = pick;   // keep the best unsure read for review
       }
       if (hit) hit.seqs.forEach(seq => scanRows.push({ code: hit.code, seq, raw: hit.raw, file: files[i].name }));
-      else scanFails.push({ file: files[i], name: files[i].name });
+      else scanFails.push({ file: files[i], name: files[i].name, guess });
       bmp.close();
     } catch (err){
       scanFails.push({ file: files[i], name: files[i].name });
@@ -1305,6 +1350,9 @@ function renderReview(){
   }
 
   const item = scanFails[revIdx];
+  // A read we could not tie to a real order: show it prefilled so it can be
+  // corrected rather than typed from scratch.
+  const g = item.guess;
   revUrl = URL.createObjectURL(item.file);
   box.innerHTML = `
     <div style="background:rgba(226,75,74,.06);border:1px solid rgba(226,75,74,.28);
@@ -1318,10 +1366,11 @@ function renderReview(){
         background:#000;border-radius:8px;margin-bottom:12px">
       <div style="display:flex;gap:10px">
         <div class="f" style="flex:1;margin-bottom:8px"><label>${t().revBag}</label>
-          <input id="rv-code" dir="ltr" autocomplete="off" spellcheck="false"
+          <input id="rv-code" dir="ltr" autocomplete="off" spellcheck="false" value="${g ? g.code : ""}"
             style="font-family:Archivo,monospace;text-transform:uppercase" placeholder="DDDDDD9"></div>
         <div class="f" style="flex:1;margin-bottom:8px"><label>${t().revSeq}</label>
-          <input id="rv-seq" dir="ltr" inputmode="numeric" autocomplete="off" placeholder="446  /  14-18"></div>
+          <input id="rv-seq" dir="ltr" inputmode="numeric" autocomplete="off" value="${g ? g.seqs.join("-") : ""}"
+            placeholder="446  /  14-18"></div>
       </div>
       <div id="rv-err" style="color:#F09595;font-size:12px;min-height:16px;margin-bottom:8px"></div>
       <div style="display:flex;gap:10px">
