@@ -139,7 +139,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v30</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v31</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -585,7 +585,7 @@ async function openOrder(id){
     { covers:["at_dubai","in_transit"],       label:() => t().st.at_dubai },
     { covers:["at_erbil"],                    label:() => t().st.at_erbil },
     { covers:["out_for_delivery","delivered"],
-      label:() => o.status === "out_for_delivery" ? t().st.out_for_delivery : t().st.delivered }
+      label:() => `${t().st.out_for_delivery} + ${t().st.delivered}` }
   ];
   const at = TL.findIndex(x => x.covers.includes(o.status));
   $("d-steps").innerHTML = TL.map((x, i) => {
