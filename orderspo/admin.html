@@ -139,7 +139,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v31</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v32</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -1290,7 +1290,11 @@ async function runScan(e){
         if (pick && pick.sure){ hit = pick; break; }
         if (pick && !guess) guess = pick;   // keep the best unsure read for review
       }
-      if (hit) hit.seqs.forEach(seq => scanRows.push({ code: hit.code, seq, raw: hit.raw, file: files[i].name }));
+      if (hit) hit.seqs.forEach(seq => {
+        // the same bag photographed twice must not become two rows
+        if (!scanRows.some(r => r.code === hit.code && r.seq === seq))
+          scanRows.push({ code: hit.code, seq, raw: hit.raw, file: files[i].name });
+      });
       else scanFails.push({ file: files[i], name: files[i].name, guess });
       bmp.close();
     } catch (err){
@@ -1440,8 +1444,11 @@ function renderReview(){
     const seqs = parseSeqs(seq.value);
     if (!fixed){ err.textContent = t().revBad; code.focus(); return; }
     if (!seqs.length){ err.textContent = t().revBad; seq.focus(); return; }
-    // "14-18" = two customers sharing this bag → one row each
-    seqs.forEach(n => scanRows.push({ code: fixed, seq: n, file: scanFails[revIdx].name }));
+    // "14-18" = two customers sharing this bag → one row each (skip repeats)
+    seqs.forEach(n => {
+      if (!scanRows.some(r => r.code === fixed && r.seq === n))
+        scanRows.push({ code: fixed, seq: n, file: scanFails[revIdx].name });
+    });
     scanFails.splice(revIdx, 1);
     renderReview();
     showScanCounts();
@@ -1477,7 +1484,10 @@ async function applyScan(){
   });
   if (bad.length) return say("sc-msg", `${t().revBad}: ${bad.join(" · ")}`, "err");
 
-  const all = [...scanRows.map(r=>({code:r.code, seq:r.seq})), ...extra];
+  const uniq = new Map();
+  [...scanRows.map(r=>({code:r.code, seq:r.seq})), ...extra]
+    .forEach(r => uniq.set(`${r.code}\u00b7${r.seq}`, r));
+  const all = [...uniq.values()];
   if (!all.length) return;
 
   // Scrub the payload before it leaves the browser. A stray value here comes
@@ -1548,7 +1558,7 @@ function parseBagPaste(){
       }
     });
     if (codes.length || notes.length)
-      out.push({ seq, codes, note: notes.join(" ") || null });
+      out.push({ seq, codes: [...new Set(codes)], note: notes.join(" ") || null });
   });
   return out;
 }
