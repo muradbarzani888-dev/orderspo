@@ -139,7 +139,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v29</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v30</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -578,12 +578,24 @@ async function openOrder(id){
     .select("status,occurred_at").eq("order_id", id).order("occurred_at");
   const seen = {};
   (ev || []).forEach(e => { if (!seen[e.status]) seen[e.status] = e.occurred_at; });
-  const at = FLOW.indexOf(o.status);
-  $("d-steps").innerHTML = FLOW.map((s, i) => {
-    const d = seen[s] ? new Date(seen[s]).toLocaleDateString("en-GB", {day:"numeric",month:"short"}) : "";
+  // The timeline shows four stops: purchased and in_transit are folded into
+  // the stop before them, and out_for_delivery + delivered share the last one.
+  const TL = [
+    { covers:["received","purchased"],        label:() => t().st.received },
+    { covers:["at_dubai","in_transit"],       label:() => t().st.at_dubai },
+    { covers:["at_erbil"],                    label:() => t().st.at_erbil },
+    { covers:["out_for_delivery","delivered"],
+      label:() => o.status === "out_for_delivery" ? t().st.out_for_delivery : t().st.delivered }
+  ];
+  const at = TL.findIndex(x => x.covers.includes(o.status));
+  $("d-steps").innerHTML = TL.map((x, i) => {
+    const when = i === TL.length - 1
+      ? (o.status === "out_for_delivery" ? seen.out_for_delivery : (seen.delivered || seen.out_for_delivery))
+      : x.covers.map(c => seen[c]).filter(Boolean)[0];
+    const d = when ? new Date(when).toLocaleDateString("en-GB", {day:"numeric",month:"short"}) : "";
     return `<div class="st ${i < at ? "done" : i === at ? "now" : ""}">
       <div class="g"><div class="dot"></div><div class="ln"></div></div>
-      <div class="tx">${t().st[s]}${d ? `<div class="dt num">${d}</div>` : ""}</div></div>`;
+      <div class="tx">${x.label()}${d ? `<div class="dt num">${d}</div>` : ""}</div></div>`;
   }).join("");
   view("detail");
 }
