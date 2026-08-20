@@ -139,7 +139,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v34</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v35</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -1423,8 +1423,8 @@ function renderReview(){
           <input id="rv-code" dir="ltr" autocomplete="off" spellcheck="false" value="${g ? g.code : ""}"
             style="font-family:Archivo,monospace;text-transform:uppercase" placeholder="DDDDDD9"></div>
         <div class="f" style="flex:1;margin-bottom:8px"><label>${t().revSeq}</label>
-          <input id="rv-seq" dir="ltr" inputmode="numeric" autocomplete="off" value="${g ? g.seqs.join("-") : ""}"
-            placeholder="446  /  14-18"></div>
+          <input id="rv-seq" dir="ltr" inputmode="tel" autocomplete="off" value="${g ? g.seqs.join("-") : ""}"
+            placeholder="446  /  14-18  /  14*18"></div>
       </div>
       <div id="rv-err" style="color:#F09595;font-size:12px;min-height:16px;margin-bottom:8px"></div>
       <div style="display:flex;gap:10px">
