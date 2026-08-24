@@ -139,7 +139,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v35</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v36</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -1524,21 +1524,34 @@ async function applyScan(){
   // finished 250 is skipped and August's open 250 gets the bag.
   const CLOSED = ["delivered", "cancelled"];
   const sets = async cyc => {
-    const { data } = await db.from("orders").select("seq,status").eq("cycle_code", cyc);
-    const open = new Set(), any = new Set();
+    const { data } = await db.from("orders").select("seq,status,bags_code").eq("cycle_code", cyc);
+    const open = new Set(), any = new Set(), codes = {};
     (data || []).forEach(o => {
-      any.add(Number(o.seq));
-      if (!CLOSED.includes(o.status)) open.add(Number(o.seq));
+      const q = Number(o.seq);
+      any.add(q);
+      if (!CLOSED.includes(o.status)) open.add(q);
+      if (o.bags_code) codes[q] = String(o.bags_code).toUpperCase();
     });
-    return { open, any };
+    return { open, any, codes };
   };
   const prev = prevCycle(p_cycle);
   const cur = await sets(p_cycle);
-  const prv = prev ? await sets(prev) : { open: new Set(), any: new Set() };
+  const prv = prev ? await sets(prev) : { open: new Set(), any: new Set(), codes: {} };
+
+  // When the same customer number is open in BOTH months, the sheet decides:
+  // each order carries its expected bag codes, and the month whose sheet lists
+  // this exact code wins. Only when neither sheet knows the code does the
+  // dropdown month win by default.
+  const listed = (m, r) => m.codes[r.seq] &&
+    new RegExp(`(^|[^A-Z0-9])${r.code}([^A-Z0-9]|$)`).test(m.codes[r.seq]);
 
   const nowRows = [], prevRows = [], closedRows = [];
   rows.forEach(r => {
-    if (cur.open.has(r.seq)) nowRows.push(r);
+    const inCur = cur.open.has(r.seq) && listed(cur, r);
+    const inPrv = prv.open.has(r.seq) && listed(prv, r);
+    if (inCur) nowRows.push(r);
+    else if (inPrv) prevRows.push(r);
+    else if (cur.open.has(r.seq)) nowRows.push(r);
     else if (prv.open.has(r.seq)) prevRows.push(r);
     else if (cur.any.has(r.seq) || prv.any.has(r.seq)) closedRows.push(r);
     else nowRows.push(r);   // unknown id: send it so the server reports it missing
