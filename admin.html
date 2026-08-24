@@ -139,7 +139,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v37</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v38</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -191,12 +191,15 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
         <div class="kv"><span data-t="total"></span><span class="num" id="d-total"></span></div>
         <div class="kv"><span data-t="deposit"></span><span class="num" id="d-dep"></span></div>
         <div class="kv"><span data-t="due"></span><span class="num" id="d-due" style="color:var(--teal);font-weight:600"></span></div>
+        <div class="kv hide" id="d-coll-row"><span data-t="collected"></span><span class="num" id="d-coll" style="font-weight:600"></span></div>
         <div class="kv"><span data-t="phone"></span><span class="num" id="d-phone"></span></div>
         <div class="kv"><span data-t="address"></span><span id="d-addr" style="text-align:left;max-width:60%"></span></div>
       </div>
       <div id="d-bags" style="margin-bottom:18px"></div>
       <div class="steps" id="d-steps"></div>
       <div class="f"><label data-t="setStatus"></label><select id="d-status"></select></div>
+      <div class="f hide" id="d-collect-box"><label data-t="collected"></label>
+        <input id="d-collect" inputmode="numeric" dir="ltr"></div>
       <button class="btn" id="d-go" data-t="update"></button>
       <div style="margin-top:24px;padding-top:18px;border-top:1px solid var(--line)">
         <div class="f"><label data-t="username"></label><input id="d-c-user" dir="ltr"></div>
@@ -272,6 +275,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
         <div class="tile"><div class="k" data-t="paidUp"></div><div class="v num" id="dh-paid">—</div></div>
         <div class="tile"><div class="k" data-t="cod"></div><div class="v num" id="dh-cod" style="color:var(--teal)">—</div></div>
         <div class="tile"><div class="k" data-t="codPending"></div><div class="v num" id="dh-cod-pending" style="color:var(--teal)">—</div><div class="sub" id="dh-cod-pending-sub"></div></div>
+        <div class="tile wide hide" id="dh-debt-tile"><div class="k" data-t="delivDebt"></div><div class="v num" id="dh-debt" style="color:#F09595">—</div><div class="sub" id="dh-debt-sub"></div></div>
       </div>
 
       <div id="dh-status" style="margin-bottom:18px"></div>
@@ -401,7 +405,7 @@ const T = {
   moveBatch:"گواستنەوەی کۆمەڵ",searchLbl:"گەڕان بە کۆد، ناو یان ژمارە",search:"گەڕان",back:"گەڕانەوە",
   username:"ناوی ئینستاگرام",phone:"ژمارەی مۆبایل",address:"ناونیشان",total:"کۆی گشتی",
   deposit:"پارەی پێشەکی",due:"بڕی ماوە",items:"ژمارەی بەرهەم",save:"تۆمارکردن",
-  setStatus:"دۆخی نوێ",update:"نوێکردنەوە",saveAmounts:"تۆمارکردنی بڕەکان",from:"لە دۆخی",to:"بۆ دۆخی",month:"مانگ",codeFrom:"لە کۆدی",codeTo:"بۆ کۆدی",
+  setStatus:"دۆخی نوێ",update:"نوێکردنەوە",collected:"پارەی کۆکراوە",collectedAsk:"چەند پارە کۆکرایەوە؟",delivDebt:"قەرزی گەیەندراو (کۆنەکراوەتەوە)",saveAmounts:"تۆمارکردنی بڕەکان",from:"لە دۆخی",to:"بۆ دۆخی",month:"مانگ",codeFrom:"لە کۆدی",codeTo:"بۆ کۆدی",
   rangeHint:"بەتاڵی بهێڵەرەوە بۆ هەمووی",
   willMove:"داواکاری دەگوازرێتەوە",moveAll:"گواستنەوەی هەموویان",noRes:"هیچ نەدۆزرایەوە",
   saved:"تۆمارکرا",need:"ناو و کۆی گشتی پێویستە",moved:"داواکاری گوازرایەوە",
@@ -431,7 +435,7 @@ const T = {
   moveBatch:"تحديث مجموعة",searchLbl:"دور بالرمز أو الاسم أو الرقم",search:"دور",back:"رجوع",
   username:"اسم الانستغرام",phone:"رقم الموبايل",address:"العنوان",total:"المجموع",
   deposit:"المدفوع",due:"المتبقي",items:"عدد القطع",save:"حفظ",
-  setStatus:"الحالة الجديدة",update:"تحديث",saveAmounts:"حفظ المبالغ",from:"من حالة",to:"إلى حالة",month:"الشهر",codeFrom:"من رمز",codeTo:"إلى رمز",
+  setStatus:"الحالة الجديدة",update:"تحديث",collected:"المبلغ المستلم",collectedAsk:"شكد انستلم؟",delivDebt:"دين المسلَّم (غير مستلم)",saveAmounts:"حفظ المبالغ",from:"من حالة",to:"إلى حالة",month:"الشهر",codeFrom:"من رمز",codeTo:"إلى رمز",
   rangeHint:"خليها فارغة للكل",
   willMove:"طلب راح ينتقل",moveAll:"حدث الكل",noRes:"ما لكيت شي",
   saved:"انحفظ",need:"لازم الاسم والمجموع",moved:"الطلبات انتقلت",
@@ -440,6 +444,8 @@ const T = {
 };
 let lang = localStorage.getItem("spo_a") === "ar" ? "ar" : "ku";
 let me = null, cycle = null, current = null;
+// true once the collected_iqd column exists (after sheinspo_upgrade.sql is run)
+let hasCollect = false;
 
 const $ = i => document.getElementById(i);
 
@@ -553,6 +559,14 @@ async function openOrder(id){
   $("d-phone").textContent = o.customers?.phone || "—";
   $("d-addr").textContent = o.customers?.address || "—";
   $("d-status").value = o.status;
+  $("d-coll-row").classList.toggle("hide", !hasCollect || o.collected_iqd == null);
+  if (hasCollect && o.collected_iqd != null){
+    const short = Number(o.collected_iqd) < Number(o.balance_iqd);
+    $("d-coll").textContent = iqd(o.collected_iqd);
+    $("d-coll").style.color = short ? "#F09595" : "var(--teal)";
+  }
+  $("d-collect-box").classList.toggle("hide", !hasCollect);
+  if (hasCollect) $("d-collect").value = o.collected_iqd ?? "";
   $("d-e-total").value = o.total_iqd;
   $("d-e-dep").value = o.deposit_iqd;
   $("d-f-items").value = o.items_count ?? "";
@@ -838,7 +852,19 @@ $("n-go").addEventListener("click", async () => {
 });
 
 $("d-go").addEventListener("click", async () => {
-  const { error } = await db.from("orders").update({ status: $("d-status").value }).eq("id", current.id);
+  const upd = { status: $("d-status").value };
+  if (hasCollect){
+    let n = toEn($("d-collect").value).replace(/\D/g, "");
+    // Delivered without an amount: ask right here — this is the moment the
+    // money changes hands, and unrecorded cash is how debt goes invisible.
+    if (upd.status === "delivered" && n === ""){
+      const a = prompt(t().collectedAsk, current.balance_iqd ?? "");
+      if (a === null) return;
+      n = toEn(a).replace(/\D/g, "");
+    }
+    if (n !== "") upd.collected_iqd = Number(n);
+  }
+  const { error } = await db.from("orders").update(upd).eq("id", current.id);
   say("d-msg", error ? error.message : t().saved, error ? "err" : "ok");
   if (!error) openOrder(current.id);
 });
@@ -898,7 +924,8 @@ async function initDash(){
 async function loadDash(){
   $("dh-table").innerHTML = `<div class="empty"><span class="spin"></span></div>`;
   const { data, error } = await db.from("orders")
-    .select("id,seq,order_code,status,total_iqd,deposit_iqd,balance_iqd,items_count,bags_code,weight_kg,customers(instagram_username,phone)")
+    .select("id,seq,order_code,status,total_iqd,deposit_iqd,balance_iqd,items_count,bags_code,weight_kg,customers(instagram_username,phone)"
+      + (hasCollect ? ",collected_iqd" : ""))
     .eq("cycle_code", $("dh-cycle").value)
     .order("seq", { ascending:false });
   if (error){ $("dh-table").innerHTML = `<div class="msg err">${error.message}</div>`; return; }
@@ -921,6 +948,16 @@ function paintTotals(){
   const delivSum = sum("balance_iqd") - pendSum;
   $("dh-cod-pending").textContent = iqd(pendSum);
   $("dh-cod-pending-sub").textContent = `${pend.length} ${t().orders} · ${t().st.delivered}: ${iqd(delivSum)}`;
+  // delivered orders where the recorded cash is short of the balance = real debt
+  $("dh-debt-tile").classList.toggle("hide", !hasCollect);
+  if (hasCollect){
+    const dl = live.filter(r => r.status === "delivered");
+    const short = dl.filter(r => Number(r.collected_iqd ?? 0) < Number(r.balance_iqd || 0));
+    const debt = short.reduce((a, r) => a + (Number(r.balance_iqd || 0) - Number(r.collected_iqd ?? 0)), 0);
+    const unrec = dl.filter(r => r.collected_iqd == null).length;
+    $("dh-debt").textContent = iqd(debt);
+    $("dh-debt-sub").textContent = `${short.length} ${t().orders}` + (unrec ? ` · ? ${unrec}` : "");
+  }
   $("dh-avg").textContent = live.length ? iqd(Math.round(sum("total_iqd")/live.length)) : "0";
 
   const tally = {};
@@ -988,13 +1025,15 @@ function renderDash(){
 }
 
 function exportDash(){
-  const head = ["code","username","phone","total","deposit","balance","status","items","bags","kg"];
+  const head = ["code","username","phone","total","deposit","balance","status","items","bags","kg"]
+    .concat(hasCollect ? ["collected"] : []);
   const lines = [head.join(",")].concat(dashRows.map(r => [
     r.order_code,
     `"${(r.customers?.instagram_username||"").replace(/"/g,'""')}"`,
     r.customers?.phone || "",
     r.total_iqd, r.deposit_iqd, r.balance_iqd, r.status,
-    r.items_count ?? "", `"${(r.bags_code||"").replace(/"/g,'""')}"`, r.weight_kg ?? ""
+    r.items_count ?? "", `"${(r.bags_code||"").replace(/"/g,'""')}"`, r.weight_kg ?? "",
+    ...(hasCollect ? [r.collected_iqd ?? ""] : [])
   ].join(",")));
   const blob = new Blob(["\ufeff" + lines.join("\n")], {type:"text/csv;charset=utf-8;"});
   const a = document.createElement("a");
@@ -1679,6 +1718,8 @@ db.auth.onAuthStateChange(async (_e, session) => {
     return;
   }
   me = s;
+  const { error: ce } = await db.from("orders").select("collected_iqd").limit(1);
+  hasCollect = !ce;
   $("me").textContent = s.full_name;
   $("login").classList.add("hide");
   $("app").classList.remove("hide");
