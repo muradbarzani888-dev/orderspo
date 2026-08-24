@@ -139,7 +139,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v36</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v37</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -153,7 +153,8 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
       <div class="tiles hide" id="h-money">
         <div class="tile"><div class="k" data-t="billed"></div><div class="v num" id="h-billed">—</div></div>
         <div class="tile"><div class="k" data-t="paidUp"></div><div class="v num" id="h-paid">—</div></div>
-        <div class="tile wide"><div class="k" data-t="cod"></div><div class="v num" id="h-cash">—</div></div>
+        <div class="tile"><div class="k" data-t="cod"></div><div class="v num" id="h-cash" style="color:var(--teal)">—</div></div>
+        <div class="tile"><div class="k" data-t="codPending"></div><div class="v num" id="h-pending" style="color:var(--teal)">—</div></div>
       </div>
       <div class="nav">
         <button data-go="new" data-t="newOrder"></button>
@@ -467,9 +468,11 @@ const toEn = t => String(t == null ? "" : t).replace(/[٠-٩۰-۹]/g, d => {
 const iqd = n => Number(n || 0).toLocaleString("en-US");
 const t = () => T[lang];
 
-function say(box, text, kind){
+function say(box, text, kind, ms){
   $(box).innerHTML = text ? `<div class="msg ${kind || "ok"}">${text}</div>` : "";
-  if (text) setTimeout(() => { if ($(box)) $(box).innerHTML = ""; }, 5000);
+  // errors stay twice as long; ms=0 pins the message until the next say()
+  const hold = ms !== undefined ? ms : (kind === "err" ? 10000 : 5000);
+  if (text && hold) setTimeout(() => { if ($(box)) $(box).innerHTML = ""; }, hold);
 }
 function view(n){
   ["home","new","paste","dash","scan","detail","batch"].forEach(v => $("v-" + v).classList.toggle("hide", v !== n));
@@ -504,6 +507,8 @@ async function loadHome(){
     $("h-billed").textContent = iqd(sum("total_iqd"));
     $("h-paid").textContent   = iqd(sum("deposit_iqd"));
     $("h-cash").textContent   = iqd(sum("balance_iqd"));
+    $("h-pending").textContent = iqd(live.filter(r => r.status !== "delivered")
+      .reduce((a, r) => a + Number(r.balance_iqd || 0), 0));
   }
 }
 
@@ -1586,7 +1591,7 @@ async function applyScan(){
     `${applied} ✓` +
     (prevRows.length ? ` · ${p_cycle}: ${nowRows.length} · ${prev}: ${prevRows.length}` : "") +
     (closedRows.length ? ` · ${t().scClosed}: ${closedRows.map(r => r.seq).join(" ")}` : "") +
-    (missing.length ? ` · ${t().scNoOrder}: ${missing.join(" ")}` : ""), "ok");
+    (missing.length ? ` · ${t().scNoOrder}: ${missing.join(" ")}` : ""), "ok", 0);
   clearScanDraft();
   scanRows = []; scanFails = []; revIdx = 0;
   if (revUrl){ URL.revokeObjectURL(revUrl); revUrl = null; }
@@ -1650,7 +1655,7 @@ $("bg-go").addEventListener("click", async () => {
   if (error) return say("bg-msg", error.message, "err");
   const r = data[0];
   say("bg-msg", `${r.bags_added} ✓ · ${r.orders_touched}` +
-    (r.missing ? ` · ${t().scNoOrder}: ${r.missing}` : ""), "ok");
+    (r.missing ? ` · ${t().scNoOrder}: ${r.missing}` : ""), "ok", 0);
   $("bg-box").value = ""; previewBags();
 });
 

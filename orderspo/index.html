@@ -161,7 +161,7 @@ button.go:disabled{opacity:.5;cursor:default}
     </div>
     <button class="go" id="submit" data-t="cta"></button>
     <p class="hint" data-t="hint"></p>
-    <p style="text-align:center;color:#3E545B;font-size:10px;margin-top:22px;font-family:Archivo,sans-serif">v8</p>
+    <p style="text-align:center;color:#3E545B;font-size:10px;margin-top:22px;font-family:Archivo,sans-serif">v9</p>
   </section>
 
   <section id="result-view" class="hidden">
@@ -309,7 +309,20 @@ function render(o){
   const seen = {};
   (o.history || []).forEach(h => { if (!seen[h.status]) seen[h.status] = h.at; });
 
-  $("r-scene").innerHTML = SCENES[o.status] || SCENES.received;
+  const dead = o.status === "cancelled";
+  $("r-scene").innerHTML = dead ? "" : (SCENES[o.status] || SCENES.received);
+  $("r-scene").style.display = dead ? "none" : "";
+  let cx = $("r-cancel");
+  if (!cx){
+    cx = document.createElement("div");
+    cx.id = "r-cancel";
+    cx.style.cssText = "background:rgba(226,75,74,.10);border:1px solid rgba(226,75,74,.35);" +
+      "border-radius:12px;padding:14px;text-align:center;color:#F09595;font-size:13.5px;margin-bottom:16px";
+    $("r-scene").before(cx);
+  }
+  cx.textContent = t.cancelled;
+  cx.style.display = dead ? "" : "none";
+  $("r-timeline").style.display = dead ? "none" : "";
 
   // Four stops, same as the admin panel: purchased and in_transit fold into
   // the stop before them, and the last stop covers the delivery hand-off.
@@ -326,7 +339,11 @@ function render(o){
   TL.forEach((x, i) => {
     const div = document.createElement("div");
     div.className = "step" + (i < reached ? " done" : i === reached ? " now" : "");
-    const meta = i === reached ? t.now : "";
+    const when = i === TL.length - 1
+      ? (seen.delivered || seen.out_for_delivery)
+      : x.covers.map(c => seen[c]).filter(Boolean)[0];
+    const d8 = i <= reached ? fmtDate(when) : "";
+    const meta = [i === reached ? t.now : "", d8].filter(Boolean).join(" · ");
 
     const gut = document.createElement("div");
     gut.className = "gut";
@@ -349,7 +366,8 @@ function render(o){
     tl.append(div);
   });
 
-  $("r-upd").textContent = "";
+  const latest = (o.history || []).map(h => h.at).sort().pop();
+  $("r-upd").textContent = latest ? `${t.updated}: ${fmtDate(latest)}` : "";
   $("form-view").classList.add("hidden");
   $("result-view").classList.remove("hidden");
   window.scrollTo(0, 0);
@@ -385,6 +403,7 @@ async function lookup(){
     if (!res.ok) throw new Error(res.status);
     const rows = await res.json();
     if (!rows || !rows.length){ showError(t.notfound); return; }
+    try { localStorage.setItem("spo_track", JSON.stringify({ code, last4 })); } catch (e) {}
     render(rows[0]);
   } catch (e) {
     showError(t.neterr);
@@ -393,6 +412,11 @@ async function lookup(){
     btn.textContent = t.cta;
   }
 }
+
+try {
+  const prev = JSON.parse(localStorage.getItem("spo_track") || "null");
+  if (prev){ $("code").value = prev.code || ""; $("last4").value = prev.last4 || ""; }
+} catch (e) {}
 
 $("submit").addEventListener("click", lookup);
 $("last4").addEventListener("keydown", e => { if (e.key === "Enter") lookup(); });
