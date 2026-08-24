@@ -311,11 +311,19 @@ function render(o){
 
   $("r-scene").innerHTML = SCENES[o.status] || SCENES.received;
 
-  const reached = FLOW.indexOf(o.status);
+  // Four stops, same as the admin panel: purchased and in_transit fold into
+  // the stop before them, and the last stop covers the delivery hand-off.
+  const TL = [
+    { covers: ["received", "purchased"],         label: t.st.received },
+    { covers: ["at_dubai", "in_transit"],        label: t.st.at_dubai },
+    { covers: ["at_erbil"],                      label: t.st.at_erbil },
+    { covers: ["out_for_delivery", "delivered"], label: `${t.st.out_for_delivery} + ${t.st.delivered}` }
+  ];
+  const reached = TL.findIndex(x => x.covers.includes(o.status));
   const tl = $("r-timeline");
   tl.innerHTML = "";
 
-  FLOW.forEach((s, i) => {
+  TL.forEach((x, i) => {
     const div = document.createElement("div");
     div.className = "step" + (i < reached ? " done" : i === reached ? " now" : "");
     const meta = i === reached ? t.now : "";
@@ -329,7 +337,7 @@ function render(o){
     const body = document.createElement("div");
     body.className = "body";
     const title = document.createElement("div");
-    title.className = "t"; title.textContent = t.st[s];
+    title.className = "t"; title.textContent = x.label;
     body.append(title);
     if (meta){
       const d = document.createElement("div");
