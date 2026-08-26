@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v40</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v41</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -332,8 +332,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
       <div id="sk-msg"></div>
       <div class="tiles">
         <div class="tile wide"><div class="k" data-t="shkoRemaining"></div><div class="v num" id="sk-remaining">—</div><div class="sub" id="sk-remaining-sub"></div></div>
-        <div class="tile"><div class="k" data-t="shkoThisMonth"></div><div class="v num" id="sk-month" style="color:var(--teal)">—</div></div>
-        <div class="tile"><div class="k" data-t="shkoAllRecv"></div><div class="v num" id="sk-all">—</div></div>
+        <div class="tile wide"><div class="k" data-t="shkoAllRecv"></div><div class="v num" id="sk-all">—</div></div>
       </div>
       <div class="f"><label data-t="month"></label><select id="sk-cycle"></select></div>
       <button class="btn ghost" id="sk-add-ofd" data-t="shkoAddOfd" style="margin-bottom:10px"></button>
@@ -1782,8 +1781,6 @@ function renderShko(){
   $("sk-remaining").textContent = iqd(sum(open));
   $("sk-remaining-sub").textContent = `${open.length} ${t().orders}`;
   const ym = d => String(d).slice(0, 7);
-  const nowYm = new Date().toISOString().slice(0, 7);
-  $("sk-month").textContent = iqd(sum(recv.filter(r => r.received_at && ym(r.received_at) === nowYm)));
   $("sk-all").textContent = iqd(sum(recv));
   $("sk-list").innerHTML = open.length ? open.map(r => shipRow(r, false)).join("")
     : `<div style="color:var(--faint);font-size:12.5px">${t().shkoEmpty}</div>`;
