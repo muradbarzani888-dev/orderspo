@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v41</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v42</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -340,6 +340,19 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
         <div class="f" style="flex:1;margin:0"><input id="sk-codes" dir="ltr" inputmode="tel" placeholder="398 401 405"></div>
         <button class="btn" id="sk-add" data-t="shkoAdd" style="width:auto;margin:0;padding:0 22px"></button>
       </div>
+      <div class="f">
+        <label data-t="shkoScanHelp"></label>
+        <input type="file" id="sk-scan" accept="image/*" multiple style="padding:14px;min-height:auto">
+      </div>
+      <div id="sk2-progress" class="hide" style="margin-bottom:14px">
+        <div style="background:var(--deep);border-radius:10px;height:8px;overflow:hidden">
+          <div id="sk2-bar" style="background:var(--teal);height:100%;width:0;transition:width .2s"></div>
+        </div>
+        <div id="sk2-count" class="num" style="color:var(--mute);font-size:12px;text-align:center;margin-top:8px"></div>
+      </div>
+      <div id="sk2-results"></div>
+      <div id="sk2-review" class="hide"></div>
+      <button class="btn hide" id="sk2-apply" data-t="shkoApply"></button>
       <div id="sk-list"></div>
       <h2 style="margin-top:28px;font-size:15px" data-t="shkoReceived"></h2>
       <div id="sk-months" style="margin-bottom:12px"></div>
@@ -428,7 +441,7 @@ const T = {
   moveBatch:"گواستنەوەی کۆمەڵ",searchLbl:"گەڕان بە کۆد، ناو یان ژمارە",search:"گەڕان",back:"گەڕانەوە",
   username:"ناوی ئینستاگرام",phone:"ژمارەی مۆبایل",address:"ناونیشان",total:"کۆی گشتی",
   deposit:"پارەی پێشەکی",due:"بڕی ماوە",items:"ژمارەی بەرهەم",save:"تۆمارکردن",
-  setStatus:"دۆخی نوێ",update:"نوێکردنەوە",collected:"پارەی کۆکراوە",collectedAsk:"چەند پارە کۆکرایەوە؟",shkoTitle:"شحنەکانی SHKO",shkoRemaining:"پارە لای SHKO (ماوە)",shkoThisMonth:"وەرگیراوی ئەم مانگە",shkoAllRecv:"کۆی وەرگیراو",shkoAddOfd:"زیادکردنی هەموو «لە گەیاندندایە»",shkoAdd:"زیادکردن",shkoReceived:"وەرگیراوەکان",shkoEmpty:"هیچ نەماوە — هەمووی وەرگیراوە ✓",shkoNone:"هیچ داواکارییەک نییە",shkoDel:"سڕینەوە",delivDebt:"قەرزی گەیەندراو (کۆنەکراوەتەوە)",saveAmounts:"تۆمارکردنی بڕەکان",from:"لە دۆخی",to:"بۆ دۆخی",month:"مانگ",codeFrom:"لە کۆدی",codeTo:"بۆ کۆدی",
+  setStatus:"دۆخی نوێ",update:"نوێکردنەوە",collected:"پارەی کۆکراوە",collectedAsk:"چەند پارە کۆکرایەوە؟",shkoTitle:"شحنەکانی SHKO",shkoRemaining:"پارە لای SHKO (ماوە)",shkoThisMonth:"وەرگیراوی ئەم مانگە",shkoAllRecv:"کۆی وەرگیراو",shkoAddOfd:"زیادکردنی هەموو «لە گەیاندندایە»",shkoAdd:"زیادکردن",shkoReceived:"وەرگیراوەکان",shkoEmpty:"هیچ نەماوە — هەمووی وەرگیراوە ✓",shkoNone:"هیچ داواکارییەک نییە",shkoDel:"سڕینەوە",shkoScanHelp:"وێنەی لەیبڵەکان هەڵبژێرە — سیستەم کۆدی کڕیار دەخوێنێتەوە، بڕی ماوە و ناو لە داواکارییەکەوە دێن",shkoApply:"تۆمارکردنی شحنەکان",delivDebt:"قەرزی گەیەندراو (کۆنەکراوەتەوە)",saveAmounts:"تۆمارکردنی بڕەکان",from:"لە دۆخی",to:"بۆ دۆخی",month:"مانگ",codeFrom:"لە کۆدی",codeTo:"بۆ کۆدی",
   rangeHint:"بەتاڵی بهێڵەرەوە بۆ هەمووی",
   willMove:"داواکاری دەگوازرێتەوە",moveAll:"گواستنەوەی هەموویان",noRes:"هیچ نەدۆزرایەوە",
   saved:"تۆمارکرا",need:"ناو و کۆی گشتی پێویستە",moved:"داواکاری گوازرایەوە",
@@ -458,7 +471,7 @@ const T = {
   moveBatch:"تحديث مجموعة",searchLbl:"دور بالرمز أو الاسم أو الرقم",search:"دور",back:"رجوع",
   username:"اسم الانستغرام",phone:"رقم الموبايل",address:"العنوان",total:"المجموع",
   deposit:"المدفوع",due:"المتبقي",items:"عدد القطع",save:"حفظ",
-  setStatus:"الحالة الجديدة",update:"تحديث",collected:"المبلغ المستلم",collectedAsk:"شكد انستلم؟",shkoTitle:"شحنات SHKO",shkoRemaining:"الفلوس عند SHKO (باقية)",shkoThisMonth:"مستلم هذا الشهر",shkoAllRecv:"مجموع المستلم",shkoAddOfd:"إضافة كل «قيد التوصيل»",shkoAdd:"إضافة",shkoReceived:"المستلمة",shkoEmpty:"ما باقي شي — كله مستلم ✓",shkoNone:"ما في طلبات",shkoDel:"حذف",delivDebt:"دين المسلَّم (غير مستلم)",saveAmounts:"حفظ المبالغ",from:"من حالة",to:"إلى حالة",month:"الشهر",codeFrom:"من رمز",codeTo:"إلى رمز",
+  setStatus:"الحالة الجديدة",update:"تحديث",collected:"المبلغ المستلم",collectedAsk:"شكد انستلم؟",shkoTitle:"شحنات SHKO",shkoRemaining:"الفلوس عند SHKO (باقية)",shkoThisMonth:"مستلم هذا الشهر",shkoAllRecv:"مجموع المستلم",shkoAddOfd:"إضافة كل «قيد التوصيل»",shkoAdd:"إضافة",shkoReceived:"المستلمة",shkoEmpty:"ما باقي شي — كله مستلم ✓",shkoNone:"ما في طلبات",shkoDel:"حذف",shkoScanHelp:"اختار صور الليبلات — النظام يقرا رمز الزبون، والمبلغ الباقي والاسم ييجون من الطلب",shkoApply:"حفظ الشحنات",delivDebt:"دين المسلَّم (غير مستلم)",saveAmounts:"حفظ المبالغ",from:"من حالة",to:"إلى حالة",month:"الشهر",codeFrom:"من رمز",codeTo:"إلى رمز",
   rangeHint:"خليها فارغة للكل",
   willMove:"طلب راح ينتقل",moveAll:"حدث الكل",noRes:"ما لكيت شي",
   saved:"انحفظ",need:"لازم الاسم والمجموع",moved:"الطلبات انتقلت",
@@ -1742,6 +1755,8 @@ async function initShko(){
     $("sk-codes").addEventListener("keydown", e => { if (e.key === "Enter") addShko(parseSeqs($("sk-codes").value)); });
     $("sk-add-ofd").addEventListener("click", addAllOfd);
     $("sk-file").addEventListener("change", skUpload);
+    $("sk-scan").addEventListener("change", runShkoScan);
+    $("sk2-apply").addEventListener("click", applyShkoScan);
   }
   await loadShko();
 }
@@ -1841,6 +1856,197 @@ async function skUpload(e){
   if (error) return say("sk-msg", error.message, "err");
   await db.from("shipments").update({ image_path: path }).eq("id", r.id);
   say("sk-msg", t().saved, "ok");
+  loadShko();
+}
+
+// ---- label-photo scan: read the customer code off each label, exactly like
+// the bag scanner. Amount + username come from the order, not from the photo.
+let sk2Rows = [], sk2Fails = [], sk2Idx = 0, sk2Url = null, sk2Orders = {};
+
+// Everything on the label that is NOT the customer code is longer digits:
+// waybill (8), phones (11), amounts (5+ once commas drop), and the date.
+function shkoExtract(txt, valid){
+  let up = toEn(String(txt || "")).replace(/[|]/g, "1").replace(/[,\.]/g, "");
+  up = up.replace(/\b\d{1,2}\s*[-–—\/]\s*\d{1,2}\s*[-–—\/]\s*\d{2,4}\b/g, " ");  // dates
+  up = up.replace(/\d{5,}/g, " ");                                              // long runs
+  const cands = [...new Set((up.match(/\b\d{1,4}\b/g) || [])
+    .map(n => parseInt(n, 10)).filter(n => n > 0 && n <= MAX_SEQ && valid.has(n)))];
+  return cands;
+}
+
+async function runShkoScan(e){
+  const files = [...e.target.files];
+  e.target.value = "";
+  if (!files.length) return;
+  const cyc = $("sk-cycle").value;
+  if (!cyc) return;
+
+  sk2Rows = []; sk2Fails = []; sk2Idx = 0;
+  if (sk2Url){ URL.revokeObjectURL(sk2Url); sk2Url = null; }
+  $("sk2-results").innerHTML = ""; $("sk2-review").innerHTML = "";
+  $("sk2-review").classList.add("hide"); $("sk2-apply").classList.add("hide");
+  $("sk2-progress").classList.remove("hide");
+
+  await freshSession();
+  const { data: os } = await db.from("orders")
+    .select("id,seq,balance_iqd,status,customers(instagram_username)").eq("cycle_code", cyc);
+  sk2Orders = {};
+  (os || []).forEach(o => sk2Orders[Number(o.seq)] = o);
+  const valid = new Set(Object.keys(sk2Orders).map(Number));
+
+  const worker = await Tesseract.createWorker("eng");
+  await worker.setParameters({ tessedit_char_whitelist: "0123456789-,./ " });
+  const PASSES = [
+    [0.45, 1.00, "otsu", 2.0, "6"],   // the code bar lives in the lower half
+    [0.00, 1.00, "otsu", 1.6, "6"],
+    [0.00, 1.00, "gray", 1.6, "11"],
+    [0.30, 0.90, 130,    2.2, "6"]
+  ];
+  const MAX_W = 2200;
+  let psmNow = null;
+
+  for (let i = 0; i < files.length; i++){
+    $("sk2-bar").style.width = `${(i / files.length) * 100}%`;
+    $("sk2-count").textContent = `${t().reading} ${i + 1} / ${files.length}`;
+    try {
+      const bmp = await createImageBitmap(files[i]);
+      let hit = null, guess = null;
+      for (const [top, bot, cut, zoom, psm] of PASSES){
+        const cv = document.createElement("canvas");
+        const sy = Math.round(bmp.height * top);
+        const sh = Math.round(bmp.height * (bot - top));
+        const scale = Math.min(zoom, MAX_W / bmp.width);
+        cv.width = Math.max(320, Math.round(bmp.width * scale));
+        cv.height = Math.max(120, Math.round(sh * scale));
+        const cx = cv.getContext("2d", { willReadFrequently: true });
+        cx.drawImage(bmp, 0, sy, bmp.width, sh, 0, 0, cv.width, cv.height);
+        const im = cx.getImageData(0, 0, cv.width, cv.height);
+        const d = im.data, hist = new Uint32Array(256);
+        for (let q = 0; q < d.length; q += 4){
+          const g = (d[q]*0.299 + d[q+1]*0.587 + d[q+2]*0.114) | 0;
+          d[q] = d[q+1] = d[q+2] = g; hist[g]++;
+        }
+        let level = 0;
+        if (cut === "otsu") level = otsu(hist, cv.width * cv.height);
+        else if (typeof cut === "number") level = cut;
+        if (level > 0) for (let q = 0; q < d.length; q += 4){
+          const v = d[q] < level ? 0 : 255; d[q] = d[q+1] = d[q+2] = v;
+        }
+        cx.putImageData(im, 0, 0);
+        if (psm !== psmNow){ await worker.setParameters({ tessedit_pageseg_mode: psm }); psmNow = psm; }
+        const { data } = await worker.recognize(cv);
+        const cands = shkoExtract(data.text, valid);
+        if (cands.length === 1){ hit = cands[0]; break; }
+        if (cands.length && guess == null) guess = cands[0];
+      }
+      if (hit != null && !sk2Rows.some(r => r.seq === hit))
+        sk2Rows.push({ seq: hit, file: files[i] });
+      else if (hit != null)
+        ;  // second photo of the same customer: first one keeps the slot
+      else sk2Fails.push({ file: files[i], guess });
+      bmp.close();
+    } catch (err){ sk2Fails.push({ file: files[i], guess: null }); }
+  }
+  await worker.terminate();
+  $("sk2-bar").style.width = "100%";
+  $("sk2-progress").classList.add("hide");
+  renderShkoScan();
+}
+
+function renderShkoScan(){
+  const rows = sk2Rows.map(r => {
+    const o = sk2Orders[r.seq];
+    return `<div class="row" style="cursor:default">
+      <div class="l"><div class="c num">${$("sk-cycle").value}-${String(r.seq).padStart(4,"0")}</div>
+        <div class="u" dir="ltr">${o?.customers?.instagram_username || "—"}</div></div>
+      <div class="b num" style="color:var(--teal)">${iqd(o?.balance_iqd || 0)}</div>
+    </div>`;
+  }).join("");
+  $("sk2-results").innerHTML =
+    `<div class="sbar" style="margin-bottom:14px">
+       <button class="on">${t().scFound}<b>${sk2Rows.length}</b></button>
+       ${sk2Fails.length ? `<button>${t().scFailed}<b>${sk2Fails.length}</b></button>` : ""}
+     </div>` + rows;
+  renderShkoReview();
+  $("sk2-apply").classList.toggle("hide", !sk2Rows.length);
+}
+
+function renderShkoReview(){
+  const box = $("sk2-review");
+  if (sk2Url){ URL.revokeObjectURL(sk2Url); sk2Url = null; }
+  if (!sk2Fails.length){ box.classList.add("hide"); box.innerHTML = ""; return; }
+  box.classList.remove("hide");
+  if (sk2Idx >= sk2Fails.length){
+    box.innerHTML = `<div style="background:rgba(29,158,117,.10);border:1px solid rgba(29,158,117,.35);
+      border-radius:12px;padding:16px;text-align:center;color:var(--teal);font-size:13px">${t().revDone}</div>`;
+    return;
+  }
+  const item = sk2Fails[sk2Idx];
+  sk2Url = URL.createObjectURL(item.file);
+  box.innerHTML = `
+    <div style="background:rgba(226,75,74,.06);border:1px solid rgba(226,75,74,.28);
+      border-radius:12px;padding:14px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span style="color:#F09595;font-size:13px">${t().revTitle}</span>
+        <span class="num" style="color:var(--mute);font-size:12px">${sk2Idx + 1} ${t().revOf} ${sk2Fails.length}</span>
+      </div>
+      <img src="${sk2Url}" alt="" style="width:100%;max-height:340px;object-fit:contain;
+        background:#000;border-radius:8px;margin-bottom:12px">
+      <div class="f" style="margin-bottom:8px"><label>${t().revSeq}</label>
+        <input id="sk2-rv" dir="ltr" inputmode="numeric" autocomplete="off" value="${item.guess ?? ""}"></div>
+      <div id="sk2-rv-err" style="color:#F09595;font-size:12px;min-height:16px;margin-bottom:8px"></div>
+      <div style="display:flex;gap:10px">
+        <button class="btn" id="sk2-rv-save" style="margin:0;flex:2">${t().revSave}</button>
+        <button class="btn" id="sk2-rv-skip" style="margin:0;flex:1;background:transparent;
+          border:1px solid var(--line);color:var(--mute)">${t().revSkip}</button>
+      </div>
+    </div>`;
+  const inp = $("sk2-rv");
+  const save = () => {
+    const n = parseInt(toEn(inp.value).replace(/[^\d]/g, ""), 10);
+    if (!n || !sk2Orders[n]){ $("sk2-rv-err").textContent = t().scNoOrder; inp.focus(); return; }
+    if (!sk2Rows.some(r => r.seq === n)) sk2Rows.push({ seq: n, file: sk2Fails[sk2Idx].file });
+    sk2Fails.splice(sk2Idx, 1);
+    renderShkoScan();
+  };
+  $("sk2-rv-save").addEventListener("click", save);
+  $("sk2-rv-skip").addEventListener("click", () => { sk2Idx++; renderShkoReview(); });
+  inp.addEventListener("keydown", ev => { if (ev.key === "Enter"){ ev.preventDefault(); save(); } });
+  inp.focus();
+}
+
+async function applyShkoScan(){
+  if (!sk2Rows.length) return;
+  const cyc = $("sk-cycle").value;
+  if (!confirm(`${sk2Rows.length}?`)) return;
+  const b = $("sk2-apply"); b.disabled = true; b.innerHTML = '<span class="spin"></span>';
+
+  const rows = sk2Rows.map(r => {
+    const o = sk2Orders[r.seq];
+    return { order_id: o.id, cycle_code: cyc, seq: r.seq,
+      username: o.customers?.instagram_username || null, amount_iqd: o.balance_iqd || 0 };
+  });
+  const { error } = await db.from("shipments").upsert(rows, { onConflict: "order_id", ignoreDuplicates: true });
+  if (error){ b.disabled = false; b.textContent = t().shkoApply; return say("sk-msg", error.message, "err"); }
+
+  // attach each photo to its shipment
+  const ids = rows.map(r => r.order_id);
+  const { data: sh } = await db.from("shipments").select("id,order_id,seq").in("order_id", ids);
+  const byOrder = {}; (sh || []).forEach(x => byOrder[x.order_id] = x);
+  let attached = 0;
+  for (const r of sk2Rows){
+    const o = sk2Orders[r.seq], srec = o && byOrder[o.id];
+    if (!srec) continue;
+    const path = `${cyc}/${r.seq}-${srec.id}.jpg`;
+    const { error: ue } = await db.storage.from("labels")
+      .upload(path, r.file, { upsert: true, contentType: r.file.type || "image/jpeg" });
+    if (!ue){ await db.from("shipments").update({ image_path: path }).eq("id", srec.id); attached++; }
+  }
+  b.disabled = false; b.textContent = t().shkoApply;
+  say("sk-msg", `${rows.length} ✓ · 🖼 ${attached}`, "ok", 0);
+  sk2Rows = []; sk2Fails = []; sk2Idx = 0;
+  $("sk2-results").innerHTML = ""; $("sk2-review").innerHTML = "";
+  $("sk2-review").classList.add("hide"); $("sk2-apply").classList.add("hide");
   loadShko();
 }
 
