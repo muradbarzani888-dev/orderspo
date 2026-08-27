@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v44</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v45</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -1196,6 +1196,25 @@ function otsu(hist, total){
   return level;
 }
 
+// Photos arrive upside down and tilted; OCR reads none of that. Rotating the
+// source and retrying is cheap next to a failed scan. The base is pre-scaled
+// so rotation never doubles the pixel work.
+function rotSrc(bmp, deg, maxW){
+  const base = Math.min(1, maxW / bmp.width);
+  const w = Math.round(bmp.width * base), h = Math.round(bmp.height * base);
+  const rad = deg * Math.PI / 180;
+  const sin = Math.abs(Math.sin(rad)), cos = Math.abs(Math.cos(rad));
+  const cv = document.createElement("canvas");
+  cv.width  = Math.max(2, Math.round(w * cos + h * sin));
+  cv.height = Math.max(2, Math.round(w * sin + h * cos));
+  const x = cv.getContext("2d");
+  x.fillStyle = "#fff"; x.fillRect(0, 0, cv.width, cv.height);
+  x.translate(cv.width / 2, cv.height / 2);
+  x.rotate(rad);
+  x.drawImage(bmp, -w / 2, -h / 2, w, h);
+  return cv;
+}
+
 async function initScan(){
   const sel = $("sc-cycle");
   if (!sel.options.length){
@@ -1394,15 +1413,29 @@ async function runScan(e){
     try {
       const bmp = await createImageBitmap(files[i]);
       let hit = null, guess = null;
-      for (const [top, bot, cut, zoom, psm] of PASSES){
+      // upright first with the full pass list; then upside down, sideways and
+      // slight tilts with the strongest passes only
+      const FULL = [PASSES[0], PASSES[2]];
+      const PLAN = [
+        [0, PASSES], [180, [PASSES[0], PASSES[1], PASSES[2]]],
+        [90, FULL], [270, FULL],
+        [12, [PASSES[0]]], [-12, [PASSES[0]]], [192, [PASSES[0]]], [168, [PASSES[0]]]
+      ];
+      const srcCache = {};
+      for (const [deg, plist] of PLAN){
+      if (hit) break;
+      // tilted frames must scan the whole image — crops assume upright layout
+      const src = srcCache[deg] || (srcCache[deg] = deg === 0 ? bmp : rotSrc(bmp, deg, MAX_W));
+      for (const [top0, bot0, cut, zoom, psm] of plist){
+        const top = deg === 0 ? top0 : 0, bot = deg === 0 ? bot0 : 1;
         const cv = document.createElement("canvas");
-        const sy = Math.round(bmp.height * top);
-        const sh = Math.round(bmp.height * (bot - top));
-        const scale = Math.min(zoom, MAX_W / bmp.width);
-        cv.width  = Math.max(320, Math.round(bmp.width * scale));
+        const sy = Math.round(src.height * top);
+        const sh = Math.round(src.height * (bot - top));
+        const scale = Math.min(zoom, MAX_W / src.width);
+        cv.width  = Math.max(320, Math.round(src.width * scale));
         cv.height = Math.max(120, Math.round(sh * scale));
         const cx = cv.getContext("2d", { willReadFrequently: true });
-        cx.drawImage(bmp, 0, sy, bmp.width, sh, 0, 0, cv.width, cv.height);
+        cx.drawImage(src, 0, sy, src.width, sh, 0, 0, cv.width, cv.height);
         const im = cx.getImageData(0, 0, cv.width, cv.height);
         const d = im.data;
 
@@ -1430,6 +1463,7 @@ async function runScan(e){
         const pick = pickCandidate(extractCode(data.text), valid);
         if (pick && pick.sure){ hit = pick; break; }
         if (pick && !guess) guess = pick;   // keep the best unsure read for review
+      }
       }
       if (hit) hit.seqs.forEach(seq => {
         // the same bag photographed twice must not become two rows
@@ -1983,15 +2017,25 @@ async function runShkoScan(e){
     try {
       const bmp = await createImageBitmap(files[i]);
       let hit = null, guess = null;
-      for (const [top, bot, cut, zoom, psm] of PASSES){
+      const PLAN = [
+        [0, PASSES], [180, [PASSES[1], PASSES[2]]],
+        [90, [PASSES[1]]], [270, [PASSES[1]]],
+        [12, [PASSES[1]]], [-12, [PASSES[1]]], [192, [PASSES[1]]], [168, [PASSES[1]]]
+      ];
+      const srcCache = {};
+      for (const [deg, plist] of PLAN){
+      if (hit != null) break;
+      const src = srcCache[deg] || (srcCache[deg] = deg === 0 ? bmp : rotSrc(bmp, deg, MAX_W));
+      for (const [top0, bot0, cut, zoom, psm] of plist){
+        const top = deg === 0 ? top0 : 0, bot = deg === 0 ? bot0 : 1;
         const cv = document.createElement("canvas");
-        const sy = Math.round(bmp.height * top);
-        const sh = Math.round(bmp.height * (bot - top));
-        const scale = Math.min(zoom, MAX_W / bmp.width);
-        cv.width = Math.max(320, Math.round(bmp.width * scale));
+        const sy = Math.round(src.height * top);
+        const sh = Math.round(src.height * (bot - top));
+        const scale = Math.min(zoom, MAX_W / src.width);
+        cv.width = Math.max(320, Math.round(src.width * scale));
         cv.height = Math.max(120, Math.round(sh * scale));
         const cx = cv.getContext("2d", { willReadFrequently: true });
-        cx.drawImage(bmp, 0, sy, bmp.width, sh, 0, 0, cv.width, cv.height);
+        cx.drawImage(src, 0, sy, src.width, sh, 0, 0, cv.width, cv.height);
         const im = cx.getImageData(0, 0, cv.width, cv.height);
         const d = im.data, hist = new Uint32Array(256);
         for (let q = 0; q < d.length; q += 4){
@@ -2010,6 +2054,7 @@ async function runShkoScan(e){
         const cands = shkoExtract(data.text, valid);
         if (cands.length === 1){ hit = cands[0]; break; }
         if (cands.length && guess == null) guess = cands[0];
+      }
       }
       if (hit != null && !sk2Rows.some(r => r.seq === hit))
         sk2Rows.push({ seq: hit, file: files[i] });
