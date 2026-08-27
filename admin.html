@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v45</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v46</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -444,7 +444,7 @@ const T = {
   revTitle:"بەدەست نووسینەوە",revOf:"لە",revBag:"کۆدی جانتا",revSeq:"کۆدی کڕیار",
   revSave:"تۆمار و دواتر",revSkip:"بازدان",revDone:"هەموویان تەواوبوون",
   scRestored:"دووبارە هێنرایەوە",revBad:"کۆد دروست نییە — ٦ پیتی وەک یەک و ژمارەیەک",revFixed:"چاککرا",
-  scOther:"لەم مانگەدا نییە، بەڵام لە مانگی پێشوودا هەیە",scPrevAuto:"لە کاتی تۆمارکردن خۆکارانە لە مانگی خۆیان تۆمار دەکرێن",scClosed:"پێشتر گەیەندراوە — تۆمار نەکرا",scSwitch:"گۆڕین بۆ",
+  scOther:"لەم مانگەدا نییە، بەڵام لە مانگی پێشوودا هەیە",scPrevAuto:"لە کاتی تۆمارکردن خۆکارانە لە مانگی خۆیان تۆمار دەکرێن",scClosed:"پێشتر گەیەندراوە — تۆمار نەکرا",scPartial:"جانتای ماوە — دۆخ نەگۆڕدرا",scSwitch:"گۆڕین بۆ",
   exportCsv:"داگرتنی Excel",exportCourier:"Excel بۆ شەرکەی گەیاندن",noOrders:"هیچ داواکاریەک نییە",
   colCode:"کۆد",colUser:"ناو",colPhone:"مۆبایل",colTotal:"کۆی گشتی",
   colDep:"پێشەکی",colBal:"ماوە",colStatus:"دۆخ",colItems:"بەرهەم",linked:"لەگەڵ کڕیارێکی هەبوو بەستراوە",
@@ -474,7 +474,7 @@ const T = {
   revTitle:"كتابة يدوية",revOf:"من",revBag:"رمز الكيس",revSeq:"رمز الزبون",
   revSave:"احفظ وكمّل",revSkip:"تخطي",revDone:"خلصت كلها",
   scRestored:"رجعت البيانات",revBad:"الرمز مو صحيح — ٦ حروف نفسها ورقم",revFixed:"انصلح",
-  scOther:"مو بهذا الشهر، بس موجود بالشهر اللي قبله",scPrevAuto:"عند الحفظ تنحفظ تلقائياً كل وحدة بشهرها",scClosed:"مسلَّم من قبل — ما انحفظ",scSwitch:"غيّر إلى",
+  scOther:"مو بهذا الشهر، بس موجود بالشهر اللي قبله",scPrevAuto:"عند الحفظ تنحفظ تلقائياً كل وحدة بشهرها",scClosed:"مسلَّم من قبل — ما انحفظ",scPartial:"أكياس ناقصة — الحالة ما تغيّرت",scSwitch:"غيّر إلى",
   exportCsv:"تحميل Excel",exportCourier:"Excel لشركة التوصيل",noOrders:"ما في طلبات",
   colCode:"الرمز",colUser:"الاسم",colPhone:"الموبايل",colTotal:"المجموع",
   colDep:"المقدم",colBal:"المتبقي",colStatus:"الحالة",colItems:"القطع",linked:"انربط بزبون موجود",
@@ -1699,15 +1699,17 @@ async function applyScan(){
   // finished 250 is skipped and August's open 250 gets the bag.
   const CLOSED = ["delivered", "cancelled"];
   const sets = async cyc => {
-    const { data } = await db.from("orders").select("seq,status,bags_code").eq("cycle_code", cyc);
-    const open = new Set(), any = new Set(), codes = {};
+    const { data } = await db.from("orders").select("id,seq,status,bags_code").eq("cycle_code", cyc);
+    const open = new Set(), any = new Set(), codes = {}, info = {};
     (data || []).forEach(o => {
       const q = Number(o.seq);
       any.add(q);
       if (!CLOSED.includes(o.status)) open.add(q);
       if (o.bags_code) codes[q] = String(o.bags_code).toUpperCase();
+      info[q] = { id: o.id, status: o.status,
+        expected: (String(o.bags_code || "").toUpperCase().match(/[A-Z]{1,8}[0-9]{1,3}/g) || []) };
     });
-    return { open, any, codes };
+    return { open, any, codes, info };
   };
   const prev = prevCycle(p_cycle);
   const cur = await sets(p_cycle);
@@ -1741,16 +1743,49 @@ async function applyScan(){
       : `${rows.length - closedRows.length}?`)
       + (closedRows.length ? ` (${t().scClosed}: ${closedRows.length})` : ""))){ done(); return; }
 
+  // An order's status only advances once ALL its sheet-listed bags are in.
+  // Bags of a half-arrived order still save, but under the order's CURRENT
+  // status, so the customer never sees "at Erbil" while a bag is missing.
+  // The same grouping also stops a scan from dragging an order backwards.
+  const affected = [];
+  [[p_cycle, nowRows, cur], [prev, prevRows, prv]].forEach(([cyc, part, m]) =>
+    part.forEach(r => { const o = m.info[r.seq]; if (o?.id) affected.push(o.id); }));
+  const existing = {};
+  if (affected.length){
+    const { data: eb } = await db.from("bags").select("order_id,code").in("order_id", affected);
+    (eb || []).forEach(b => (existing[b.order_id] = existing[b.order_id] || new Set()).add(String(b.code).toUpperCase()));
+  }
+  const RANK = q => FLOW.indexOf(q);
+  const calls = {}, partial = [];
+  [[p_cycle, nowRows, cur], [prev, prevRows, prv]].forEach(([cyc, part, m]) => {
+    part.forEach(r => {
+      const o = m.info[r.seq] || {};
+      let target = p_status;
+      if (o.status && RANK(o.status) > RANK(p_status)) target = o.status;   // never regress
+      else if (o.expected && o.expected.length){
+        const covered = new Set(existing[o.id] ? [...existing[o.id]] : []);
+        part.forEach(x => { if (x.seq === r.seq) covered.add(x.code); });
+        const missingBags = o.expected.filter(c => !covered.has(c));
+        if (missingBags.length){
+          target = o.status || p_status;
+          if (!partial.some(x => x.seq === r.seq && x.cyc === cyc))
+            partial.push({ seq: r.seq, cyc, have: o.expected.length - missingBags.length, total: o.expected.length });
+        }
+      }
+      const k = `${cyc}\u0001${target}`;
+      (calls[k] = calls[k] || { cyc, status: target, rows: [] }).rows.push(r);
+    });
+  });
+
   let applied = 0, missing = [];
-  for (const [cyc, part] of [[p_cycle, nowRows], [prev, prevRows]]){
-    if (!part.length) continue;
+  for (const c of Object.values(calls)){
     const { data, error } = await db.rpc("apply_bag_scan",
-      { p_cycle: cyc, p_status, p_rows: part });
+      { p_cycle: c.cyc, p_status: c.status, p_rows: c.rows });
     if (error){
-      console.error("apply_bag_scan failed", { p_cycle: cyc, p_status, p_rows: part }, error);
+      console.error("apply_bag_scan failed", c, error);
       saveScanDraft();
       done();
-      return say("sc-msg", `${cyc}: ${error.message}`, "err");
+      return say("sc-msg", `${c.cyc}: ${error.message}`, "err");
     }
     const r = data[0];
     applied += r.applied || 0;
@@ -1761,6 +1796,7 @@ async function applyScan(){
     `${applied} ✓` +
     (prevRows.length ? ` · ${p_cycle}: ${nowRows.length} · ${prev}: ${prevRows.length}` : "") +
     (closedRows.length ? ` · ${t().scClosed}: ${closedRows.map(r => r.seq).join(" ")}` : "") +
+    (partial.length ? ` · ${t().scPartial}: ${partial.map(x => `${x.seq}(${x.have}/${x.total})`).join(" ")}` : "") +
     (missing.length ? ` · ${t().scNoOrder}: ${missing.join(" ")}` : ""), "ok", 0);
   clearScanDraft();
   scanRows = []; scanFails = []; revIdx = 0;
