@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v43</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v44</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -268,6 +268,8 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
           <select id="dh-cycle"></select></div>
         <button class="btn ghost" id="dh-export" style="width:auto;padding:0 18px;margin:0"
           data-t="exportCsv"></button>
+        <button class="btn ghost" id="dh-exp-courier" style="width:auto;padding:0 18px;margin:0"
+          data-t="exportCourier"></button>
       </div>
 
       <div class="tiles">
@@ -404,9 +406,17 @@ async function freshSession(){
 }
 const isJwtErr = e => e && /jwt|expired|401|invalid.*token/i.test(String(e.message || e.code || ""));
 const rawRpc = db.rpc.bind(db);
+// "TypeError: Failed to fetch" = the request never reached the server (a
+// dropped connection, not a rejected save) — safe to retry after a pause.
+const isNetErr = e => e && /failed to fetch|networkerror|load failed/i.test(String(e.message || ""));
+const pause = ms => new Promise(r => setTimeout(r, ms));
 db.rpc = async (fn, args, opts) => {
   await freshSession();
   let r = await rawRpc(fn, args, opts);
+  for (let i = 0; i < 2 && r.error && isNetErr(r.error); i++){
+    await pause(1500 * (i + 1));
+    r = await rawRpc(fn, args, opts);
+  }
   if (r.error && isJwtErr(r.error)){
     const { error } = await db.auth.refreshSession();
     if (error){ await db.auth.signOut(); return r; }
@@ -435,7 +445,7 @@ const T = {
   revSave:"تۆمار و دواتر",revSkip:"بازدان",revDone:"هەموویان تەواوبوون",
   scRestored:"دووبارە هێنرایەوە",revBad:"کۆد دروست نییە — ٦ پیتی وەک یەک و ژمارەیەک",revFixed:"چاککرا",
   scOther:"لەم مانگەدا نییە، بەڵام لە مانگی پێشوودا هەیە",scPrevAuto:"لە کاتی تۆمارکردن خۆکارانە لە مانگی خۆیان تۆمار دەکرێن",scClosed:"پێشتر گەیەندراوە — تۆمار نەکرا",scSwitch:"گۆڕین بۆ",
-  exportCsv:"داگرتنی Excel",noOrders:"هیچ داواکاریەک نییە",
+  exportCsv:"داگرتنی Excel",exportCourier:"Excel بۆ شەرکەی گەیاندن",noOrders:"هیچ داواکاریەک نییە",
   colCode:"کۆد",colUser:"ناو",colPhone:"مۆبایل",colTotal:"کۆی گشتی",
   colDep:"پێشەکی",colBal:"ماوە",colStatus:"دۆخ",colItems:"بەرهەم",linked:"لەگەڵ کڕیارێکی هەبوو بەستراوە",
   moveBatch:"گواستنەوەی کۆمەڵ",searchLbl:"گەڕان بە کۆد، ناو یان ژمارە",search:"گەڕان",back:"گەڕانەوە",
@@ -465,7 +475,7 @@ const T = {
   revSave:"احفظ وكمّل",revSkip:"تخطي",revDone:"خلصت كلها",
   scRestored:"رجعت البيانات",revBad:"الرمز مو صحيح — ٦ حروف نفسها ورقم",revFixed:"انصلح",
   scOther:"مو بهذا الشهر، بس موجود بالشهر اللي قبله",scPrevAuto:"عند الحفظ تنحفظ تلقائياً كل وحدة بشهرها",scClosed:"مسلَّم من قبل — ما انحفظ",scSwitch:"غيّر إلى",
-  exportCsv:"تحميل Excel",noOrders:"ما في طلبات",
+  exportCsv:"تحميل Excel",exportCourier:"Excel لشركة التوصيل",noOrders:"ما في طلبات",
   colCode:"الرمز",colUser:"الاسم",colPhone:"الموبايل",colTotal:"المجموع",
   colDep:"المقدم",colBal:"المتبقي",colStatus:"الحالة",colItems:"القطع",linked:"انربط بزبون موجود",
   moveBatch:"تحديث مجموعة",searchLbl:"دور بالرمز أو الاسم أو الرقم",search:"دور",back:"رجوع",
@@ -957,6 +967,7 @@ async function initDash(){
     sel.addEventListener("change", loadDash);
     $("dh-q").addEventListener("input", renderDash);
     $("dh-export").addEventListener("click", exportDash);
+    $("dh-exp-courier").addEventListener("click", exportCourier);
   }
   loadDash();
 }
@@ -964,7 +975,7 @@ async function initDash(){
 async function loadDash(){
   $("dh-table").innerHTML = `<div class="empty"><span class="spin"></span></div>`;
   const { data, error } = await db.from("orders")
-    .select("id,seq,order_code,status,total_iqd,deposit_iqd,balance_iqd,items_count,bags_code,weight_kg,customers(instagram_username,phone)"
+    .select("id,seq,order_code,status,total_iqd,deposit_iqd,balance_iqd,items_count,bags_code,weight_kg,customers(instagram_username,phone,address)"
       + (hasCollect ? ",collected_iqd" : ""))
     .eq("cycle_code", $("dh-cycle").value)
     .order("seq", { ascending:false });
@@ -1062,6 +1073,52 @@ function renderDash(){
     }));
   document.querySelectorAll("#dh-table tbody tr").forEach(tr =>
     tr.addEventListener("click", () => openOrder(tr.dataset.id)));
+}
+
+// Iraqi governorates, Arabic plus the Latin/Kurdish spellings the sheet uses.
+const GOV_MAP = {
+  "بغداد":"بغداد","اربيل":"أربيل","أربيل":"أربيل","هولير":"أربيل","هەولێر":"أربيل",
+  "hawler":"أربيل","erbil":"أربيل","hewler":"أربيل","البصرة":"البصرة","بصرة":"البصرة",
+  "basra":"البصرة","نينوى":"نينوى","الموصل":"نينوى","mosul":"نينوى","كركوك":"كركوك",
+  "kirkuk":"كركوك","السليمانية":"السليمانية","سليمانية":"السليمانية","slemani":"السليمانية",
+  "sulaymaniyah":"السليمانية","دهوك":"دهوك","duhok":"دهوك","dohuk":"دهوك","zakho":"دهوك",
+  "زاخو":"دهوك","صلاح الدين":"صلاح الدين","الأنبار":"الأنبار","الانبار":"الأنبار",
+  "النجف":"النجف","najaf":"النجف","كربلاء":"كربلاء","karbala":"كربلاء","بابل":"بابل",
+  "واسط":"واسط","ديالى":"ديالى","ذي قار":"ذي قار","الناصرية":"ذي قار","ناصرية":"ذي قار",
+  "المثنى":"المثنى","السماوة":"المثنى","القادسية":"القادسية","الديوانية":"القادسية",
+  "ميسان":"ميسان","العمارة":"ميسان","halabja":"حلبجة","حلبجة":"حلبجة","كفري":"السليمانية",
+  "ranya":"السليمانية","soran":"أربيل","koya":"أربيل","shaqllawa":"أربيل","akre":"دهوك"
+};
+function govOf(addr){
+  const a = String(addr || "").toLowerCase();
+  for (const k in GOV_MAP)
+    if (a.includes(k.toLowerCase())) return GOV_MAP[k];
+  return "";
+}
+
+// One file the courier's back office can bulk-load: name, phone, city, address,
+// COD (the wasl is already deducted from balance), and our order code as the
+// reference. Follows the status chip filter, so e.g. tap "out for delivery"
+// first to export just that batch.
+function exportCourier(){
+  let rows = dashRows.filter(r => r.status !== "cancelled");
+  if (dashFilter) rows = rows.filter(r => r.status === dashFilter);
+  const head = ["reference","customer_name","phone","city","address","cod_amount_iqd","notes"];
+  const q = v => `"${String(v ?? "").replace(/"/g,'""').replace(/\s+/g," ").trim()}"`;
+  const lines = [head.join(",")].concat(rows.map(r => [
+    r.order_code,
+    q(r.customers?.instagram_username || ""),
+    `="${r.customers?.phone || ""}"`,
+    q(govOf(r.customers?.address)),
+    q(r.customers?.address || ""),
+    r.balance_iqd || 0,
+    ""
+  ].join(",")));
+  const blob = new Blob(["\ufeff" + lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `courier_${$("dh-cycle").value}${dashFilter ? "_" + dashFilter : ""}.csv`;
+  a.click();
 }
 
 function exportDash(){
