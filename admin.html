@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v48</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v49</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -163,6 +163,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
         <button data-go="dash" data-t="dashboard" id="nav-dash" class="hide"></button>
         <button data-go="scan" data-t="scanBags" id="nav-scan" class="hide"></button>
         <button data-go="shko" data-t="shkoTitle" id="nav-shko" class="hide"></button>
+        <button data-go="cost" data-t="costTitle" id="nav-cost" class="hide"></button>
         <button data-go="batch" data-t="moveBatch"></button>
         <button data-go="home" data-t="refresh"></button>
       </div>
@@ -362,6 +363,48 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
       <input type="file" id="sk-file" accept="image/*" class="hide">
     </div>
 
+    <div id="v-cost" class="hide">
+      <button class="back" data-go="home" data-t="back"></button>
+      <h2 data-t="costTitle"></h2>
+      <div id="ct-msg"></div>
+      <div class="f"><label data-t="month"></label><select id="ct-cycle"></select></div>
+      <div class="tiles">
+        <div class="tile"><div class="k" data-t="revenue"></div><div class="v num" id="ct-rev">—</div></div>
+        <div class="tile"><div class="k" data-t="totalCost"></div><div class="v num" id="ct-cost" style="color:#F09595">—</div></div>
+        <div class="tile wide"><div class="k" data-t="netProfit"></div><div class="v num" id="ct-net" style="color:var(--teal)">—</div><div class="sub" id="ct-net-sub"></div></div>
+      </div>
+      <div id="ct-break" style="margin-bottom:18px"></div>
+      <button class="btn ghost" id="ct-seed" data-t="seedFixed" style="margin-bottom:14px"></button>
+      <div style="background:var(--deep);border-radius:12px;padding:14px;margin-bottom:16px">
+        <div style="color:var(--mute);font-size:12.5px;margin-bottom:10px" data-t="addCost"></div>
+        <div style="display:flex;gap:10px">
+          <div class="f" style="flex:1"><label data-t="costCat"></label><select id="ct-cat"></select></div>
+          <div class="f" style="flex:1"><label data-t="costLabel"></label><input id="ct-label"></div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <div class="f" style="flex:1"><label data-t="costQty"></label><input id="ct-qty" inputmode="decimal" dir="ltr" placeholder="10"></div>
+          <div class="f" style="flex:1"><label data-t="costUsd"></label><input id="ct-usd" inputmode="decimal" dir="ltr" placeholder="475"></div>
+          <div class="f" style="flex:1"><label data-t="costFx"></label><input id="ct-fx" inputmode="numeric" dir="ltr"></div>
+        </div>
+        <div class="f"><label data-t="costIqd"></label><input id="ct-iqd" inputmode="numeric" dir="ltr" placeholder="616,000"></div>
+        <button class="btn" id="ct-add" data-t="saveCost"></button>
+      </div>
+      <div id="ct-list"></div>
+      <div style="margin-top:22px;padding-top:16px;border-top:1px solid var(--line)">
+        <div style="color:var(--mute);font-size:12.5px;margin-bottom:10px" data-t="costSettings"></div>
+        <div style="display:flex;gap:10px">
+          <div class="f" style="flex:1"><label data-t="costFx"></label><input id="ct-s-fx" inputmode="numeric" dir="ltr"></div>
+          <div class="f" style="flex:1"><label data-t="perKg"></label><input id="ct-s-kg" inputmode="decimal" dir="ltr"></div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <div class="f" style="flex:1"><label>KRG</label><input id="ct-s-krg" inputmode="numeric" dir="ltr"></div>
+          <div class="f" style="flex:1"><label data-t="baghdad"></label><input id="ct-s-bgd" inputmode="numeric" dir="ltr"></div>
+          <div class="f" style="flex:1"><label data-t="south"></label><input id="ct-s-sth" inputmode="numeric" dir="ltr"></div>
+        </div>
+        <button class="btn ghost" id="ct-s-save" data-t="saveSettings"></button>
+      </div>
+    </div>
+
     <div id="v-batch" class="hide">
       <button class="back" data-go="home" data-t="back"></button>
       <h2 data-t="moveBatch"></h2>
@@ -451,7 +494,7 @@ const T = {
   moveBatch:"گواستنەوەی کۆمەڵ",searchLbl:"گەڕان بە کۆد، ناو یان ژمارە",search:"گەڕان",back:"گەڕانەوە",
   username:"ناوی ئینستاگرام",phone:"ژمارەی مۆبایل",address:"ناونیشان",total:"کۆی گشتی",
   deposit:"پارەی پێشەکی",due:"بڕی ماوە",items:"ژمارەی بەرهەم",save:"تۆمارکردن",
-  setStatus:"دۆخی نوێ",update:"نوێکردنەوە",collected:"پارەی کۆکراوە",collectedAsk:"چەند پارە کۆکرایەوە؟",shkoTitle:"شحنەکانی SHKO",shkoRemaining:"پارە لای SHKO (ماوە)",shkoThisMonth:"وەرگیراوی ئەم مانگە",shkoAllRecv:"کۆی وەرگیراو",shkoAddOfd:"زیادکردنی هەموو «لە گەیاندندایە»",shkoAdd:"زیادکردن",shkoReceived:"وەرگیراوەکان",shkoEmpty:"هیچ نەماوە — هەمووی وەرگیراوە ✓",shkoNone:"هیچ داواکارییەک نییە",shkoDel:"سڕینەوە",shkoScanHelp:"وێنەی لەیبڵەکان هەڵبژێرە — سیستەم کۆدی کڕیار دەخوێنێتەوە، بڕی ماوە و ناو لە داواکارییەکەوە دێن",shkoApply:"تۆمارکردنی شحنەکان",shkoImgDel:"سڕینەوەی وێنە",shkoMoved:"گۆڕدرا بۆ «لە گەیاندندایە»",delivDebt:"قەرزی گەیەندراو (کۆنەکراوەتەوە)",saveAmounts:"تۆمارکردنی بڕەکان",from:"لە دۆخی",to:"بۆ دۆخی",month:"مانگ",codeFrom:"لە کۆدی",codeTo:"بۆ کۆدی",
+  setStatus:"دۆخی نوێ",update:"نوێکردنەوە",collected:"پارەی کۆکراوە",collectedAsk:"چەند پارە کۆکرایەوە؟",shkoTitle:"شحنەکانی SHKO",shkoRemaining:"پارە لای SHKO (ماوە)",shkoThisMonth:"وەرگیراوی ئەم مانگە",shkoAllRecv:"کۆی وەرگیراو",shkoAddOfd:"زیادکردنی هەموو «لە گەیاندندایە»",shkoAdd:"زیادکردن",shkoReceived:"وەرگیراوەکان",shkoEmpty:"هیچ نەماوە — هەمووی وەرگیراوە ✓",shkoNone:"هیچ داواکارییەک نییە",shkoDel:"سڕینەوە",shkoScanHelp:"وێنەی لەیبڵەکان هەڵبژێرە — سیستەم کۆدی کڕیار دەخوێنێتەوە، بڕی ماوە و ناو لە داواکارییەکەوە دێن",shkoApply:"تۆمارکردنی شحنەکان",shkoImgDel:"سڕینەوەی وێنە",costTitle:"کۆست و قازانج",revenue:"داهاتی مانگ",totalCost:"کۆی کۆستەکان",netProfit:"قازانجی سافی",margin:"ڕێژەی قازانج",seedFixed:"زیادکردنی کۆستە جێگیرەکانی مانگ",addCost:"زیادکردنی کۆست",costCat:"جۆر",costLabel:"ناو",costQty:"ژمارە",costUsd:"نرخ بە دۆلار",costFx:"نرخی دۆلار",costIqd:"یان بڕ بە دینار",saveCost:"تۆمارکردن",costSettings:"ڕێکخستنەکانی کۆست",perKg:"دۆلار بۆ کیلۆ",baghdad:"بەغدا",south:"باشوور",saveSettings:"پاشەکەوتکردن",catFixed:"جێگیر",catCards:"کارتی شەین",catAds:"ڕیکلامی مێتا",catAgent:"ئاژانسی دوبەی",catShko:"گەیاندنی SHKO",catOther:"کۆستی تر",autoCalc:"خۆکار",kgRec:"کیلۆی تۆمارکراو",deliv:"گەیەندراو",unknownGov:"نادیار",shkoMoved:"گۆڕدرا بۆ «لە گەیاندندایە»",delivDebt:"قەرزی گەیەندراو (کۆنەکراوەتەوە)",saveAmounts:"تۆمارکردنی بڕەکان",from:"لە دۆخی",to:"بۆ دۆخی",month:"مانگ",codeFrom:"لە کۆدی",codeTo:"بۆ کۆدی",
   rangeHint:"بەتاڵی بهێڵەرەوە بۆ هەمووی",
   willMove:"داواکاری دەگوازرێتەوە",moveAll:"گواستنەوەی هەموویان",noRes:"هیچ نەدۆزرایەوە",
   saved:"تۆمارکرا",need:"ناو و کۆی گشتی پێویستە",moved:"داواکاری گوازرایەوە",
@@ -481,7 +524,7 @@ const T = {
   moveBatch:"تحديث مجموعة",searchLbl:"دور بالرمز أو الاسم أو الرقم",search:"دور",back:"رجوع",
   username:"اسم الانستغرام",phone:"رقم الموبايل",address:"العنوان",total:"المجموع",
   deposit:"المدفوع",due:"المتبقي",items:"عدد القطع",save:"حفظ",
-  setStatus:"الحالة الجديدة",update:"تحديث",collected:"المبلغ المستلم",collectedAsk:"شكد انستلم؟",shkoTitle:"شحنات SHKO",shkoRemaining:"الفلوس عند SHKO (باقية)",shkoThisMonth:"مستلم هذا الشهر",shkoAllRecv:"مجموع المستلم",shkoAddOfd:"إضافة كل «قيد التوصيل»",shkoAdd:"إضافة",shkoReceived:"المستلمة",shkoEmpty:"ما باقي شي — كله مستلم ✓",shkoNone:"ما في طلبات",shkoDel:"حذف",shkoScanHelp:"اختار صور الليبلات — النظام يقرا رمز الزبون، والمبلغ الباقي والاسم ييجون من الطلب",shkoApply:"حفظ الشحنات",shkoImgDel:"حذف الصورة",shkoMoved:"تحوّلت إلى «قيد التوصيل»",delivDebt:"دين المسلَّم (غير مستلم)",saveAmounts:"حفظ المبالغ",from:"من حالة",to:"إلى حالة",month:"الشهر",codeFrom:"من رمز",codeTo:"إلى رمز",
+  setStatus:"الحالة الجديدة",update:"تحديث",collected:"المبلغ المستلم",collectedAsk:"شكد انستلم؟",shkoTitle:"شحنات SHKO",shkoRemaining:"الفلوس عند SHKO (باقية)",shkoThisMonth:"مستلم هذا الشهر",shkoAllRecv:"مجموع المستلم",shkoAddOfd:"إضافة كل «قيد التوصيل»",shkoAdd:"إضافة",shkoReceived:"المستلمة",shkoEmpty:"ما باقي شي — كله مستلم ✓",shkoNone:"ما في طلبات",shkoDel:"حذف",shkoScanHelp:"اختار صور الليبلات — النظام يقرا رمز الزبون، والمبلغ الباقي والاسم ييجون من الطلب",shkoApply:"حفظ الشحنات",shkoImgDel:"حذف الصورة",costTitle:"التكاليف والأرباح",revenue:"دخل الشهر",totalCost:"مجموع التكاليف",netProfit:"صافي الربح",margin:"نسبة الربح",seedFixed:"إضافة التكاليف الثابتة للشهر",addCost:"إضافة تكلفة",costCat:"النوع",costLabel:"الاسم",costQty:"العدد",costUsd:"السعر بالدولار",costFx:"سعر الدولار",costIqd:"أو المبلغ بالدينار",saveCost:"حفظ",costSettings:"إعدادات التكاليف",perKg:"دولار للكيلو",baghdad:"بغداد",south:"الجنوب",saveSettings:"حفظ",catFixed:"ثابتة",catCards:"كارتات شي إن",catAds:"إعلانات ميتا",catAgent:"وكيل دبي",catShko:"توصيل SHKO",catOther:"تكاليف أخرى",autoCalc:"تلقائي",kgRec:"كيلو مسجّل",deliv:"مسلَّم",unknownGov:"غير معروف",shkoMoved:"تحوّلت إلى «قيد التوصيل»",delivDebt:"دين المسلَّم (غير مستلم)",saveAmounts:"حفظ المبالغ",from:"من حالة",to:"إلى حالة",month:"الشهر",codeFrom:"من رمز",codeTo:"إلى رمز",
   rangeHint:"خليها فارغة للكل",
   willMove:"طلب راح ينتقل",moveAll:"حدث الكل",noRes:"ما لكيت شي",
   saved:"انحفظ",need:"لازم الاسم والمجموع",moved:"الطلبات انتقلت",
@@ -494,6 +537,8 @@ let me = null, cycle = null, current = null;
 let hasCollect = false;
 // true once the shipments table exists (SHKO money tracking)
 let hasShip = false;
+// true once the expenses table exists (costs & profit section)
+let hasCosts = false;
 
 const $ = i => document.getElementById(i);
 
@@ -529,7 +574,7 @@ function say(box, text, kind, ms){
   if (text && hold) setTimeout(() => { if ($(box)) $(box).innerHTML = ""; }, hold);
 }
 function view(n){
-  ["home","new","paste","dash","scan","detail","batch","shko"].forEach(v => $("v-" + v).classList.toggle("hide", v !== n));
+  ["home","new","paste","dash","scan","detail","batch","shko","cost"].forEach(v => $("v-" + v).classList.toggle("hide", v !== n));
   window.scrollTo(0,0);
 }
 function paintLang(){
@@ -557,6 +602,7 @@ async function loadHome(){
   $("nav-dash").classList.toggle("hide", me.role !== "admin");
   $("nav-scan").classList.toggle("hide", me.role !== "admin");
   $("nav-shko").classList.toggle("hide", me.role !== "admin" || !hasShip);
+  $("nav-cost").classList.toggle("hide", me.role !== "admin" || !hasCosts);
   $("bag-box").classList.toggle("hide", me.role !== "admin");
   if (me.role === "admin"){
     $("h-billed").textContent = iqd(sum("total_iqd"));
@@ -755,6 +801,7 @@ document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", 
   if (g === "dash") initDash();
   if (g === "scan") initScan();
   if (g === "shko") initShko();
+  if (g === "cost") initCost();
   view(g);
 }));
 $("q-go").addEventListener("click", search);
@@ -2012,6 +2059,162 @@ async function skUpload(e){
   loadShko();
 }
 
+// ---------- Costs & profit ----------
+let ctInit = false, ctSet = {}, ctExp = [], ctOrders = [];
+const CT_CATS = ["cards", "agent", "shko", "ads", "fixed", "other"];
+const KRG = new Set(["أربيل", "السليمانية", "دهوك", "حلبجة"]);
+
+async function initCost(){
+  if (!ctInit){
+    ctInit = true;
+    const sel = $("ct-cycle");
+    const { data: used } = await db.from("orders").select("cycle_code");
+    const have = [...new Set((used || []).map(o => o.cycle_code))];
+    const { data } = await db.from("cycles").select("code,label")
+      .in("code", have.length ? have : [""]).order("code", { ascending: false });
+    sel.innerHTML = (data || []).map(c => `<option value="${c.code}">${c.label || c.code}</option>`).join("");
+    if (cycle && [...sel.options].some(o => o.value === cycle)) sel.value = cycle;
+    sel.addEventListener("change", loadCost);
+    $("ct-cat").innerHTML = CT_CATS.map(c =>
+      `<option value="${c}">${t()["cat" + c[0].toUpperCase() + c.slice(1)]}</option>`).join("");
+    $("ct-add").addEventListener("click", addCost);
+    $("ct-seed").addEventListener("click", seedFixed);
+    $("ct-s-save").addEventListener("click", saveCostSettings);
+  }
+  await loadCost();
+}
+
+async function loadCost(){
+  const cyc = $("ct-cycle").value;
+  const [se, ex, os] = await Promise.all([
+    db.from("cost_settings").select("key,value"),
+    db.from("expenses").select("*").eq("cycle_code", cyc).order("id"),
+    db.from("orders").select("status,total_iqd,weight_kg,customers(address)").eq("cycle_code", cyc)
+  ]);
+  ctSet = {}; (se.data || []).forEach(r => ctSet[r.key] = r.value);
+  ctExp = ex.data || [];
+  ctOrders = os.data || [];
+  $("ct-fx").value = ctSet.fx_usd_iqd || 1400;
+  $("ct-s-fx").value = ctSet.fx_usd_iqd || 1400;
+  $("ct-s-kg").value = ctSet.agent_per_kg_usd || 1.25;
+  const fees = ctSet.shko_fees || {};
+  $("ct-s-krg").value = fees.krg ?? 4000;
+  $("ct-s-bgd").value = fees.baghdad ?? 5000;
+  $("ct-s-sth").value = fees.south ?? 6000;
+  renderCost();
+}
+
+// Global Cloud: recorded kg x $/kg x fx. SHKO: delivered orders priced by
+// governorate. Each auto row yields to a manual row of the same category, so
+// nothing double-counts when the real invoice is typed in.
+function ctAuto(){
+  const fx = Number(ctSet.fx_usd_iqd || 1400);
+  const perKg = Number(ctSet.agent_per_kg_usd || 1.25);
+  const fees = ctSet.shko_fees || { krg: 4000, baghdad: 5000, south: 6000 };
+  const live = ctOrders.filter(o => o.status !== "cancelled");
+  const kg = live.reduce((a, o) => a + Number(o.weight_kg || 0), 0);
+  const agent = Math.round(kg * perKg * fx);
+  const dl = live.filter(o => o.status === "delivered");
+  let nKrg = 0, nBgd = 0, nSth = 0, nUnk = 0;
+  dl.forEach(o => {
+    const g = govOf(o.customers?.address);
+    if (g === "بغداد") nBgd++;
+    else if (KRG.has(g)) nKrg++;
+    else if (g) nSth++;
+    else { nUnk++; nKrg++; }          // unknown address: charged at the KRG fee
+  });
+  const shko = nKrg * (fees.krg ?? 4000) + nBgd * (fees.baghdad ?? 5000) + nSth * (fees.south ?? 6000);
+  return { agent, kg, shko, nKrg, nBgd, nSth, nUnk, revenue: live.reduce((a, o) => a + Number(o.total_iqd || 0), 0) };
+}
+
+function renderCost(){
+  const A = ctAuto();
+  const manual = {}; ctExp.forEach(e => manual[e.category] = (manual[e.category] || 0) + Number(e.amount_iqd || 0));
+  const useAgent = manual.agent ? 0 : A.agent;
+  const useShko  = manual.shko  ? 0 : A.shko;
+  const total = Object.values(manual).reduce((a, b) => a + b, 0) + useAgent + useShko;
+  const net = A.revenue - total;
+  $("ct-rev").textContent = iqd(A.revenue);
+  $("ct-cost").textContent = iqd(total);
+  $("ct-net").textContent = iqd(net);
+  $("ct-net").style.color = net >= 0 ? "var(--teal)" : "#F09595";
+  $("ct-net-sub").textContent = A.revenue ? `${t().margin}: ${Math.round(net / A.revenue * 100)}%` : "";
+
+  const line = (k, v, sub) => `<div style="display:flex;justify-content:space-between;align-items:baseline;
+      padding:9px 0;border-bottom:1px solid rgba(44,66,73,.5)">
+    <div><span style="font-size:13px">${k}</span>${sub ? `<div style="color:var(--faint);font-size:11px">${sub}</div>` : ""}</div>
+    <span class="num" style="color:#F09595">${iqd(v)}</span></div>`;
+  let h = "";
+  if (useAgent) h += line(`${t().catAgent} ⚙️`, useAgent,
+    `${A.kg.toFixed(1)} ${t().kgRec} × $${ctSet.agent_per_kg_usd || 1.25} × ${ctSet.fx_usd_iqd || 1400}`);
+  if (useShko) h += line(`${t().catShko} ⚙️`, useShko,
+    `KRG ${A.nKrg} · ${t().baghdad} ${A.nBgd} · ${t().south} ${A.nSth}` + (A.nUnk ? ` · ${t().unknownGov} ${A.nUnk}` : ""));
+  CT_CATS.forEach(c => { if (manual[c]) h += line(t()["cat" + c[0].toUpperCase() + c.slice(1)], manual[c]); });
+  $("ct-break").innerHTML = h;
+
+  $("ct-list").innerHTML = ctExp.map(e => `<div class="row" style="cursor:default">
+    <div class="l"><div class="c">${t()["cat" + e.category[0].toUpperCase() + e.category.slice(1)] || e.category}</div>
+      <div class="u">${e.label || ""}${e.qty ? ` · ${e.qty} × $${e.unit_usd} × ${e.fx_rate}` : ""}</div></div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span class="num">${iqd(e.amount_iqd)}</span>
+      <button data-ctdel="${e.id}" style="width:32px;height:32px;border-radius:10px;
+        border:1px solid rgba(226,75,74,.4);background:transparent;color:#F09595">🗑</button>
+    </div></div>`).join("");
+  document.querySelectorAll("[data-ctdel]").forEach(b => b.onclick = async () => {
+    if (!confirm("🗑?")) return;
+    const { error } = await db.from("expenses").delete().eq("id", b.dataset.ctdel);
+    if (error) return say("ct-msg", error.message, "err");
+    loadCost();
+  });
+}
+
+async function addCost(){
+  const cyc = $("ct-cycle").value;
+  const qty = parseFloat(toEn($("ct-qty").value)) || null;
+  const usd = parseFloat(toEn($("ct-usd").value)) || null;
+  const fx  = parseFloat(toEn($("ct-fx").value)) || Number(ctSet.fx_usd_iqd || 1400);
+  let amount = parseInt(toEn($("ct-iqd").value).replace(/[^\d]/g, ""), 10) || 0;
+  if (!amount && usd) amount = Math.round((qty || 1) * usd * fx);
+  if (!amount) return say("ct-msg", t().need, "err");
+  const { error } = await db.from("expenses").insert({
+    cycle_code: cyc, category: $("ct-cat").value,
+    label: $("ct-label").value.trim() || null,
+    qty, unit_usd: usd, fx_rate: usd ? fx : null,
+    amount_iqd: amount, note: null
+  });
+  if (error) return say("ct-msg", error.message, "err");
+  ["ct-label", "ct-qty", "ct-usd", "ct-iqd"].forEach(i => $(i).value = "");
+  say("ct-msg", t().saved, "ok");
+  loadCost();
+}
+
+async function seedFixed(){
+  const cyc = $("ct-cycle").value;
+  const tpl = ctSet.fixed_monthly || [];
+  const have = new Set(ctExp.filter(e => e.category === "fixed").map(e => e.label));
+  const rows = tpl.filter(f => !have.has(f.label)).map(f => ({
+    cycle_code: cyc, category: "fixed", label: f.label, amount_iqd: f.amount }));
+  if (!rows.length) return say("ct-msg", "✓", "ok");
+  const { error } = await db.from("expenses").insert(rows);
+  if (error) return say("ct-msg", error.message, "err");
+  say("ct-msg", `${rows.length} ✓`, "ok");
+  loadCost();
+}
+
+async function saveCostSettings(){
+  const vals = [
+    { key: "fx_usd_iqd", value: Number(toEn($("ct-s-fx").value)) || 1400 },
+    { key: "agent_per_kg_usd", value: Number(toEn($("ct-s-kg").value)) || 1.25 },
+    { key: "shko_fees", value: { krg: Number(toEn($("ct-s-krg").value)) || 4000,
+        baghdad: Number(toEn($("ct-s-bgd").value)) || 5000,
+        south: Number(toEn($("ct-s-sth").value)) || 6000 } }
+  ];
+  const { error } = await db.from("cost_settings").upsert(vals, { onConflict: "key" });
+  if (error) return say("ct-msg", error.message, "err");
+  say("ct-msg", t().saved, "ok");
+  loadCost();
+}
+
 // A shipment in the SHKO list means the parcel left with the courier, so the
 // order itself moves to out_for_delivery — but only forward: orders already
 // out, delivered or cancelled are left untouched.
@@ -2294,6 +2497,8 @@ db.auth.onAuthStateChange(async (_e, session) => {
   hasCollect = !ce;
   const { error: se2 } = await db.from("shipments").select("id").limit(1);
   hasShip = !se2;
+  const { error: ce2 } = await db.from("expenses").select("id").limit(1);
+  hasCosts = !ce2;
   $("me").textContent = s.full_name;
   $("login").classList.add("hide");
   $("app").classList.remove("hide");
