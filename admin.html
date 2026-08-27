@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v46</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v47</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -430,7 +430,7 @@ const T = {
  ku:{cycle:"مانگ",orders:"داواکاری",cod:"پارەی ماوە بۆ کۆکردنەوە",codPending:"ماوە بۆ کۆکردنەوە (بێ گەیەندراوەکان)",billed:"کۆی گشتی مانگ",paidUp:"پێشەکی وەرگیراو",
   saveCustomer:"تۆمارکردنی زانیاری کڕیار",newOrder:"داواکاری نوێ",
   pasteMany:"زیادکردنی کۆمەڵ",refresh:"نوێکردنەوە",
-  pasteHelp:"ڕیزەکان لە شیتەکە کۆپی بکە و لێرە بیانلکێنە. بەم ڕیزبەندییە: کۆد، ناو، بڕ، ناونیشان، مۆبایل",
+  pasteHelp:"ڕیزەکان لە شیتەکە کۆپی بکە و لێرە بیانلکێنە. بەم ڕیزبەندییە: کۆد، ناو، بڕ، ناونیشان، مۆبایل — و ئارەزوومەندانە ستوونی شەشەم: کۆدی جانتا",
   willAdd:"داواکاری زیاد دەکرێت",addAll:"زیادکردنی هەموویان",
   itemsCode:"کۆدی بەرهەم",bagsCode:"کۆدی جانتا",codeE:"کۆدی E",
   qtyShip:"بڕی گەیاندن",kg:"کێش",info:"تێبینی",saveFields:"تۆمارکردن",
@@ -460,7 +460,7 @@ const T = {
  ar:{cycle:"الشهر",orders:"الطلبات",cod:"المبلغ المتبقي للتحصيل",codPending:"المتبقي للتحصيل (بدون المسلَّم)",billed:"مجموع الشهر",paidUp:"المدفوع مقدماً",
   saveCustomer:"حفظ معلومات الزبون",newOrder:"طلب جديد",
   pasteMany:"إضافة مجموعة",refresh:"تحديث",
-  pasteHelp:"انسخ الصفوف من الشيت والصقها هنا. بهذا الترتيب: الرمز، الاسم، المبلغ، العنوان، الموبايل",
+  pasteHelp:"انسخ الصفوف من الشيت والصقها هنا. بهذا الترتيب: الرمز، الاسم، المبلغ، العنوان، الموبايل — واختيارياً عمود سادس: رمز الكيس",
   willAdd:"طلب راح ينضاف",addAll:"أضف الكل",
   itemsCode:"رمز القطع",bagsCode:"رمز الكيس",codeE:"رمز E",
   qtyShip:"كمية الشحن",kg:"الوزن",info:"ملاحظات",saveFields:"حفظ",
@@ -806,7 +806,9 @@ function parsePaste(){
     if (phone.length !== 10) phone = null;
 
     if (!seq || !name || !total){ bad.push(seq || (i + 1)); return; }
-    out.push({ seq, name, phone, address, total, deposit: Math.min(dep, total) });
+    // optional 6th column: the sheet's bag codes (XXXXX4+XXXXX5 / A1)
+    const bags = (String(c[5] || "").toUpperCase().match(/[A-Z]{1,8}[0-9]{1,3}/g)) || [];
+    out.push({ seq, name, phone, address, total, deposit: Math.min(dep, total), bags });
   });
   return { rows: out, bad };
 }
@@ -830,11 +832,20 @@ $("p-go").addEventListener("click", async () => {
   if (!rows.length) return;
   if (!confirm(`${rows.length}?`)) return;
   const b = $("p-go"); b.disabled = true; b.innerHTML = '<span class="spin"></span>';
-  const { data, error } = await db.rpc("bulk_add_orders", { p_cycle: cycle, p_rows: rows });
+  const { data, error } = await db.rpc("bulk_add_orders",
+    { p_cycle: cycle, p_rows: rows.map(({ bags, ...rest }) => rest) });
   b.disabled = false; b.textContent = t().addAll;
   if (error) return say("p-msg", error.message, "err");
   const r = data[0];
-  say("p-msg", `${r.created} — ${r.codes}` + (r.skipped ? ` · ${r.skipped} ✕` : ""));
+  // rows that carried a bags column register their bag list in the same paste
+  const bagRows = rows.filter(x => x.bags.length)
+    .map(x => ({ seq: x.seq, codes: [...new Set(x.bags)], note: null }));
+  let bagNote = "";
+  if (bagRows.length){
+    const { data: bd, error: be } = await db.rpc("add_bags", { p_cycle: cycle, p_rows: bagRows });
+    bagNote = be ? ` · 🎒 ${be.message}` : ` · 🎒 ${bd?.[0]?.bags_added ?? 0} ✓`;
+  }
+  say("p-msg", `${r.created} — ${r.codes}` + (r.skipped ? ` · ${r.skipped} ✕` : "") + bagNote, "ok", 0);
   $("p-box").value = ""; previewPaste(); loadHome();
 });
 
