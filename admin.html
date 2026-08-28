@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v52</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v53</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -2229,8 +2229,15 @@ async function ctParsePdf(f){
     // column boundaries: X positions that repeat across many lines
     const xs = {};
     lines.forEach(l => l.items.forEach(it => { const k = Math.round(it.x / 8) * 8; xs[k] = (xs[k] || 0) + 1; }));
+    // neighbouring clusters are the same column drifting a few pixels
+    const merged = [];
+    Object.keys(xs).map(Number).sort((a, b) => a - b).forEach(x => {
+      const M = merged[merged.length - 1];
+      if (M && x - M.hi <= 16){ M.hi = x; M.c += xs[x]; }
+      else merged.push({ lo: x, hi: x, c: xs[x] });
+    });
     const need = Math.max(3, lines.length * 0.3);
-    const bounds = Object.entries(xs).filter(([, c]) => c >= need).map(([k]) => +k).sort((a, b) => a - b);
+    const bounds = merged.filter(m => m.c >= need).map(m => m.lo).sort((a, b) => a - b);
     lines.forEach(l => {
       l.items.sort((a, b) => a.x - b.x);
       if (bounds.length >= 2){
@@ -2269,16 +2276,22 @@ function renderFilePrev(){
 }
 
 function ctSumCol(i){
-  let sum = 0, n = 0;
+  // A cell only counts when it IS a number. "المجموع6,797,000" and
+  // "الهاتف07503094092" are text with digits inside — not money — and a
+  // digit run longer than 9 is a phone, never a fee.
+  let sum = 0, n = 0, mixed = 0;
   ctFileRows.forEach(r => {
-    const raw = String(r[i] ?? "").trim();
+    const raw = toEn(String(r[i] ?? "")).trim();
     if (!raw) return;
-    const v = parseFloat(toEn(raw).replace(/[^\d.\-]/g, ""));
-    if (isFinite(v) && v !== 0){ sum += v; n++; }
+    if (!/^[\d.,\s]+$/.test(raw)){ if (/\d/.test(raw)) mixed++; return; }
+    const v = parseFloat(raw.replace(/[\s,]/g, ""));
+    if (!isFinite(v) || v === 0) return;
+    if (String(Math.round(v)).length > 9) return;
+    sum += v; n++;
   });
   sum = Math.round(sum);
   $("ct-file-sum").innerHTML = `<span class="num" style="color:var(--teal);font-weight:700;font-size:16px">${iqd(sum)}</span>
-    <span style="color:var(--mute);font-size:12px"> · ${n} ${t().rowsN}</span>
+    <span style="color:var(--mute);font-size:12px"> · ${n} ${t().rowsN}${mixed ? ` · ⚠ ${mixed}` : ""}</span>
     <button class="btn" id="ct-file-save" style="margin-top:10px">${t().saveCost}</button>`;
   $("ct-file-save").onclick = async () => {
     const { error } = await db.from("expenses").insert({
