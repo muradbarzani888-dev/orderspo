@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v67</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v68</span></span>
     <div id="h-online" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"></div>
     <div id="h-alerts"></div>
     <button id="l-ku" class="on">KU</button>
@@ -2171,28 +2171,45 @@ function lbOne(cyc, o){
   const name = o.customers?.instagram_username || "—";
   const phone = o.customers?.phone ? "0" + o.customers.phone : "—";
   const addr = (o.customers?.address || "—").replace(/\s+/g, " ").trim();
-  const city = govOf(addr) || "";
+  const city = govOf(addr) || "—";
+  const today = new Date().toLocaleDateString("en-GB").replace(/\//g, "-");
+  const nameF = lbFit(name, "4mm", [[21, "2.2mm"], [17, "2.5mm"], [14, "2.8mm"], [11, "3.1mm"], [9, "3.5mm"]]);
+  const addrF = lbFit(addr, "4mm", [[55, "3mm"], [38, "3.4mm"], [24, "3.7mm"]]);
   return `<div class="lb">
     <div class="top">
-      <img src="${LB_SKO}" class="courier" alt="SKO POST">
-      <div style="flex:1"></div>
-      <div class="code num">${String(o.seq).padStart(4, "0")}</div>
-    </div>
-    <div class="bar">${lbBarcodeSvg(wb, 46, 11)}<div class="wb num">${wb}</div></div>
-    <div class="rows">
-      <div class="r"><span class="k">${t().lblName}</span><span class="v ltr" style="font-size:${lbFit(name, "4.6mm", [[21, "3.2mm"], [16, "3.8mm"]])}">${lbEsc(name)}</span></div>
-      <div class="r"><span class="k">${t().lblPhone}</span><span class="v ltr big">${lbEsc(phone)}</span></div>
-      <div class="r"><span class="k">${t().lblCity}</span><span class="v">${lbEsc(city)}</span></div>
-      <div class="r addr"><span class="k">${t().lblAddr}</span><span class="v wrap" style="font-size:${lbFit(addr, "4mm", [[55, "3mm"], [34, "3.4mm"]])}">${lbEsc(addr)}</span></div>
-    </div>
-    <div class="due"><span class="k">${t().lblDue}</span><span class="v num">${iqd(o.balance_iqd || 0)}</span></div>
-    <div class="foot">
-      <img src="/logo_t.png" class="mylogo" alt="">
-      <div class="callwrap">
-        <div class="callk">ژمارەی ئێمە · Shein-spo-6449</div>
-        <div class="call num">📞 0750 385 6449</div>
+      <span style="display:flex;align-items:center;gap:2.2mm">
+        <img src="${LB_SKO}" alt="SKO POST">
+        <img src="/logo_t.png" style="height:10mm;width:10mm;object-fit:contain" alt="SHEINSPO">
+      </span>
+      <div class="pills">
+        <div class="pill">التاريخ: <span class="ltr">${today}</span></div>
+        <div class="pill">رقم الشاحنة: <span class="ltr">${wb}</span></div>
       </div>
     </div>
+    <div class="banner">شركة شحن وتوصيل داخل العراق</div>
+    <div class="box cust">
+      <div class="cap">معلومات الزبون</div>
+      <div class="top-row">
+        <div class="bc">${lbBarcodeSvg(wb, 30, 13)}<div class="n">${wb}</div></div>
+        <div class="rows">
+          <div class="r"><span class="k">اسم الزبون</span><span class="v ltr" style="font-size:${nameF}">${lbEsc(name)}</span></div>
+          <div class="r"><span class="k">رقم الهاتف</span><span class="v ltr">${lbEsc(phone)}</span></div>
+          <div class="r"><span class="k">المحافظة</span><span class="v">${lbEsc(city)}</span></div>
+        </div>
+      </div>
+      <div class="addr"><span class="k">العنوان</span>
+        <span class="v" style="font-size:${addrF}">${lbEsc(addr)}</span></div>
+    </div>
+    <div class="box page">
+      <div class="cap">معلومات الصفحة</div>
+      <div class="rows">
+        <div class="r"><span class="k">اسم الصفحة</span><span class="v ltr">Shein-spo-6449</span></div>
+        <div class="r"><span class="k">رقم الهاتف</span><span class="v ltr">07503856449</span></div>
+        <div class="r"><span class="k">الفرع</span><span class="v">هةولير</span></div>
+      </div>
+    </div>
+    <div class="code"><div class="k">رمز الزبون</div><div class="v num">${o.seq}</div></div>
+    <div class="total"><div class="k">السعر الكلي</div><div class="v num">${iqd(o.balance_iqd || 0)}</div></div>
   </div>`;
 }
 
@@ -2201,41 +2218,55 @@ const LB_SKO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAANAAAABUCAIAAAB85y
 const LB_CSS = `
 @page{size:100mm 100mm;margin:0}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;background:#fff;color:#111}
-.num{font-variant-numeric:tabular-nums;letter-spacing:.02em}
-.ltr{direction:ltr;unicode-bidi:isolate}
-.lb{width:100mm;height:100mm;padding:4mm 4.5mm;display:flex;flex-direction:column;
-  page-break-after:always;overflow:hidden;background:#fff}
-.lb:last-child{page-break-after:auto}
-.top{display:flex;align-items:center;gap:2.6mm;flex:0 0 11mm}
-.courier{height:8.5mm;width:auto}
-.code{font-weight:800;font-size:9mm;color:#0d9488;border:0.6mm solid #0d9488;
-  border-radius:3mm;padding:0 3mm;line-height:12mm}
-.bar{flex:0 0 15mm;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;border-top:0.35mm solid #d7dde0;border-bottom:0.35mm solid #d7dde0;padding:1mm 0}
-.bar svg{display:block}
-.wb{font-size:3.4mm;font-weight:700;letter-spacing:.35em;margin-top:0.8mm}
-.rows{flex:1 1 auto;display:flex;flex-direction:column;justify-content:center;
-  gap:1.6mm;direction:rtl;min-height:0}
-.r{display:flex;align-items:baseline;gap:2.5mm}
-.r .k{flex:0 0 17mm;font-size:3mm;font-weight:600;color:#8a969b}
-.r .v{flex:1;font-weight:700;font-size:4.2mm;text-align:right;min-width:0;
+html,body{background:#fff}
+body{font-family:"Tahoma","Arial","Noto Naskh Arabic","Geeza Pro",sans-serif;color:#000;-webkit-font-smoothing:none}
+.num{font-variant-numeric:tabular-nums}
+.lb{width:100mm;height:100mm;padding:1.8mm 2.8mm;display:flex;flex-direction:column;
+  gap:1.15mm;background:#fff;overflow:hidden;page-break-after:always;break-after:page}
+.lb:last-child{page-break-after:auto;break-after:auto}
+.top{display:flex;align-items:center;justify-content:space-between;flex:0 0 auto}
+.top img{height:8.8mm}
+.pills{display:flex;flex-direction:column;gap:1.2mm}
+.pill{border:0.35mm solid #0A4184;border-radius:2.6mm;padding:0.7mm 2.4mm;
+  font-size:3.3mm;font-weight:700;text-align:center;min-width:43mm;direction:rtl;white-space:nowrap}
+.banner{flex:0 0 auto;border-top:1.2mm solid #0A4184;border-bottom:1.2mm solid #0A4184;
+  color:#0A4184;font-weight:700;font-size:3.9mm;text-align:center;padding:1mm 0;direction:rtl}
+.box{position:relative;border:0.45mm solid #0A4184;border-radius:3mm;
+  padding:4.2mm 2.8mm 1.8mm;direction:rtl;min-height:0;
+  display:flex;flex-direction:column;justify-content:center}
+.box.cust{flex:1 1 31mm}
+.box.page{flex:1 1 19.5mm}
+.box>.cap{position:absolute;top:-2.7mm;right:50%;transform:translateX(50%);
+  background:#fff;border:0.45mm solid #0A4184;border-radius:2.6mm;
+  padding:0.4mm 3.6mm;font-size:3.4mm;font-weight:700;white-space:nowrap;line-height:1.15}
+.rows{display:flex;flex-direction:column;justify-content:center;gap:1.1mm;min-height:0}
+.r{display:flex;align-items:baseline;gap:1.8mm;font-size:4mm;line-height:1.22}
+.r .k{font-weight:700;flex:0 0 auto;min-width:22mm;white-space:nowrap}
+.r .v{font-weight:700;flex:1 1 auto;min-width:0;text-align:right;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.r .v.big{font-size:5.4mm}
-.r.addr{align-items:flex-start}
-.r .v.wrap{white-space:normal;line-height:1.3;display:-webkit-box;
-  -webkit-box-orient:vertical;-webkit-line-clamp:3}
-.due{flex:0 0 12mm;display:flex;align-items:center;direction:rtl;gap:3mm;
-  margin-top:3mm;
-  background:#f0fdfa;border:0.45mm solid #0d9488;border-radius:3mm;padding:0 3.5mm}
-.due .k{font-size:3.6mm;font-weight:700;color:#0f766e}
-.due .v{flex:1;font-size:8mm;font-weight:800;color:#111;direction:ltr;text-align:left}
-.foot{flex:0 0 17.5mm;display:flex;align-items:center;gap:3.5mm;
-  border-top:0.4mm solid #d7dde0;margin-top:2.6mm;padding-top:1.6mm}
-.mylogo{height:15mm;width:15mm;object-fit:contain}
-.callwrap{flex:1;display:flex;flex-direction:column;align-items:flex-end;gap:0.8mm}
-.callk{font-size:3.1mm;font-weight:700;color:#0f766e}
-.call{font-size:6.2mm;font-weight:800;color:#111;direction:ltr;white-space:nowrap;letter-spacing:.03em}`;
+.ltr{direction:ltr;unicode-bidi:isolate;letter-spacing:0.12mm}
+.cust .top-row{display:flex;gap:3mm;align-items:center;min-height:0}
+.cust .top-row .rows{flex:1 1 auto;min-width:0}
+.bc{flex:0 0 auto;text-align:center}
+.bc svg{display:block}
+.bc .n{font-size:3.4mm;font-weight:700;letter-spacing:0.6mm;direction:ltr;unicode-bidi:isolate;margin-top:0.6mm}
+.addr{display:flex;gap:1.8mm;align-items:baseline;margin-top:1.4mm;
+  border-top:0.3mm dashed #0A4184;padding-top:1.4mm}
+.addr .k{font-weight:700;font-size:4mm;flex:0 0 auto;white-space:nowrap}
+.addr .v{font-weight:700;flex:1 1 auto;min-width:0;text-align:right;line-height:1.28;
+  overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3}
+.code{display:flex;direction:rtl;align-items:stretch;border:0.45mm solid #0A4184;
+  border-radius:3mm;overflow:hidden;flex:0 0 9mm}
+.code .k{display:flex;align-items:center;justify-content:center;padding:0 2.5mm;
+  font-size:3.6mm;font-weight:700;border-left:0.45mm solid #0A4184;flex:0 0 32mm;white-space:nowrap}
+.code .v{flex:1;display:flex;align-items:center;justify-content:center;
+  font-size:6mm;font-weight:700;direction:ltr;unicode-bidi:isolate;letter-spacing:0.8mm}
+.total{display:flex;direction:rtl;align-items:stretch;border:0.45mm solid #0A4184;
+  border-radius:3mm;overflow:hidden;flex:0 0 10.5mm}
+.total .k{display:flex;align-items:center;justify-content:center;padding:0 2.5mm;
+  font-size:4mm;font-weight:700;border-left:0.45mm solid #0A4184;flex:0 0 32mm;white-space:nowrap}
+.total .v{flex:1;display:flex;align-items:center;justify-content:center;
+  font-size:8.4mm;font-weight:700;direction:ltr;unicode-bidi:isolate}`;
 
 async function initLbl(){
   if (!lbInit){
