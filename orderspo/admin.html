@@ -140,7 +140,8 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v63</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v64</span></span>
+    <div id="h-online" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"></div>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -2901,6 +2902,29 @@ async function addAllOfd(){
   loadShko();
 }
 
+// Who is on the site right now: each signed-in session joins a realtime
+// presence channel; closing the tab drops them off within a minute.
+let presenceCh = null;
+function startPresence(session){
+  if (presenceCh || !me) return;
+  presenceCh = db.channel("online-staff", { config: { presence: { key: session.user.id } } });
+  presenceCh.on("presence", { event: "sync" }, paintOnline);
+  presenceCh.subscribe(async st => {
+    if (st === "SUBSCRIBED")
+      await presenceCh.track({ name: me.full_name, role: me.role });
+  });
+}
+function paintOnline(){
+  if (!presenceCh) return;
+  const state = presenceCh.presenceState();
+  const users = Object.values(state).map(a => a[0]).filter(Boolean);
+  $("h-online").innerHTML = users.map(u =>
+    `<span style="display:inline-flex;align-items:center;gap:6px;background:var(--deep);
+       border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:12px">
+       <span style="width:8px;height:8px;border-radius:50%;background:#1D9E75;
+         box-shadow:0 0 6px rgba(29,158,117,.8)"></span>${u.name}${u.role === "admin" ? " ★" : ""}</span>`).join("");
+}
+
 db.auth.onAuthStateChange(async (_e, session) => {
   if (!session){
     started = false;
@@ -2931,6 +2955,7 @@ db.auth.onAuthStateChange(async (_e, session) => {
   $("login").classList.add("hide");
   $("app").classList.remove("hide");
   paintLang();
+  startPresence(session);
   await loadHome();
   view("home");
 });
