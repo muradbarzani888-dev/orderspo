@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v60</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v63</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -2297,33 +2297,46 @@ async function lbPdf(){
   if (!rows.length) return;
   const b = $("lb-pdf"); b.disabled = true;
   try {
-    if (!window.html2canvas) await lbScript("https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js");
     if (!window.jspdf) await lbScript("https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js");
     const cyc = $("lb-cycle").value;
-    // html2canvas cannot see into an iframe's stylesheet, so the PDF path
-    // renders in a hidden stage inside this page with the CSS scoped to it.
-    let st = document.getElementById("lb-stage");
-    if (!st){ st = document.createElement("div"); st.id = "lb-stage"; document.body.appendChild(st); }
-    st.style.cssText = "position:fixed;left:-9999px;top:0;background:#fff;z-index:-1";
-    const scoped = LB_CSS.replace(/@page\{[^}]*\}/, "")
-      .split("\n").map(l => l
-        .replace(/^\*\{/, "#lb-stage, #lb-stage *{")
-        .replace(/^body\{/, "#lb-stage{")
-        .replace(/^\./, "#lb-stage .")).join("\n");
-    st.innerHTML = `<style>${scoped}</style>` + rows.map(o => lbOne(cyc, o)).join("");
-    await Promise.all([...st.querySelectorAll("img")].map(im => im.complete ? 1 :
+    // Capture happens INSIDE the same isolated iframe the print path uses —
+    // rendered by its own stylesheet, untouched by the RTL admin page.
+    const fr = $("lb-frame");
+    fr.style.cssText = "position:fixed;left:-10000px;top:0;width:420px;height:460px;visibility:visible;border:0";
+    await new Promise(r => { fr.onload = r; fr.srcdoc = lbDoc(rows, cyc); });
+    const cd = fr.contentDocument, cw = fr.contentWindow;
+    await new Promise((res, rej) => {
+      const sc = cd.createElement("script");
+      sc.src = "https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js";
+      sc.onload = res; sc.onerror = rej; cd.head.appendChild(sc);
+    });
+    await Promise.all([...cd.images].map(im => im.complete ? 1 :
       new Promise(r => { im.onload = r; im.onerror = r; })));
+    // let the hidden iframe finish layout (rAF is throttled off-screen, so a
+    // plain delay + the blank-retry below are the reliable combination)
+    await new Promise(r => setTimeout(r, 300));
+    const blank = cv => {                       // refuse to save white pages
+      const d = cv.getContext("2d").getImageData(0, 0, cv.width, cv.height).data;
+      let dark = 0; for (let i = 0; i < d.length; i += 160) if (d[i] < 120) dark++;
+      return dark < d.length / 160 * 0.01;
+    };
     const doc = new window.jspdf.jsPDF({ unit: "mm", format: [100, 100] });
-    const els = [...st.querySelectorAll(".lb")];
+    const els = [...cd.querySelectorAll(".lb")];
+    if (els.length !== rows.length) throw new Error(`render ${els.length}/${rows.length}`);
     for (let i = 0; i < els.length; i++){
       say("lb-msg", `PDF ${i + 1} / ${els.length}`, "ok", 0);
-      const cv = await html2canvas(els[i], { scale: 4, backgroundColor: "#ffffff", useCORS: true, logging: false });
+      let cv = await cw.html2canvas(els[i], { scale: 4, backgroundColor: "#ffffff", logging: false });
+      if (blank(cv)){
+        await new Promise(r => setTimeout(r, 350));
+        cv = await cw.html2canvas(els[i], { scale: 4, backgroundColor: "#ffffff", logging: false });
+        if (blank(cv)) throw new Error("blank render — try again");
+      }
       if (i) doc.addPage([100, 100]);
       doc.addImage(cv.toDataURL("image/jpeg", 0.92), "JPEG", 0, 0, 100, 100);
     }
     doc.save(`labels_${cyc}_${rows[0].seq}-${rows[rows.length - 1].seq}.pdf`);
     say("lb-msg", `✓ PDF · ${rows.length}`, "ok");
-    st.innerHTML = "";
+    fr.style.cssText = "display:none";
   } catch (e){ say("lb-msg", e.message, "err"); }
   b.disabled = false;
 }
