@@ -140,8 +140,9 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v64</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v65</span></span>
     <div id="h-online" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"></div>
+    <div id="h-alerts"></div>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -524,7 +525,7 @@ const T = {
   moveBatch:"گواستنەوەی کۆمەڵ",searchLbl:"گەڕان بە کۆد، ناو یان ژمارە",search:"گەڕان",back:"گەڕانەوە",
   username:"ناوی ئینستاگرام",phone:"ژمارەی مۆبایل",address:"ناونیشان",total:"کۆی گشتی",
   deposit:"پارەی پێشەکی",due:"بڕی ماوە",items:"ژمارەی بەرهەم",save:"تۆمارکردن",
-  setStatus:"دۆخی نوێ",update:"نوێکردنەوە",collected:"پارەی کۆکراوە",collectedAsk:"چەند پارە کۆکرایەوە؟",shkoTitle:"شحنەکانی SHKO",shkoRemaining:"پارە لای SHKO (ماوە)",shkoThisMonth:"وەرگیراوی ئەم مانگە",shkoAllRecv:"کۆی وەرگیراو",shkoAddOfd:"زیادکردنی هەموو «لە گەیاندندایە»",shkoAdd:"زیادکردن",shkoReceived:"وەرگیراوەکان",shkoEmpty:"هیچ نەماوە — هەمووی وەرگیراوە ✓",shkoNone:"هیچ داواکارییەک نییە",shkoDel:"سڕینەوە",shkoScanHelp:"وێنەی لەیبڵەکان هەڵبژێرە — سیستەم کۆدی کڕیار دەخوێنێتەوە، بڕی ماوە و ناو لە داواکارییەکەوە دێن",shkoApply:"تۆمارکردنی شحنەکان",shkoImgDel:"سڕینەوەی وێنە",lblTitle:"چاپکردنی لەیبڵ",lblHelp:"کۆد یان مەودا بنووسە (1-50 398) یان هەموو دۆخێک زیاد بکە، دواتر چاپکردن — هەر لەیبڵێک 100×100mm. ژمارەی بارکۆد = مانگ + کۆدی کڕیار.",lblAddStatus:"زیادکردنی هەموو",lblPrint:"چاپکردن",lblName:"ناو",lblPhone:"مۆبایلی کڕیار",lblCity:"شار",lblAddr:"ناونیشان",lblDue:"بڕی ماوە",costTitle:"کۆست و قازانج",revenue:"داهاتی مانگ",totalCost:"کۆی کۆستەکان",netProfit:"قازانجی سافی",margin:"ڕێژەی قازانج",seedFixed:"زیادکردنی کۆستە جێگیرەکانی مانگ",addCost:"زیادکردنی کۆست",costCat:"جۆر",costLabel:"ناو",costQty:"ژمارە",costUsd:"نرخ بە دۆلار",costFx:"نرخی دۆلار",costIqd:"یان بڕ بە دینار",saveCost:"تۆمارکردن",costSettings:"ڕێکخستنەکانی کۆست",perKg:"دۆلار بۆ کیلۆ",baghdad:"بەغدا",south:"باشوور",saveSettings:"پاشەکەوتکردن",catFixed:"جێگیر",catCards:"کارتی شەین",catAds:"ڕیکلامی مێتا",catAgent:"ئاژانسی دوبەی",catShko:"گەیاندنی SHKO",catOther:"کۆستی تر",autoCalc:"خۆکار",kgRec:"کیلۆی تۆمارکراو",deliv:"گەیەندراو",unknownGov:"نادیار",shkoFile:"فایلی SHKO بار بکە",pickCol:"ستوونی کرێی گەیاندن هەڵبژێرە ⬇",rowsN:"ڕیز",shkoMoved:"گۆڕدرا بۆ «لە گەیاندندایە»",delivDebt:"قەرزی گەیەندراو (کۆنەکراوەتەوە)",saveAmounts:"تۆمارکردنی بڕەکان",from:"لە دۆخی",to:"بۆ دۆخی",month:"مانگ",codeFrom:"لە کۆدی",codeTo:"بۆ کۆدی",
+  setStatus:"دۆخی نوێ",update:"نوێکردنەوە",collected:"پارەی کۆکراوە",collectedAsk:"چەند پارە کۆکرایەوە؟",shkoTitle:"شحنەکانی SHKO",shkoRemaining:"پارە لای SHKO (ماوە)",shkoThisMonth:"وەرگیراوی ئەم مانگە",shkoAllRecv:"کۆی وەرگیراو",shkoAddOfd:"زیادکردنی هەموو «لە گەیاندندایە»",shkoAdd:"زیادکردن",shkoReceived:"وەرگیراوەکان",shkoEmpty:"هیچ نەماوە — هەمووی وەرگیراوە ✓",shkoNone:"هیچ داواکارییەک نییە",shkoDel:"سڕینەوە",shkoScanHelp:"وێنەی لەیبڵەکان هەڵبژێرە — سیستەم کۆدی کڕیار دەخوێنێتەوە، بڕی ماوە و ناو لە داواکارییەکەوە دێن",shkoApply:"تۆمارکردنی شحنەکان",shkoImgDel:"سڕینەوەی وێنە",lblTitle:"چاپکردنی لەیبڵ",lblHelp:"کۆد یان مەودا بنووسە (1-50 398) یان هەموو دۆخێک زیاد بکە، دواتر چاپکردن — هەر لەیبڵێک 100×100mm. ژمارەی بارکۆد = مانگ + کۆدی کڕیار.",lblAddStatus:"زیادکردنی هەموو",lblPrint:"چاپکردن",lblName:"ناو",lblPhone:"مۆبایلی کڕیار",lblCity:"شار",lblAddr:"ناونیشان",lblDue:"بڕی ماوە",alTitle:"داواکاری گیرماوەکان",alPre:"زیاتر لە ٧ ڕۆژ لە شەین — نەگەیشتووەتە دوبەی",alDub:"زیاتر لە ١٤ ڕۆژ لە ڕێگای دوبەی → هەولێر",alErb:"زیاتر لە ٥ ڕۆژ لە هەولێرە — لەیبڵ و SHKO",alOut:"زیاتر لە ٥ ڕۆژە لای SHKO — پرسیاریان لێبکە",costTitle:"کۆست و قازانج",revenue:"داهاتی مانگ",totalCost:"کۆی کۆستەکان",netProfit:"قازانجی سافی",margin:"ڕێژەی قازانج",seedFixed:"زیادکردنی کۆستە جێگیرەکانی مانگ",addCost:"زیادکردنی کۆست",costCat:"جۆر",costLabel:"ناو",costQty:"ژمارە",costUsd:"نرخ بە دۆلار",costFx:"نرخی دۆلار",costIqd:"یان بڕ بە دینار",saveCost:"تۆمارکردن",costSettings:"ڕێکخستنەکانی کۆست",perKg:"دۆلار بۆ کیلۆ",baghdad:"بەغدا",south:"باشوور",saveSettings:"پاشەکەوتکردن",catFixed:"جێگیر",catCards:"کارتی شەین",catAds:"ڕیکلامی مێتا",catAgent:"ئاژانسی دوبەی",catShko:"گەیاندنی SHKO",catOther:"کۆستی تر",autoCalc:"خۆکار",kgRec:"کیلۆی تۆمارکراو",deliv:"گەیەندراو",unknownGov:"نادیار",shkoFile:"فایلی SHKO بار بکە",pickCol:"ستوونی کرێی گەیاندن هەڵبژێرە ⬇",rowsN:"ڕیز",shkoMoved:"گۆڕدرا بۆ «لە گەیاندندایە»",delivDebt:"قەرزی گەیەندراو (کۆنەکراوەتەوە)",saveAmounts:"تۆمارکردنی بڕەکان",from:"لە دۆخی",to:"بۆ دۆخی",month:"مانگ",codeFrom:"لە کۆدی",codeTo:"بۆ کۆدی",
   rangeHint:"بەتاڵی بهێڵەرەوە بۆ هەمووی",
   willMove:"داواکاری دەگوازرێتەوە",moveAll:"گواستنەوەی هەموویان",noRes:"هیچ نەدۆزرایەوە",
   saved:"تۆمارکرا",need:"ناو و کۆی گشتی پێویستە",moved:"داواکاری گوازرایەوە",
@@ -554,7 +555,7 @@ const T = {
   moveBatch:"تحديث مجموعة",searchLbl:"دور بالرمز أو الاسم أو الرقم",search:"دور",back:"رجوع",
   username:"اسم الانستغرام",phone:"رقم الموبايل",address:"العنوان",total:"المجموع",
   deposit:"المدفوع",due:"المتبقي",items:"عدد القطع",save:"حفظ",
-  setStatus:"الحالة الجديدة",update:"تحديث",collected:"المبلغ المستلم",collectedAsk:"شكد انستلم؟",shkoTitle:"شحنات SHKO",shkoRemaining:"الفلوس عند SHKO (باقية)",shkoThisMonth:"مستلم هذا الشهر",shkoAllRecv:"مجموع المستلم",shkoAddOfd:"إضافة كل «قيد التوصيل»",shkoAdd:"إضافة",shkoReceived:"المستلمة",shkoEmpty:"ما باقي شي — كله مستلم ✓",shkoNone:"ما في طلبات",shkoDel:"حذف",shkoScanHelp:"اختار صور الليبلات — النظام يقرا رمز الزبون، والمبلغ الباقي والاسم ييجون من الطلب",shkoApply:"حفظ الشحنات",shkoImgDel:"حذف الصورة",lblTitle:"طباعة الليبلات",lblHelp:"اكتب الرموز أو مدى (1-50 398) أو ضيف حالة كاملة ثم اطبع — كل ليبل 100×100mm. رقم الباركود = الشهر + رمز الزبون.",lblAddStatus:"إضافة الكل",lblPrint:"طباعة",lblName:"الاسم",lblPhone:"موبايل الزبون",lblCity:"المدينة",lblAddr:"العنوان",lblDue:"المبلغ المتبقي",costTitle:"التكاليف والأرباح",revenue:"دخل الشهر",totalCost:"مجموع التكاليف",netProfit:"صافي الربح",margin:"نسبة الربح",seedFixed:"إضافة التكاليف الثابتة للشهر",addCost:"إضافة تكلفة",costCat:"النوع",costLabel:"الاسم",costQty:"العدد",costUsd:"السعر بالدولار",costFx:"سعر الدولار",costIqd:"أو المبلغ بالدينار",saveCost:"حفظ",costSettings:"إعدادات التكاليف",perKg:"دولار للكيلو",baghdad:"بغداد",south:"الجنوب",saveSettings:"حفظ",catFixed:"ثابتة",catCards:"كارتات شي إن",catAds:"إعلانات ميتا",catAgent:"وكيل دبي",catShko:"توصيل SHKO",catOther:"تكاليف أخرى",autoCalc:"تلقائي",kgRec:"كيلو مسجّل",deliv:"مسلَّم",unknownGov:"غير معروف",shkoFile:"ارفع ملف SHKO",pickCol:"اختر عمود أجرة التوصيل ⬇",rowsN:"صف",shkoMoved:"تحوّلت إلى «قيد التوصيل»",delivDebt:"دين المسلَّم (غير مستلم)",saveAmounts:"حفظ المبالغ",from:"من حالة",to:"إلى حالة",month:"الشهر",codeFrom:"من رمز",codeTo:"إلى رمز",
+  setStatus:"الحالة الجديدة",update:"تحديث",collected:"المبلغ المستلم",collectedAsk:"شكد انستلم؟",shkoTitle:"شحنات SHKO",shkoRemaining:"الفلوس عند SHKO (باقية)",shkoThisMonth:"مستلم هذا الشهر",shkoAllRecv:"مجموع المستلم",shkoAddOfd:"إضافة كل «قيد التوصيل»",shkoAdd:"إضافة",shkoReceived:"المستلمة",shkoEmpty:"ما باقي شي — كله مستلم ✓",shkoNone:"ما في طلبات",shkoDel:"حذف",shkoScanHelp:"اختار صور الليبلات — النظام يقرا رمز الزبون، والمبلغ الباقي والاسم ييجون من الطلب",shkoApply:"حفظ الشحنات",shkoImgDel:"حذف الصورة",lblTitle:"طباعة الليبلات",lblHelp:"اكتب الرموز أو مدى (1-50 398) أو ضيف حالة كاملة ثم اطبع — كل ليبل 100×100mm. رقم الباركود = الشهر + رمز الزبون.",lblAddStatus:"إضافة الكل",lblPrint:"طباعة",lblName:"الاسم",lblPhone:"موبايل الزبون",lblCity:"المدينة",lblAddr:"العنوان",lblDue:"المبلغ المتبقي",alTitle:"طلبات عالقة",alPre:"أكثر من ٧ أيام بشي إن — بعده ما وصل دبي",alDub:"أكثر من ١٤ يوم بطريق دبي → أربيل",alErb:"أكثر من ٥ أيام بأربيل — ليبل وSHKO",alOut:"أكثر من ٥ أيام عند SHKO — اسألهم",costTitle:"التكاليف والأرباح",revenue:"دخل الشهر",totalCost:"مجموع التكاليف",netProfit:"صافي الربح",margin:"نسبة الربح",seedFixed:"إضافة التكاليف الثابتة للشهر",addCost:"إضافة تكلفة",costCat:"النوع",costLabel:"الاسم",costQty:"العدد",costUsd:"السعر بالدولار",costFx:"سعر الدولار",costIqd:"أو المبلغ بالدينار",saveCost:"حفظ",costSettings:"إعدادات التكاليف",perKg:"دولار للكيلو",baghdad:"بغداد",south:"الجنوب",saveSettings:"حفظ",catFixed:"ثابتة",catCards:"كارتات شي إن",catAds:"إعلانات ميتا",catAgent:"وكيل دبي",catShko:"توصيل SHKO",catOther:"تكاليف أخرى",autoCalc:"تلقائي",kgRec:"كيلو مسجّل",deliv:"مسلَّم",unknownGov:"غير معروف",shkoFile:"ارفع ملف SHKO",pickCol:"اختر عمود أجرة التوصيل ⬇",rowsN:"صف",shkoMoved:"تحوّلت إلى «قيد التوصيل»",delivDebt:"دين المسلَّم (غير مستلم)",saveAmounts:"حفظ المبالغ",from:"من حالة",to:"إلى حالة",month:"الشهر",codeFrom:"من رمز",codeTo:"إلى رمز",
   rangeHint:"خليها فارغة للكل",
   willMove:"طلب راح ينتقل",moveAll:"حدث الكل",noRes:"ما لكيت شي",
   saved:"انحفظ",need:"لازم الاسم والمجموع",moved:"الطلبات انتقلت",
@@ -619,10 +620,40 @@ function paintLang(){
   });
 }
 
+// Orders that have sat too long in one stage, judged by the business's own
+// normal timings: SHEIN->Dubai 5-7 days, Dubai->Erbil 7-14, then labels+SHKO.
+async function loadAlerts(){
+  const { data, error } = await db.from("stuck_orders").select("cycle_code,seq,order_code,status,since");
+  if (error || !data){ $("h-alerts").innerHTML = ""; return; }
+  const days = r => r.since ? (Date.now() - new Date(r.since)) / 864e5 : 999;
+  const B = [
+    { st: ["received", "purchased"],  d: 7,  label: t().alPre },
+    { st: ["at_dubai", "in_transit"], d: 14, label: t().alDub },
+    { st: ["at_erbil"],               d: 5,  label: t().alErb },
+    { st: ["out_for_delivery"],       d: 5,  label: t().alOut }
+  ];
+  let h = "";
+  B.forEach(b => {
+    const list = data.filter(r => b.st.includes(r.status) && days(r) > b.d)
+      .sort((x, y) => days(y) - days(x));
+    if (!list.length) return;
+    const codes = list.slice(0, 12).map(r =>
+      `<span class="num" dir="ltr">${r.order_code}</span>`).join("، ");
+    h += `<div style="padding:10px 0;border-top:1px solid rgba(239,159,39,.22)">
+      <div style="color:#EF9F27;font-size:13px;font-weight:600;margin-bottom:6px">${list.length} × ${b.label}</div>
+      <div style="color:var(--mute);font-size:11.5px;line-height:2">${codes}${list.length > 12 ? ` +${list.length - 12}` : ""}</div>
+    </div>`;
+  });
+  $("h-alerts").innerHTML = h ? `<div style="background:rgba(239,159,39,.08);
+      border:1px solid rgba(239,159,39,.35);border-radius:14px;padding:4px 16px 6px;margin:14px 0 4px">
+      <div style="color:#EF9F27;font-weight:700;font-size:13.5px;padding:12px 0 8px">⚠ ${t().alTitle}</div>${h}</div>` : "";
+}
+
 async function loadHome(){
   const { data: c } = await db.from("cycles").select("code,label").eq("is_open", true).maybeSingle();
   if (c) cycle = c.code;
   $("h-cycle").textContent = cycle || "—";
+  loadAlerts();
   const { data: rows } = await db.from("orders")
     .select("balance_iqd,total_iqd,deposit_iqd,status").eq("cycle_code", cycle);
   const live = (rows || []).filter(r => r.status !== "cancelled");
