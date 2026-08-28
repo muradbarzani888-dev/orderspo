@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v49</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v50</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -374,7 +374,6 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
         <div class="tile wide"><div class="k" data-t="netProfit"></div><div class="v num" id="ct-net" style="color:var(--teal)">—</div><div class="sub" id="ct-net-sub"></div></div>
       </div>
       <div id="ct-break" style="margin-bottom:18px"></div>
-      <button class="btn ghost" id="ct-seed" data-t="seedFixed" style="margin-bottom:14px"></button>
       <div style="background:var(--deep);border-radius:12px;padding:14px;margin-bottom:16px">
         <div style="color:var(--mute);font-size:12.5px;margin-bottom:10px" data-t="addCost"></div>
         <div style="display:flex;gap:10px">
@@ -2078,7 +2077,6 @@ async function initCost(){
     $("ct-cat").innerHTML = CT_CATS.map(c =>
       `<option value="${c}">${t()["cat" + c[0].toUpperCase() + c.slice(1)]}</option>`).join("");
     $("ct-add").addEventListener("click", addCost);
-    $("ct-seed").addEventListener("click", seedFixed);
     $("ct-s-save").addEventListener("click", saveCostSettings);
   }
   await loadCost();
@@ -2094,6 +2092,18 @@ async function loadCost(){
   ctSet = {}; (se.data || []).forEach(r => ctSet[r.key] = r.value);
   ctExp = ex.data || [];
   ctOrders = os.data || [];
+  // the fixed 2,331,000 writes itself into every month that has orders
+  if (ctOrders.length && !ctExp.some(e => e.category === "fixed")){
+    const tpl = ctSet.fixed_monthly || [];
+    if (tpl.length){
+      const { error: fe } = await db.from("expenses").insert(tpl.map(f =>
+        ({ cycle_code: cyc, category: "fixed", label: f.label, amount_iqd: f.amount })));
+      if (!fe){
+        const { data: ex2 } = await db.from("expenses").select("*").eq("cycle_code", cyc).order("id");
+        ctExp = ex2 || ctExp;
+      }
+    }
+  }
   $("ct-fx").value = ctSet.fx_usd_iqd || 1400;
   $("ct-s-fx").value = ctSet.fx_usd_iqd || 1400;
   $("ct-s-kg").value = ctSet.agent_per_kg_usd || 1.25;
@@ -2104,35 +2114,17 @@ async function loadCost(){
   renderCost();
 }
 
-// Global Cloud: recorded kg x $/kg x fx. SHKO: delivered orders priced by
-// governorate. Each auto row yields to a manual row of the same category, so
-// nothing double-counts when the real invoice is typed in.
+// Costs are what the receipts say, nothing estimated: every line is typed in
+// (or imported from the courier's file). The only computed figure is revenue.
 function ctAuto(){
-  const fx = Number(ctSet.fx_usd_iqd || 1400);
-  const perKg = Number(ctSet.agent_per_kg_usd || 1.25);
-  const fees = ctSet.shko_fees || { krg: 4000, baghdad: 5000, south: 6000 };
   const live = ctOrders.filter(o => o.status !== "cancelled");
-  const kg = live.reduce((a, o) => a + Number(o.weight_kg || 0), 0);
-  const agent = Math.round(kg * perKg * fx);
-  const dl = live.filter(o => o.status === "delivered");
-  let nKrg = 0, nBgd = 0, nSth = 0, nUnk = 0;
-  dl.forEach(o => {
-    const g = govOf(o.customers?.address);
-    if (g === "بغداد") nBgd++;
-    else if (KRG.has(g)) nKrg++;
-    else if (g) nSth++;
-    else { nUnk++; nKrg++; }          // unknown address: charged at the KRG fee
-  });
-  const shko = nKrg * (fees.krg ?? 4000) + nBgd * (fees.baghdad ?? 5000) + nSth * (fees.south ?? 6000);
-  return { agent, kg, shko, nKrg, nBgd, nSth, nUnk, revenue: live.reduce((a, o) => a + Number(o.total_iqd || 0), 0) };
+  return { revenue: live.reduce((a, o) => a + Number(o.total_iqd || 0), 0) };
 }
 
 function renderCost(){
   const A = ctAuto();
   const manual = {}; ctExp.forEach(e => manual[e.category] = (manual[e.category] || 0) + Number(e.amount_iqd || 0));
-  const useAgent = manual.agent ? 0 : A.agent;
-  const useShko  = manual.shko  ? 0 : A.shko;
-  const total = Object.values(manual).reduce((a, b) => a + b, 0) + useAgent + useShko;
+  const total = Object.values(manual).reduce((a, b) => a + b, 0);
   const net = A.revenue - total;
   $("ct-rev").textContent = iqd(A.revenue);
   $("ct-cost").textContent = iqd(total);
@@ -2145,10 +2137,6 @@ function renderCost(){
     <div><span style="font-size:13px">${k}</span>${sub ? `<div style="color:var(--faint);font-size:11px">${sub}</div>` : ""}</div>
     <span class="num" style="color:#F09595">${iqd(v)}</span></div>`;
   let h = "";
-  if (useAgent) h += line(`${t().catAgent} ⚙️`, useAgent,
-    `${A.kg.toFixed(1)} ${t().kgRec} × $${ctSet.agent_per_kg_usd || 1.25} × ${ctSet.fx_usd_iqd || 1400}`);
-  if (useShko) h += line(`${t().catShko} ⚙️`, useShko,
-    `KRG ${A.nKrg} · ${t().baghdad} ${A.nBgd} · ${t().south} ${A.nSth}` + (A.nUnk ? ` · ${t().unknownGov} ${A.nUnk}` : ""));
   CT_CATS.forEach(c => { if (manual[c]) h += line(t()["cat" + c[0].toUpperCase() + c.slice(1)], manual[c]); });
   $("ct-break").innerHTML = h;
 
