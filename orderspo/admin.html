@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v59</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v60</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -2155,9 +2155,10 @@ function lbOne(cyc, o){
     <div class="due"><span class="k">${t().lblDue}</span><span class="v num">${iqd(o.balance_iqd || 0)}</span></div>
     <div class="foot">
       <img src="/logo_t.png" class="mylogo" alt="">
-      <div class="page num">Shein-spo-6449</div>
-      <div class="callwrap"><div class="callk">ژمارەی ئێمە</div>
-        <div class="call num">📞 0750 385 6449</div></div>
+      <div class="callwrap">
+        <div class="callk">ژمارەی ئێمە · Shein-spo-6449</div>
+        <div class="call num">📞 0750 385 6449</div>
+      </div>
     </div>
   </div>`;
 }
@@ -2191,18 +2192,17 @@ body{font-family:-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;background:#ff
 .r.addr{align-items:flex-start}
 .r .v.wrap{white-space:normal;line-height:1.3;display:-webkit-box;
   -webkit-box-orient:vertical;-webkit-line-clamp:3}
-.due{flex:0 0 12.5mm;display:flex;align-items:center;direction:rtl;gap:3mm;
-  margin-top:2.4mm;
+.due{flex:0 0 12mm;display:flex;align-items:center;direction:rtl;gap:3mm;
+  margin-top:3mm;
   background:#f0fdfa;border:0.45mm solid #0d9488;border-radius:3mm;padding:0 3.5mm}
 .due .k{font-size:3.6mm;font-weight:700;color:#0f766e}
 .due .v{flex:1;font-size:8mm;font-weight:800;color:#111;direction:ltr;text-align:left}
-.foot{flex:0 0 14mm;display:flex;align-items:center;gap:3mm;
-  border-top:0.35mm solid #d7dde0;margin-top:1.6mm;padding-top:1mm}
-.mylogo{height:12.5mm;width:12.5mm;object-fit:contain}
-.page{font-size:3.1mm;color:#8a969b;flex:1}
-.callwrap{display:flex;flex-direction:column;align-items:flex-end}
-.callk{font-size:2.7mm;font-weight:700;color:#0f766e}
-.call{font-size:5.2mm;font-weight:800;color:#111;direction:ltr;white-space:nowrap}`;
+.foot{flex:0 0 17.5mm;display:flex;align-items:center;gap:3.5mm;
+  border-top:0.4mm solid #d7dde0;margin-top:2.6mm;padding-top:1.6mm}
+.mylogo{height:15mm;width:15mm;object-fit:contain}
+.callwrap{flex:1;display:flex;flex-direction:column;align-items:flex-end;gap:0.8mm}
+.callk{font-size:3.1mm;font-weight:700;color:#0f766e}
+.call{font-size:6.2mm;font-weight:800;color:#111;direction:ltr;white-space:nowrap;letter-spacing:.03em}`;
 
 async function initLbl(){
   if (!lbInit){
