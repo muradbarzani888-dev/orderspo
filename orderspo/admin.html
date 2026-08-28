@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v55</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v56</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -2140,8 +2140,8 @@ function lbOne(cyc, o){
   const city = govOf(addr) || "";
   return `<div class="lb">
     <div class="top">
-      <img src="/logo.png" class="logo" alt="">
-      <div class="brand">SHEINSPO</div>
+      <img src="${LB_SKO}" class="courier" alt="SKO POST">
+      <div style="flex:1"></div>
       <div class="code num">${String(o.seq).padStart(4, "0")}</div>
     </div>
     <div class="bar">${lbBarcodeSvg(wb, 46, 11)}<div class="wb num">${wb}</div></div>
@@ -2152,9 +2152,15 @@ function lbOne(cyc, o){
       <div class="r addr"><span class="k">${t().lblAddr}</span><span class="v wrap" style="font-size:${lbFit(addr, "4mm", [[55, "3mm"], [34, "3.4mm"]])}">${lbEsc(addr)}</span></div>
     </div>
     <div class="due"><span class="k">${t().lblDue}</span><span class="v num">${iqd(o.balance_iqd || 0)}</span></div>
-    <div class="foot num">Shein-spo-6449 · 0750 385 6449</div>
+    <div class="foot">
+      <img src="/logo_t.png" class="mylogo" alt="">
+      <div class="page num">Shein-spo-6449</div>
+      <div class="call num">📞 0750 385 6449</div>
+    </div>
   </div>`;
 }
+
+const LB_SKO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAANAAAABUCAIAAAB85y7tAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAFhUlEQVR4nO2bS3LbQAxEebRcwiVa8iKVRc7hmzsuy5ElfoZAdwND2ujiIuXM4DUwXfrQ9PBWKhk0fEhQhy9R+t4aHsVWk3gqfUsNK6Jqqkx4RZkOru/FCVmYAbmlOIR1G9DzEceB4YQszIDQTzRoY4+31YSJGF2RiC4sjK5y4mVh0NZq2IHQH2yMp+SzALTEhhfEoFeX8iZ4c7AxEtERBxuTFCFlIkabADzxM+IpvXBGIm8AoEjMTP87zofFjWpSPKUXzkhk6N76mFbpmW7cs0fnJQEZcZkskg7UZ7TsIdMQfhROkxLQDlkwGiiu0tRJmifNsezvJUeIs/sBtnTUg580Z9qJR4PScHGTBCpv4vg6A1CIHDGjZHsJONfk7ThvWTuLLOgOHDlfUskO9zAQjGU/UKAvti7vIE3JPuNYxpljLKC4F0RVV5lIUKbVUJalOAzyFofbgUFiH3HKdBtHiZ6/t35yO7FuhEq2GkHJGX50fUlf4Z54JVuVI9LGnjwoFze2c62SrWqLZ86844F62+xg0a40zwnV4qYdWpykW+wlGeWbCVWm5+gpkfUZusWeTNHN7NB5JssO5REw3WJPr4hO9uYWMwyzXFwJBUZ3Ct1+7jFKTcJWMRBGF7IAdLfA3RyomkmW0Cd/0i4DWpwXjTwtIpSwmWSpTPLH7DKgxQHozoEbzCPo6HBREoeSk3Z5kBO96LwHMDetkP0ki3coOWavhwioC536Nw1tK0wzyVL5JM8YMCAnetG7CNywNYiOxhYl9MmftMuAFgegNZ9FeJHNJEtrFT5jgC5kYWj9c+uYyGYsRSQIoVuJbRdXBQLQQztwrkISqfrhJWFp21c5l1BIdOrfgMDjyBylimVvXNVF5pRgdMYzIOS4mb0RVoWltF2kTYlBV+ACWcbGVY2kTcnLHZID5/Xk3bsTn3BBVTuZgzIS5+i9BC5or9wngLPU5DsKLc439bVRgufNMdv3Y5UpS1Ki66t6qcAlsSxDYEDe+lgvAGVIDhzZfNDg8lnGOcAsoH4OYsgMHN85szfCbXR9GAcUN1KYyvP6D48nucYndMnUSfacgICJQPE2hSm4VnzXz8MxewHl4FTDUdVfZDFF2ub7B46cnfc89oATjkhSP0Kr3voa5QfnPQwGlwaSoAGKRBuu+lrkRwacRHeWESehAyBYJj979icpYlQmy06UGABAccb6BE41KXufPEuLs0NVBrysIEsdHjEXDsjb7X5wLq7QBoDT2sgOnHY0WM97wLm4WicYUUYP8sS7jO7cixOyvOgIMwBUwxW60RrN6T+fBRuQ+0nGfUJ5K0Eu00ZgYWlxsIcIS8mNJz2AWbKoS+DaXBXiiyWvWDqooqP2SQmqWzqiQqP2iQitXipNVIErpaoCV0pVBa6UqgpcKVUVuFKqKnClVFXgSqmqwB1Tz8Pydd460Pc1o23l68eaRcpEp4+Vlusl/nfSJb3GlRzcrtPsWIehtWuudv1JXjcX367XCtwRdT28ceklZDFG4ywr85/M6y8iLs2YGlSBO6Aa5z0uZegWkaeVYD0v/fyygrhU4H6a2uc9ydDmZzvv+k0Db/9zv6QK3AFlCdzL8PXvsXnK56XAhTmswB1Nl/UMDbMvDcb0zAPHZO6plfIK3NG0+RXV9eZ4v3JS/3b35Ha959jyLbMZ2Qrc0dS+VXH/tcD+QjVZaQz0mq7v0b8qcN9Arvc748rTygvh9e7J5LIYaC6owB1KEYG7LvtjTkIF7gfJ/rHMuPjsSfB9WXRBBe5QcgVu3ArT/PVyM0xP/pqPqsAdStjb3/wmxenu09jfu/86NwN9S/DLuoGx+VuKCtyR9Bu6Q7b2xMfirbLL+uLGrnttOazAHUebb5Frct3aYNL2th24f4tP5s9AiAtzAAAAAElFTkSuQmCC";
 
 const LB_CSS = `
 @page{size:100mm 100mm;margin:0}
@@ -2166,11 +2172,10 @@ body{font-family:-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;background:#ff
   page-break-after:always;overflow:hidden;background:#fff}
 .lb:last-child{page-break-after:auto}
 .top{display:flex;align-items:center;gap:2.6mm;flex:0 0 12mm}
-.logo{width:11mm;height:11mm;border-radius:2.4mm;object-fit:cover}
-.brand{font-weight:800;font-size:5mm;letter-spacing:.14em;color:#111;flex:1}
+.courier{height:8.5mm;width:auto}
 .code{font-weight:800;font-size:9mm;color:#0d9488;border:0.6mm solid #0d9488;
   border-radius:3mm;padding:0 3mm;line-height:12mm}
-.bar{flex:0 0 17.5mm;display:flex;flex-direction:column;align-items:center;
+.bar{flex:0 0 16mm;display:flex;flex-direction:column;align-items:center;
   justify-content:center;border-top:0.35mm solid #d7dde0;border-bottom:0.35mm solid #d7dde0;padding:1mm 0}
 .bar svg{display:block}
 .wb{font-size:3.4mm;font-weight:700;letter-spacing:.35em;margin-top:0.8mm}
@@ -2188,8 +2193,11 @@ body{font-family:-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;background:#ff
   background:#f0fdfa;border:0.45mm solid #0d9488;border-radius:3mm;padding:0 3.5mm}
 .due .k{font-size:3.6mm;font-weight:700;color:#0f766e}
 .due .v{flex:1;font-size:8mm;font-weight:800;color:#111;direction:ltr;text-align:left}
-.foot{flex:0 0 6mm;display:flex;align-items:flex-end;justify-content:center;
-  font-size:2.9mm;color:#8a969b;letter-spacing:.05em}`;
+.foot{flex:0 0 11mm;display:flex;align-items:center;gap:2.5mm;
+  border-top:0.35mm solid #d7dde0;padding-top:1.2mm}
+.mylogo{height:9mm;width:9mm;object-fit:contain}
+.page{font-size:3.1mm;color:#8a969b;flex:1}
+.call{font-size:5.2mm;font-weight:800;color:#111;direction:ltr;white-space:nowrap}`;
 
 async function initLbl(){
   if (!lbInit){
