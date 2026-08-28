@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v51</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v52</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -387,7 +387,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
         </div>
         <div class="f hide" id="ct-shko-box">
           <label data-t="shkoFile"></label>
-          <input type="file" id="ct-file" accept=".csv,.xlsx,.xls,.txt" style="padding:14px;min-height:auto">
+          <input type="file" id="ct-file" accept=".csv,.xlsx,.xls,.txt,.pdf" style="padding:14px;min-height:auto">
           <div id="ct-file-prev" style="margin-top:10px;overflow-x:auto"></div>
         </div>
         <div class="f" id="ct-iqd-row"><label data-t="costIqd"></label><input id="ct-iqd" inputmode="numeric" dir="ltr" placeholder="616,000"></div>
@@ -2182,7 +2182,9 @@ async function ctParseFile(e){
   if (!f) return;
   ctFileName = f.name;
   try {
-    if (/\.(xlsx|xls)$/i.test(f.name)){
+    if (/\.pdf$/i.test(f.name)){
+      ctFileRows = await ctParsePdf(f);
+    } else if (/\.(xlsx|xls)$/i.test(f.name)){
       if (!window.XLSX) await new Promise((res, rej) => {
         const sc = document.createElement("script");
         sc.src = "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js";
@@ -2196,6 +2198,53 @@ async function ctParseFile(e){
     }
   } catch (err){ return say("ct-msg", err.message, "err"); }
   renderFilePrev();
+}
+
+// PDF statements: pdf.js gives every text piece with its position; lines are
+// rebuilt by Y, columns by clustering the X positions the table repeats.
+async function ctParsePdf(f){
+  if (!window.pdfjsLib){
+    await new Promise((res, rej) => {
+      const sc = document.createElement("script");
+      sc.src = "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js";
+      sc.onload = res; sc.onerror = rej; document.head.appendChild(sc);
+    });
+    const w = await fetch("https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js");
+    pdfjsLib.GlobalWorkerOptions.workerSrc = URL.createObjectURL(new Blob([await w.text()], { type: "text/javascript" }));
+  }
+  const doc = await pdfjsLib.getDocument({ data: await f.arrayBuffer() }).promise;
+  const rows = [];
+  for (let pn = 1; pn <= doc.numPages; pn++){
+    const page = await doc.getPage(pn);
+    const tc = await page.getTextContent();
+    const items = tc.items.filter(it => it.str.trim())
+      .map(it => ({ s: it.str.trim(), x: it.transform[4], y: it.transform[5] }));
+    // lines: same Y within a small tolerance
+    const lines = [];
+    items.sort((a, b) => b.y - a.y || a.x - b.x).forEach(it => {
+      const L = lines.find(l => Math.abs(l.y - it.y) < 4);
+      if (L){ L.items.push(it); L.y = (L.y + it.y) / 2; }
+      else lines.push({ y: it.y, items: [it] });
+    });
+    // column boundaries: X positions that repeat across many lines
+    const xs = {};
+    lines.forEach(l => l.items.forEach(it => { const k = Math.round(it.x / 8) * 8; xs[k] = (xs[k] || 0) + 1; }));
+    const need = Math.max(3, lines.length * 0.3);
+    const bounds = Object.entries(xs).filter(([, c]) => c >= need).map(([k]) => +k).sort((a, b) => a - b);
+    lines.forEach(l => {
+      l.items.sort((a, b) => a.x - b.x);
+      if (bounds.length >= 2){
+        const cells = bounds.map(() => "");
+        l.items.forEach(it => {
+          let bi = 0;
+          for (let i = 0; i < bounds.length; i++) if (it.x >= bounds[i] - 12) bi = i;
+          cells[bi] = (cells[bi] ? cells[bi] + " " : "") + it.s;
+        });
+        rows.push(cells);
+      } else rows.push(l.items.map(it => it.s));
+    });
+  }
+  return rows;
 }
 
 function renderFilePrev(){
