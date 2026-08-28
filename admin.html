@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v54</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v55</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -164,6 +164,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
         <button data-go="scan" data-t="scanBags" id="nav-scan" class="hide"></button>
         <button data-go="shko" data-t="shkoTitle" id="nav-shko" class="hide"></button>
         <button data-go="cost" data-t="costTitle" id="nav-cost" class="hide"></button>
+        <button data-go="lbl" data-t="lblTitle"></button>
         <button data-go="batch" data-t="moveBatch"></button>
         <button data-go="home" data-t="refresh"></button>
       </div>
@@ -409,6 +410,29 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
       </div>
     </div>
 
+    <div id="v-lbl" class="hide">
+      <button class="back" data-go="home" data-t="back"></button>
+      <h2 data-t="lblTitle"></h2>
+      <div id="lb-msg"></div>
+      <p style="color:var(--mute);font-size:12.5px;line-height:1.9;margin-bottom:14px" data-t="lblHelp"></p>
+      <div class="f"><label data-t="month"></label><select id="lb-cycle"></select></div>
+      <div style="display:flex;gap:10px;margin-bottom:10px">
+        <div class="f" style="flex:1;margin:0"><input id="lb-codes" dir="ltr" inputmode="tel" placeholder="1-50  398  401"></div>
+        <button class="btn" id="lb-add" data-t="shkoAdd" style="width:auto;margin:0;padding:0 22px"></button>
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:14px">
+        <div class="f" style="flex:1;margin:0"><select id="lb-status"></select></div>
+        <button class="btn ghost" id="lb-add-st" data-t="lblAddStatus" style="width:auto;margin:0;padding:0 16px"></button>
+      </div>
+      <div id="lb-list" style="margin-bottom:14px"></div>
+      <div style="display:flex;gap:10px">
+        <button class="btn hide" id="lb-print" data-t="lblPrint" style="flex:2;margin:0"></button>
+        <button class="btn hide" id="lb-clear" style="flex:1;margin:0;background:transparent;
+          border:1px solid var(--line);color:var(--mute)">✕</button>
+      </div>
+      <iframe id="lb-frame" style="display:none"></iframe>
+    </div>
+
     <div id="v-batch" class="hide">
       <button class="back" data-go="home" data-t="back"></button>
       <h2 data-t="moveBatch"></h2>
@@ -498,7 +522,7 @@ const T = {
   moveBatch:"گواستنەوەی کۆمەڵ",searchLbl:"گەڕان بە کۆد، ناو یان ژمارە",search:"گەڕان",back:"گەڕانەوە",
   username:"ناوی ئینستاگرام",phone:"ژمارەی مۆبایل",address:"ناونیشان",total:"کۆی گشتی",
   deposit:"پارەی پێشەکی",due:"بڕی ماوە",items:"ژمارەی بەرهەم",save:"تۆمارکردن",
-  setStatus:"دۆخی نوێ",update:"نوێکردنەوە",collected:"پارەی کۆکراوە",collectedAsk:"چەند پارە کۆکرایەوە؟",shkoTitle:"شحنەکانی SHKO",shkoRemaining:"پارە لای SHKO (ماوە)",shkoThisMonth:"وەرگیراوی ئەم مانگە",shkoAllRecv:"کۆی وەرگیراو",shkoAddOfd:"زیادکردنی هەموو «لە گەیاندندایە»",shkoAdd:"زیادکردن",shkoReceived:"وەرگیراوەکان",shkoEmpty:"هیچ نەماوە — هەمووی وەرگیراوە ✓",shkoNone:"هیچ داواکارییەک نییە",shkoDel:"سڕینەوە",shkoScanHelp:"وێنەی لەیبڵەکان هەڵبژێرە — سیستەم کۆدی کڕیار دەخوێنێتەوە، بڕی ماوە و ناو لە داواکارییەکەوە دێن",shkoApply:"تۆمارکردنی شحنەکان",shkoImgDel:"سڕینەوەی وێنە",costTitle:"کۆست و قازانج",revenue:"داهاتی مانگ",totalCost:"کۆی کۆستەکان",netProfit:"قازانجی سافی",margin:"ڕێژەی قازانج",seedFixed:"زیادکردنی کۆستە جێگیرەکانی مانگ",addCost:"زیادکردنی کۆست",costCat:"جۆر",costLabel:"ناو",costQty:"ژمارە",costUsd:"نرخ بە دۆلار",costFx:"نرخی دۆلار",costIqd:"یان بڕ بە دینار",saveCost:"تۆمارکردن",costSettings:"ڕێکخستنەکانی کۆست",perKg:"دۆلار بۆ کیلۆ",baghdad:"بەغدا",south:"باشوور",saveSettings:"پاشەکەوتکردن",catFixed:"جێگیر",catCards:"کارتی شەین",catAds:"ڕیکلامی مێتا",catAgent:"ئاژانسی دوبەی",catShko:"گەیاندنی SHKO",catOther:"کۆستی تر",autoCalc:"خۆکار",kgRec:"کیلۆی تۆمارکراو",deliv:"گەیەندراو",unknownGov:"نادیار",shkoFile:"فایلی SHKO بار بکە",pickCol:"ستوونی کرێی گەیاندن هەڵبژێرە ⬇",rowsN:"ڕیز",shkoMoved:"گۆڕدرا بۆ «لە گەیاندندایە»",delivDebt:"قەرزی گەیەندراو (کۆنەکراوەتەوە)",saveAmounts:"تۆمارکردنی بڕەکان",from:"لە دۆخی",to:"بۆ دۆخی",month:"مانگ",codeFrom:"لە کۆدی",codeTo:"بۆ کۆدی",
+  setStatus:"دۆخی نوێ",update:"نوێکردنەوە",collected:"پارەی کۆکراوە",collectedAsk:"چەند پارە کۆکرایەوە؟",shkoTitle:"شحنەکانی SHKO",shkoRemaining:"پارە لای SHKO (ماوە)",shkoThisMonth:"وەرگیراوی ئەم مانگە",shkoAllRecv:"کۆی وەرگیراو",shkoAddOfd:"زیادکردنی هەموو «لە گەیاندندایە»",shkoAdd:"زیادکردن",shkoReceived:"وەرگیراوەکان",shkoEmpty:"هیچ نەماوە — هەمووی وەرگیراوە ✓",shkoNone:"هیچ داواکارییەک نییە",shkoDel:"سڕینەوە",shkoScanHelp:"وێنەی لەیبڵەکان هەڵبژێرە — سیستەم کۆدی کڕیار دەخوێنێتەوە، بڕی ماوە و ناو لە داواکارییەکەوە دێن",shkoApply:"تۆمارکردنی شحنەکان",shkoImgDel:"سڕینەوەی وێنە",lblTitle:"چاپکردنی لەیبڵ",lblHelp:"کۆد یان مەودا بنووسە (1-50 398) یان هەموو دۆخێک زیاد بکە، دواتر چاپکردن — هەر لەیبڵێک 100×100mm. ژمارەی بارکۆد = مانگ + کۆدی کڕیار.",lblAddStatus:"زیادکردنی هەموو",lblPrint:"چاپکردن",lblName:"ناو",lblPhone:"مۆبایل",lblCity:"شار",lblAddr:"ناونیشان",lblDue:"بڕی ماوە",costTitle:"کۆست و قازانج",revenue:"داهاتی مانگ",totalCost:"کۆی کۆستەکان",netProfit:"قازانجی سافی",margin:"ڕێژەی قازانج",seedFixed:"زیادکردنی کۆستە جێگیرەکانی مانگ",addCost:"زیادکردنی کۆست",costCat:"جۆر",costLabel:"ناو",costQty:"ژمارە",costUsd:"نرخ بە دۆلار",costFx:"نرخی دۆلار",costIqd:"یان بڕ بە دینار",saveCost:"تۆمارکردن",costSettings:"ڕێکخستنەکانی کۆست",perKg:"دۆلار بۆ کیلۆ",baghdad:"بەغدا",south:"باشوور",saveSettings:"پاشەکەوتکردن",catFixed:"جێگیر",catCards:"کارتی شەین",catAds:"ڕیکلامی مێتا",catAgent:"ئاژانسی دوبەی",catShko:"گەیاندنی SHKO",catOther:"کۆستی تر",autoCalc:"خۆکار",kgRec:"کیلۆی تۆمارکراو",deliv:"گەیەندراو",unknownGov:"نادیار",shkoFile:"فایلی SHKO بار بکە",pickCol:"ستوونی کرێی گەیاندن هەڵبژێرە ⬇",rowsN:"ڕیز",shkoMoved:"گۆڕدرا بۆ «لە گەیاندندایە»",delivDebt:"قەرزی گەیەندراو (کۆنەکراوەتەوە)",saveAmounts:"تۆمارکردنی بڕەکان",from:"لە دۆخی",to:"بۆ دۆخی",month:"مانگ",codeFrom:"لە کۆدی",codeTo:"بۆ کۆدی",
   rangeHint:"بەتاڵی بهێڵەرەوە بۆ هەمووی",
   willMove:"داواکاری دەگوازرێتەوە",moveAll:"گواستنەوەی هەموویان",noRes:"هیچ نەدۆزرایەوە",
   saved:"تۆمارکرا",need:"ناو و کۆی گشتی پێویستە",moved:"داواکاری گوازرایەوە",
@@ -528,7 +552,7 @@ const T = {
   moveBatch:"تحديث مجموعة",searchLbl:"دور بالرمز أو الاسم أو الرقم",search:"دور",back:"رجوع",
   username:"اسم الانستغرام",phone:"رقم الموبايل",address:"العنوان",total:"المجموع",
   deposit:"المدفوع",due:"المتبقي",items:"عدد القطع",save:"حفظ",
-  setStatus:"الحالة الجديدة",update:"تحديث",collected:"المبلغ المستلم",collectedAsk:"شكد انستلم؟",shkoTitle:"شحنات SHKO",shkoRemaining:"الفلوس عند SHKO (باقية)",shkoThisMonth:"مستلم هذا الشهر",shkoAllRecv:"مجموع المستلم",shkoAddOfd:"إضافة كل «قيد التوصيل»",shkoAdd:"إضافة",shkoReceived:"المستلمة",shkoEmpty:"ما باقي شي — كله مستلم ✓",shkoNone:"ما في طلبات",shkoDel:"حذف",shkoScanHelp:"اختار صور الليبلات — النظام يقرا رمز الزبون، والمبلغ الباقي والاسم ييجون من الطلب",shkoApply:"حفظ الشحنات",shkoImgDel:"حذف الصورة",costTitle:"التكاليف والأرباح",revenue:"دخل الشهر",totalCost:"مجموع التكاليف",netProfit:"صافي الربح",margin:"نسبة الربح",seedFixed:"إضافة التكاليف الثابتة للشهر",addCost:"إضافة تكلفة",costCat:"النوع",costLabel:"الاسم",costQty:"العدد",costUsd:"السعر بالدولار",costFx:"سعر الدولار",costIqd:"أو المبلغ بالدينار",saveCost:"حفظ",costSettings:"إعدادات التكاليف",perKg:"دولار للكيلو",baghdad:"بغداد",south:"الجنوب",saveSettings:"حفظ",catFixed:"ثابتة",catCards:"كارتات شي إن",catAds:"إعلانات ميتا",catAgent:"وكيل دبي",catShko:"توصيل SHKO",catOther:"تكاليف أخرى",autoCalc:"تلقائي",kgRec:"كيلو مسجّل",deliv:"مسلَّم",unknownGov:"غير معروف",shkoFile:"ارفع ملف SHKO",pickCol:"اختر عمود أجرة التوصيل ⬇",rowsN:"صف",shkoMoved:"تحوّلت إلى «قيد التوصيل»",delivDebt:"دين المسلَّم (غير مستلم)",saveAmounts:"حفظ المبالغ",from:"من حالة",to:"إلى حالة",month:"الشهر",codeFrom:"من رمز",codeTo:"إلى رمز",
+  setStatus:"الحالة الجديدة",update:"تحديث",collected:"المبلغ المستلم",collectedAsk:"شكد انستلم؟",shkoTitle:"شحنات SHKO",shkoRemaining:"الفلوس عند SHKO (باقية)",shkoThisMonth:"مستلم هذا الشهر",shkoAllRecv:"مجموع المستلم",shkoAddOfd:"إضافة كل «قيد التوصيل»",shkoAdd:"إضافة",shkoReceived:"المستلمة",shkoEmpty:"ما باقي شي — كله مستلم ✓",shkoNone:"ما في طلبات",shkoDel:"حذف",shkoScanHelp:"اختار صور الليبلات — النظام يقرا رمز الزبون، والمبلغ الباقي والاسم ييجون من الطلب",shkoApply:"حفظ الشحنات",shkoImgDel:"حذف الصورة",lblTitle:"طباعة الليبلات",lblHelp:"اكتب الرموز أو مدى (1-50 398) أو ضيف حالة كاملة ثم اطبع — كل ليبل 100×100mm. رقم الباركود = الشهر + رمز الزبون.",lblAddStatus:"إضافة الكل",lblPrint:"طباعة",lblName:"الاسم",lblPhone:"الموبايل",lblCity:"المدينة",lblAddr:"العنوان",lblDue:"المبلغ المتبقي",costTitle:"التكاليف والأرباح",revenue:"دخل الشهر",totalCost:"مجموع التكاليف",netProfit:"صافي الربح",margin:"نسبة الربح",seedFixed:"إضافة التكاليف الثابتة للشهر",addCost:"إضافة تكلفة",costCat:"النوع",costLabel:"الاسم",costQty:"العدد",costUsd:"السعر بالدولار",costFx:"سعر الدولار",costIqd:"أو المبلغ بالدينار",saveCost:"حفظ",costSettings:"إعدادات التكاليف",perKg:"دولار للكيلو",baghdad:"بغداد",south:"الجنوب",saveSettings:"حفظ",catFixed:"ثابتة",catCards:"كارتات شي إن",catAds:"إعلانات ميتا",catAgent:"وكيل دبي",catShko:"توصيل SHKO",catOther:"تكاليف أخرى",autoCalc:"تلقائي",kgRec:"كيلو مسجّل",deliv:"مسلَّم",unknownGov:"غير معروف",shkoFile:"ارفع ملف SHKO",pickCol:"اختر عمود أجرة التوصيل ⬇",rowsN:"صف",shkoMoved:"تحوّلت إلى «قيد التوصيل»",delivDebt:"دين المسلَّم (غير مستلم)",saveAmounts:"حفظ المبالغ",from:"من حالة",to:"إلى حالة",month:"الشهر",codeFrom:"من رمز",codeTo:"إلى رمز",
   rangeHint:"خليها فارغة للكل",
   willMove:"طلب راح ينتقل",moveAll:"حدث الكل",noRes:"ما لكيت شي",
   saved:"انحفظ",need:"لازم الاسم والمجموع",moved:"الطلبات انتقلت",
@@ -578,7 +602,7 @@ function say(box, text, kind, ms){
   if (text && hold) setTimeout(() => { if ($(box)) $(box).innerHTML = ""; }, hold);
 }
 function view(n){
-  ["home","new","paste","dash","scan","detail","batch","shko","cost"].forEach(v => $("v-" + v).classList.toggle("hide", v !== n));
+  ["home","new","paste","dash","scan","detail","batch","shko","cost","lbl"].forEach(v => $("v-" + v).classList.toggle("hide", v !== n));
   window.scrollTo(0,0);
 }
 function paintLang(){
@@ -804,6 +828,7 @@ document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", 
   if (g === "scan") initScan();
   if (g === "shko") initShko();
   if (g === "cost") initCost();
+  if (g === "lbl") initLbl();
   view(g);
 }));
 $("q-go").addEventListener("click", search);
@@ -2063,6 +2088,194 @@ async function skUpload(e){
   await db.from("shipments").update({ image_path: path }).eq("id", r.id);
   say("sk-msg", t().saved, "ok");
   loadShko();
+}
+
+// ---------- Label printing: Sheinspo's own clean 100x100 design ----------
+// Barcode number = cycle + zero-padded customer code (26080398), so the last
+// four digits always identify the customer at a glance or a scan.
+let lbInit = false, lbSel = new Map();
+
+const C128 = ["212222","222122","222221","121223","121322","131222","122213","122312","132212","221213",
+"221312","231212","112232","122132","122231","113222","123122","123221","223211","221132",
+"221231","213212","223112","312131","311222","321122","321221","312212","322112","322211",
+"212123","212321","232121","111323","131123","131321","112313","132113","132311","211313",
+"231113","231311","112133","112331","132131","113123","113321","133121","313121","211331",
+"231131","213113","213311","213131","311123","311321","331121","312113","312311","332111",
+"314111","221411","431111","111224","111422","121124","121421","141122","141221","112214",
+"112412","122114","122411","142112","142211","241211","221114","413111","241112","134111",
+"111242","121142","121241","114212","124112","124211","411212","421112","421211","212141",
+"214121","412121","111143","111341","131141","114113","114311","411113","411311","113141",
+"114131","311141","411131","211412","211214","211232","2331112"];
+
+function lbBarcodeSvg(digits, wmm, hmm){
+  const vals = [105];                                  // Set C: two digits per symbol
+  for (let i = 0; i < digits.length; i += 2) vals.push(+digits.slice(i, i + 2));
+  let chk = vals[0];
+  for (let i = 1; i < vals.length; i++) chk += i * vals[i];
+  vals.push(chk % 103, 106);
+  const seq = vals.map(v => C128[v]).join("");
+  const total = [...seq].reduce((a, c) => a + +c, 0);
+  const unit = wmm / total;
+  let x = 0, dark = true, bars = "";
+  for (const c of seq){
+    const w = +c * unit;
+    if (dark) bars += `<rect x="${x.toFixed(3)}" y="0" width="${w.toFixed(3)}" height="${hmm}" fill="#000"/>`;
+    x += w; dark = !dark;
+  }
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${wmm}mm" height="${hmm}mm" viewBox="0 0 ${wmm} ${hmm}" shape-rendering="crispEdges">${bars}</svg>`;
+}
+
+const lbEsc = v => String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+const lbFit = (txt, base, steps) => {          // shrink long values instead of clipping
+  const n = String(txt || "").length;
+  for (const [len, size] of steps) if (n > len) return size;
+  return base;
+};
+
+function lbOne(cyc, o){
+  const wb = `${cyc}${String(o.seq).padStart(4, "0")}`;
+  const name = o.customers?.instagram_username || "—";
+  const phone = o.customers?.phone ? "0" + o.customers.phone : "—";
+  const addr = (o.customers?.address || "—").replace(/\s+/g, " ").trim();
+  const city = govOf(addr) || "";
+  return `<div class="lb">
+    <div class="top">
+      <img src="/logo.png" class="logo" alt="">
+      <div class="brand">SHEINSPO</div>
+      <div class="code num">${String(o.seq).padStart(4, "0")}</div>
+    </div>
+    <div class="bar">${lbBarcodeSvg(wb, 46, 11)}<div class="wb num">${wb}</div></div>
+    <div class="rows">
+      <div class="r"><span class="k">${t().lblName}</span><span class="v ltr" style="font-size:${lbFit(name, "4.6mm", [[21, "3.2mm"], [16, "3.8mm"]])}">${lbEsc(name)}</span></div>
+      <div class="r"><span class="k">${t().lblPhone}</span><span class="v ltr big">${lbEsc(phone)}</span></div>
+      <div class="r"><span class="k">${t().lblCity}</span><span class="v">${lbEsc(city)}</span></div>
+      <div class="r addr"><span class="k">${t().lblAddr}</span><span class="v wrap" style="font-size:${lbFit(addr, "4mm", [[55, "3mm"], [34, "3.4mm"]])}">${lbEsc(addr)}</span></div>
+    </div>
+    <div class="due"><span class="k">${t().lblDue}</span><span class="v num">${iqd(o.balance_iqd || 0)}</span></div>
+    <div class="foot num">Shein-spo-6449 · 0750 385 6449</div>
+  </div>`;
+}
+
+const LB_CSS = `
+@page{size:100mm 100mm;margin:0}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;background:#fff;color:#111}
+.num{font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.ltr{direction:ltr;unicode-bidi:isolate}
+.lb{width:100mm;height:100mm;padding:4mm 4.5mm;display:flex;flex-direction:column;
+  page-break-after:always;overflow:hidden;background:#fff}
+.lb:last-child{page-break-after:auto}
+.top{display:flex;align-items:center;gap:2.6mm;flex:0 0 12mm}
+.logo{width:11mm;height:11mm;border-radius:2.4mm;object-fit:cover}
+.brand{font-weight:800;font-size:5mm;letter-spacing:.14em;color:#111;flex:1}
+.code{font-weight:800;font-size:9mm;color:#0d9488;border:0.6mm solid #0d9488;
+  border-radius:3mm;padding:0 3mm;line-height:12mm}
+.bar{flex:0 0 17.5mm;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;border-top:0.35mm solid #d7dde0;border-bottom:0.35mm solid #d7dde0;padding:1mm 0}
+.bar svg{display:block}
+.wb{font-size:3.4mm;font-weight:700;letter-spacing:.35em;margin-top:0.8mm}
+.rows{flex:1 1 auto;display:flex;flex-direction:column;justify-content:center;
+  gap:1.6mm;direction:rtl;min-height:0}
+.r{display:flex;align-items:baseline;gap:2.5mm}
+.r .k{flex:0 0 17mm;font-size:3mm;font-weight:600;color:#8a969b}
+.r .v{flex:1;font-weight:700;font-size:4.2mm;text-align:right;min-width:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.r .v.big{font-size:5.4mm}
+.r.addr{align-items:flex-start}
+.r .v.wrap{white-space:normal;line-height:1.3;display:-webkit-box;
+  -webkit-box-orient:vertical;-webkit-line-clamp:3}
+.due{flex:0 0 13mm;display:flex;align-items:center;direction:rtl;gap:3mm;
+  background:#f0fdfa;border:0.45mm solid #0d9488;border-radius:3mm;padding:0 3.5mm}
+.due .k{font-size:3.6mm;font-weight:700;color:#0f766e}
+.due .v{flex:1;font-size:8mm;font-weight:800;color:#111;direction:ltr;text-align:left}
+.foot{flex:0 0 6mm;display:flex;align-items:flex-end;justify-content:center;
+  font-size:2.9mm;color:#8a969b;letter-spacing:.05em}`;
+
+async function initLbl(){
+  if (!lbInit){
+    lbInit = true;
+    const sel = $("lb-cycle");
+    const { data: used } = await db.from("orders").select("cycle_code");
+    const have = [...new Set((used || []).map(o => o.cycle_code))];
+    const { data } = await db.from("cycles").select("code,label")
+      .in("code", have.length ? have : [""]).order("code", { ascending: false });
+    sel.innerHTML = (data || []).map(c => `<option value="${c.code}">${c.label || c.code}</option>`).join("");
+    if (cycle && [...sel.options].some(o => o.value === cycle)) sel.value = cycle;
+    sel.addEventListener("change", () => { lbSel.clear(); lbRender(); });
+    $("lb-status").innerHTML = FLOW.map(v => `<option value="${v}">${t().st[v]}</option>`).join("");
+    $("lb-add").addEventListener("click", lbAddCodes);
+    $("lb-codes").addEventListener("keydown", e => { if (e.key === "Enter") lbAddCodes(); });
+    $("lb-add-st").addEventListener("click", lbAddStatus);
+    $("lb-print").addEventListener("click", lbPrint);
+    $("lb-clear").addEventListener("click", () => { lbSel.clear(); lbRender(); });
+  }
+  lbRender();
+}
+
+function lbParse(txt){
+  const out = new Set();
+  toEn(String(txt || "")).split(/[\s,+]+/).forEach(tok => {
+    const m = tok.match(/^(\d{1,4})-(\d{1,4})$/);
+    if (m){ for (let i = +m[1]; i <= +m[2] && i - +m[1] < 1000; i++) out.add(i); }
+    else if (/^\d{1,4}$/.test(tok)) out.add(+tok);
+  });
+  return [...out];
+}
+
+async function lbAddCodes(){
+  const seqs = lbParse($("lb-codes").value);
+  if (!seqs.length) return;
+  const { data, error } = await db.from("orders")
+    .select("seq,order_code,balance_iqd,status,customers(instagram_username,phone,address)")
+    .eq("cycle_code", $("lb-cycle").value).in("seq", seqs);
+  if (error) return say("lb-msg", error.message, "err");
+  (data || []).forEach(o => lbSel.set(Number(o.seq), o));
+  const found = new Set((data || []).map(o => Number(o.seq)));
+  const miss = seqs.filter(q => !found.has(q));
+  if (miss.length) say("lb-msg", `${t().scNoOrder}: ${miss.join(" ")}`, "err");
+  $("lb-codes").value = "";
+  lbRender();
+}
+
+async function lbAddStatus(){
+  const { data, error } = await db.from("orders")
+    .select("seq,order_code,balance_iqd,status,customers(instagram_username,phone,address)")
+    .eq("cycle_code", $("lb-cycle").value).eq("status", $("lb-status").value);
+  if (error) return say("lb-msg", error.message, "err");
+  (data || []).forEach(o => lbSel.set(Number(o.seq), o));
+  lbRender();
+}
+
+function lbRender(){
+  const rows = [...lbSel.values()].sort((a, b) => a.seq - b.seq);
+  $("lb-print").classList.toggle("hide", !rows.length);
+  $("lb-clear").classList.toggle("hide", !rows.length);
+  $("lb-print").textContent = rows.length ? `${t().lblPrint} (${rows.length})` : t().lblPrint;
+  $("lb-list").innerHTML = rows.slice(0, 40).map(o => `<div class="row" style="cursor:default">
+      <div class="l"><div class="c num">${o.order_code}</div>
+        <div class="u" dir="ltr">${o.customers?.instagram_username || "—"}</div></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="num" style="color:var(--teal)">${iqd(o.balance_iqd || 0)}</span>
+        <button data-lbdel="${o.seq}" style="width:30px;height:30px;border-radius:9px;
+          border:1px solid var(--line);background:transparent;color:var(--mute)">✕</button>
+      </div></div>`).join("") +
+    (rows.length > 40 ? `<div style="color:var(--faint);font-size:12px;padding:8px 0">+${rows.length - 40}</div>` : "");
+  document.querySelectorAll("[data-lbdel]").forEach(b => b.onclick = () => { lbSel.delete(+b.dataset.lbdel); lbRender(); });
+}
+
+function lbPrint(){
+  const rows = [...lbSel.values()].sort((a, b) => a.seq - b.seq);
+  if (!rows.length) return;
+  const cyc = $("lb-cycle").value;
+  const doc = `<!doctype html><html><head><meta charset="utf-8"><style>${LB_CSS}</style></head><body>` +
+    rows.map(o => lbOne(cyc, o)).join("") + "</body></html>";
+  const fr = $("lb-frame");
+  fr.srcdoc = doc;
+  fr.onload = () => {
+    const img = fr.contentDocument.querySelector("img");
+    const go = () => setTimeout(() => { fr.contentWindow.focus(); fr.contentWindow.print(); }, 150);
+    if (img && !img.complete){ img.onload = go; img.onerror = go; } else go();
+  };
 }
 
 // ---------- Costs & profit ----------
