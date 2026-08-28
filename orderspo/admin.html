@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v53</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v54</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -699,17 +699,15 @@ async function openOrder(id){
   // The timeline shows four stops: purchased and in_transit are folded into
   // the stop before them, and out_for_delivery + delivered share the last one.
   const TL = [
-    { covers:["received","purchased"],        label:() => t().st.received },
-    { covers:["at_dubai","in_transit"],       label:() => t().st.at_dubai },
-    { covers:["at_erbil"],                    label:() => t().st.at_erbil },
-    { covers:["out_for_delivery","delivered"],
-      label:() => `${t().st.out_for_delivery} + ${t().st.delivered}` }
+    { covers:["received","purchased"],  label:() => t().st.received },
+    { covers:["at_dubai","in_transit"], label:() => t().st.at_dubai },
+    { covers:["at_erbil"],              label:() => t().st.at_erbil },
+    { covers:["out_for_delivery"],      label:() => t().st.out_for_delivery },
+    { covers:["delivered"],             label:() => t().st.delivered }
   ];
   const at = TL.findIndex(x => x.covers.includes(o.status));
   $("d-steps").innerHTML = TL.map((x, i) => {
-    const when = i === TL.length - 1
-      ? (o.status === "out_for_delivery" ? seen.out_for_delivery : (seen.delivered || seen.out_for_delivery))
-      : x.covers.map(c => seen[c]).filter(Boolean)[0];
+    const when = x.covers.map(c => seen[c]).filter(Boolean)[0];
     const d = when ? new Date(when).toLocaleDateString("en-GB", {day:"numeric",month:"short"}) : "";
     return `<div class="st ${i < at ? "done" : i === at ? "now" : ""}">
       <div class="g"><div class="dot"></div><div class="ln"></div></div>
@@ -2011,10 +2009,14 @@ function wireShko(){
       undo ? { received: false, received_at: null }
            : { received: true, received_at: new Date().toISOString() }).eq("id", id);
     if (error){ b.disabled = false; return say("sk-msg", error.message, "err"); }
-    // money back from SHKO = cash collected on the order (only fills a blank)
-    if (!undo && hasCollect && r?.order_id)
-      await db.from("orders").update({ collected_iqd: r.amount_iqd })
-        .eq("id", r.order_id).is("collected_iqd", null);
+    if (!undo && r?.order_id){
+      // money back from SHKO = delivered, and cash collected (fills a blank only)
+      await db.from("orders").update({ status: "delivered" }).eq("id", r.order_id)
+        .in("status", ["received", "purchased", "at_dubai", "in_transit", "at_erbil", "out_for_delivery"]);
+      if (hasCollect)
+        await db.from("orders").update({ collected_iqd: r.amount_iqd })
+          .eq("id", r.order_id).is("collected_iqd", null);
+    }
     loadShko();
   });
   document.querySelectorAll("[data-del]").forEach(b => b.onclick = async () => {

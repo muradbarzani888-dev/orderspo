@@ -161,7 +161,7 @@ button.go:disabled{opacity:.5;cursor:default}
     </div>
     <button class="go" id="submit" data-t="cta"></button>
     <p class="hint" data-t="hint"></p>
-    <p style="text-align:center;color:#3E545B;font-size:10px;margin-top:22px;font-family:Archivo,sans-serif">v9</p>
+    <p style="text-align:center;color:#3E545B;font-size:10px;margin-top:22px;font-family:Archivo,sans-serif">v10</p>
   </section>
 
   <section id="result-view" class="hidden">
@@ -327,10 +327,11 @@ function render(o){
   // Four stops, same as the admin panel: purchased and in_transit fold into
   // the stop before them, and the last stop covers the delivery hand-off.
   const TL = [
-    { covers: ["received", "purchased"],         label: t.st.received },
-    { covers: ["at_dubai", "in_transit"],        label: t.st.at_dubai },
-    { covers: ["at_erbil"],                      label: t.st.at_erbil },
-    { covers: ["out_for_delivery", "delivered"], label: `${t.st.out_for_delivery} + ${t.st.delivered}` }
+    { covers: ["received", "purchased"],  label: t.st.received },
+    { covers: ["at_dubai", "in_transit"], label: t.st.at_dubai },
+    { covers: ["at_erbil"],               label: t.st.at_erbil },
+    { covers: ["out_for_delivery"],       label: t.st.out_for_delivery },
+    { covers: ["delivered"],              label: t.st.delivered }
   ];
   const reached = TL.findIndex(x => x.covers.includes(o.status));
   const tl = $("r-timeline");
@@ -339,9 +340,7 @@ function render(o){
   TL.forEach((x, i) => {
     const div = document.createElement("div");
     div.className = "step" + (i < reached ? " done" : i === reached ? " now" : "");
-    const when = i === TL.length - 1
-      ? (seen.delivered || seen.out_for_delivery)
-      : x.covers.map(c => seen[c]).filter(Boolean)[0];
+    const when = x.covers.map(c => seen[c]).filter(Boolean)[0];
     const d8 = i <= reached ? fmtDate(when) : "";
     const meta = [i === reached ? t.now : "", d8].filter(Boolean).join(" · ");
 
