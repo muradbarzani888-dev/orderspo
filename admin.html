@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v66</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v67</span></span>
     <div id="h-online" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"></div>
     <div id="h-alerts"></div>
     <button id="l-ku" class="on">KU</button>
@@ -625,11 +625,14 @@ function paintLang(){
 async function loadAlerts(){
   const { data, error } = await db.from("stuck_orders").select("cycle_code,seq,order_code,status,since");
   if (error || !data){ $("h-alerts").innerHTML = ""; return; }
-  // one simple rule: anything undelivered that has sat in its current stage
-  // for more than 25 days deserves a look
-  const LIMIT = 25;
+  // per-stage patience, based on the business's normal timings plus margin:
+  // SHEIN 5-7d -> flag at 12; Dubai->Erbil 7-14d -> flag at 20; after that
+  // it's in our hands (labels + SHKO), so a week is already too long.
+  const LIMITS = { received: 12, purchased: 12, at_dubai: 20, in_transit: 20,
+                   at_erbil: 7, out_for_delivery: 7 };
   const days = r => r.since ? (Date.now() - new Date(r.since)) / 864e5 : 999;
-  const late = data.filter(r => days(r) > LIMIT).sort((x, y) => days(y) - days(x));
+  const late = data.filter(r => days(r) > (LIMITS[r.status] ?? 25))
+    .sort((x, y) => days(y) - days(x));
   const byStatus = {};
   late.forEach(r => (byStatus[r.status] = byStatus[r.status] || []).push(r));
   let h = "";
@@ -638,7 +641,7 @@ async function loadAlerts(){
     const codes = list.slice(0, 12).map(r =>
       `<span class="num" dir="ltr">${r.order_code}</span>`).join("، ");
     h += `<div style="padding:10px 0;border-top:1px solid rgba(239,159,39,.22)">
-      <div style="color:#EF9F27;font-size:13px;font-weight:600;margin-bottom:6px">${list.length} × ${t().st[st] || st} — +${LIMIT} ${t().alDays}</div>
+      <div style="color:#EF9F27;font-size:13px;font-weight:600;margin-bottom:6px">${list.length} × ${t().st[st] || st} — +${LIMITS[st] ?? 25} ${t().alDays}</div>
       <div style="color:var(--mute);font-size:11.5px;line-height:2">${codes}${list.length > 12 ? ` +${list.length - 12}` : ""}</div>
     </div>`;
   });
