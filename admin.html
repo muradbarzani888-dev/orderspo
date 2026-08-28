@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v57</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v58</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -427,7 +427,8 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
       <div id="lb-list" style="margin-bottom:14px"></div>
       <div style="display:flex;gap:10px">
         <button class="btn hide" id="lb-print" data-t="lblPrint" style="flex:2;margin:0"></button>
-        <button class="btn hide" id="lb-clear" style="flex:1;margin:0;background:transparent;
+        <button class="btn ghost hide" id="lb-pdf" style="flex:1;margin:0">PDF</button>
+        <button class="btn hide" id="lb-clear" style="flex:0 0 52px;margin:0;background:transparent;
           border:1px solid var(--line);color:var(--mute)">✕</button>
       </div>
       <iframe id="lb-frame" style="display:none"></iframe>
@@ -2218,6 +2219,7 @@ async function initLbl(){
     $("lb-codes").addEventListener("keydown", e => { if (e.key === "Enter") lbAddCodes(); });
     $("lb-add-st").addEventListener("click", lbAddStatus);
     $("lb-print").addEventListener("click", lbPrint);
+    $("lb-pdf").addEventListener("click", lbPdf);
     $("lb-clear").addEventListener("click", () => { lbSel.clear(); lbRender(); });
   }
   lbRender();
@@ -2260,6 +2262,7 @@ async function lbAddStatus(){
 function lbRender(){
   const rows = [...lbSel.values()].sort((a, b) => a.seq - b.seq);
   $("lb-print").classList.toggle("hide", !rows.length);
+  $("lb-pdf").classList.toggle("hide", !rows.length);
   $("lb-clear").classList.toggle("hide", !rows.length);
   $("lb-print").textContent = rows.length ? `${t().lblPrint} (${rows.length})` : t().lblPrint;
   $("lb-list").innerHTML = rows.slice(0, 40).map(o => `<div class="row" style="cursor:default">
@@ -2274,14 +2277,63 @@ function lbRender(){
   document.querySelectorAll("[data-lbdel]").forEach(b => b.onclick = () => { lbSel.delete(+b.dataset.lbdel); lbRender(); });
 }
 
+const lbScript = src => new Promise((res, rej) => {
+  const sc = document.createElement("script");
+  sc.src = src; sc.onload = res; sc.onerror = rej;
+  document.head.appendChild(sc);
+});
+
+function lbDoc(rows, cyc){
+  return `<!doctype html><html><head><meta charset="utf-8"><style>${LB_CSS}</style></head><body>` +
+    rows.map(o => lbOne(cyc, o)).join("") + "</body></html>";
+}
+
+// PDF for the 4barcode workflow on the Mac: each label rendered by the browser
+// (Arabic shaping, logos, barcode) then rasterised at print resolution into a
+// 100x100mm page.
+async function lbPdf(){
+  const rows = [...lbSel.values()].sort((a, b) => a.seq - b.seq);
+  if (!rows.length) return;
+  const b = $("lb-pdf"); b.disabled = true;
+  try {
+    if (!window.html2canvas) await lbScript("https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js");
+    if (!window.jspdf) await lbScript("https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js");
+    const cyc = $("lb-cycle").value;
+    // html2canvas cannot see into an iframe's stylesheet, so the PDF path
+    // renders in a hidden stage inside this page with the CSS scoped to it.
+    let st = document.getElementById("lb-stage");
+    if (!st){ st = document.createElement("div"); st.id = "lb-stage"; document.body.appendChild(st); }
+    st.style.cssText = "position:fixed;left:-9999px;top:0;background:#fff;z-index:-1";
+    const scoped = LB_CSS.replace(/@page\{[^}]*\}/, "")
+      .split("\n").map(l => l
+        .replace(/^\*\{/, "#lb-stage, #lb-stage *{")
+        .replace(/^body\{/, "#lb-stage{")
+        .replace(/^\./, "#lb-stage .")).join("\n");
+    st.innerHTML = `<style>${scoped}</style>` + rows.map(o => lbOne(cyc, o)).join("");
+    await Promise.all([...st.querySelectorAll("img")].map(im => im.complete ? 1 :
+      new Promise(r => { im.onload = r; im.onerror = r; })));
+    const doc = new window.jspdf.jsPDF({ unit: "mm", format: [100, 100] });
+    const els = [...st.querySelectorAll(".lb")];
+    for (let i = 0; i < els.length; i++){
+      say("lb-msg", `PDF ${i + 1} / ${els.length}`, "ok", 0);
+      const cv = await html2canvas(els[i], { scale: 4, backgroundColor: "#ffffff", useCORS: true, logging: false });
+      if (i) doc.addPage([100, 100]);
+      doc.addImage(cv.toDataURL("image/jpeg", 0.92), "JPEG", 0, 0, 100, 100);
+    }
+    doc.save(`labels_${cyc}_${rows[0].seq}-${rows[rows.length - 1].seq}.pdf`);
+    say("lb-msg", `✓ PDF · ${rows.length}`, "ok");
+    st.innerHTML = "";
+  } catch (e){ say("lb-msg", e.message, "err"); }
+  b.disabled = false;
+}
+
 function lbPrint(){
   const rows = [...lbSel.values()].sort((a, b) => a.seq - b.seq);
   if (!rows.length) return;
   const cyc = $("lb-cycle").value;
-  const doc = `<!doctype html><html><head><meta charset="utf-8"><style>${LB_CSS}</style></head><body>` +
-    rows.map(o => lbOne(cyc, o)).join("") + "</body></html>";
   const fr = $("lb-frame");
-  fr.srcdoc = doc;
+  fr.style.cssText = "display:none";
+  fr.srcdoc = lbDoc(rows, cyc);
   fr.onload = () => {
     const img = fr.contentDocument.querySelector("img");
     const go = () => setTimeout(() => { fr.contentWindow.focus(); fr.contentWindow.print(); }, 150);
