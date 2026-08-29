@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v78</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v79</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -518,6 +518,8 @@ const T = {
   revTitle:"بەدەست نووسینەوە",revOf:"لە",revBag:"کۆدی جانتا",revSeq:"کۆدی کڕیار",
   revSave:"تۆمار و دواتر",revSkip:"بازدان",revDone:"هەموویان تەواوبوون",
   revDupHint:"ئەم کۆدە پێشتر لە وێنەیەکی ترەوە خوێنرایەوە — کۆدی ئەم وێنەیە بنووسە:",
+  revDrop:"فڕێدان",revDupDrop:"ئەگەر هەمان لەیبڵە دووجار وێنەگیراوە، فڕێیبدە",
+  revTaken:"پێشتر تۆمارکراوە — ئەگەر هەمانە فڕێیبدە",
   revSwapHint:"وێنەیەکی تر شوێنی ئەمەی گرتەوە — کۆدی ڕاستی ئەم وێنەیە بنووسە",
   scRestored:"دووبارە هێنرایەوە",revBad:"کۆد دروست نییە — ٦ پیتی وەک یەک و ژمارەیەک",revFixed:"چاککرا",
   scOther:"لەم مانگەدا نییە، بەڵام لە مانگی پێشوودا هەیە",scPrevAuto:"لە کاتی تۆمارکردن خۆکارانە لە مانگی خۆیان تۆمار دەکرێن",scClosed:"پێشتر گەیەندراوە — تۆمار نەکرا",scPartial:"جانتای ماوە — دۆخ نەگۆڕدرا",scSwitch:"گۆڕین بۆ",
@@ -550,6 +552,8 @@ const T = {
   revTitle:"كتابة يدوية",revOf:"من",revBag:"رمز الكيس",revSeq:"رمز الزبون",
   revSave:"احفظ وكمّل",revSkip:"تخطي",revDone:"خلصت كلها",
   revDupHint:"هذا الرمز انقرا قبل من صورة ثانية — اكتب رمز هاي الصورة:",
+  revDrop:"تجاهل",revDupDrop:"اذا نفس اللصقة منصورة مرتين، تجاهلها",
+  revTaken:"مسجل من قبل — اذا نفسها تجاهلها",
   revSwapHint:"صورة ثانية اخذت مكان هاي — اكتب الرمز الصحيح لهاي الصورة",
   scRestored:"رجعت البيانات",revBad:"الرمز مو صحيح — ٦ حروف نفسها ورقم",revFixed:"انصلح",
   scOther:"مو بهذا الشهر، بس موجود بالشهر اللي قبله",scPrevAuto:"عند الحفظ تنحفظ تلقائياً كل وحدة بشهرها",scClosed:"مسلَّم من قبل — ما انحفظ",scPartial:"أكياس ناقصة — الحالة ما تغيّرت",scSwitch:"غيّر إلى",
@@ -1606,11 +1610,13 @@ async function runScan(e){
         if (pick && !guess) guess = pick;   // keep the best unsure read for review
       }
       }
-      if (hit) hit.seqs.forEach(seq => {
-        // the same bag photographed twice must not become two rows
-        if (!scanRows.some(r => r.code === hit.code && r.seq === seq))
-          scanRows.push({ code: hit.code, seq, raw: hit.raw, file: files[i].name });
-      });
+      if (hit){
+        // the same bag photographed twice must not become two rows — but a
+        // read that adds NOTHING may be a misread, so it goes to review
+        const fresh = hit.seqs.filter(seq => !scanRows.some(r => r.code === hit.code && r.seq === seq));
+        fresh.forEach(seq => scanRows.push({ code: hit.code, seq, raw: hit.raw, file: files[i].name }));
+        if (!fresh.length) scanFails.push({ file: files[i], name: files[i].name, guess: hit, dup: true });
+      }
       else scanFails.push({ file: files[i], name: files[i].name, guess });
       if (bmp.close) bmp.close();
     } catch (err){
@@ -1712,12 +1718,7 @@ function renderReview(){
   if (!scanFails.length){ box.classList.add("hide"); box.innerHTML = ""; return; }
   box.classList.remove("hide");
 
-  if (revIdx >= scanFails.length){
-    box.innerHTML = `<div style="background:rgba(29,158,117,.10);border:1px solid rgba(29,158,117,.35);
-      border-radius:12px;padding:16px;text-align:center;color:var(--teal);font-size:13px">
-      ${t().revDone}</div>`;
-    return;
-  }
+  if (revIdx >= scanFails.length) revIdx = 0;   // skipped items cycle back
 
   const item = scanFails[revIdx];
   // A read we could not tie to a real order: show it prefilled so it can be
@@ -1734,6 +1735,7 @@ function renderReview(){
       </div>
       <img src="${revUrl}" alt="" style="width:100%;max-height:340px;object-fit:contain;
         background:#000;border-radius:8px;margin-bottom:12px">
+      ${item.dup ? `<div style="color:#EFC368;font-size:12.5px;line-height:1.8;margin-bottom:8px">${t().revTaken}</div>` : ""}
       <div style="display:flex;gap:10px">
         <div class="f" style="flex:1;margin-bottom:8px"><label>${t().revBag}</label>
           <input id="rv-code" dir="ltr" autocomplete="off" spellcheck="false" value="${g ? g.code : ""}"
@@ -1747,6 +1749,8 @@ function renderReview(){
         <button class="btn" id="rv-save" style="margin:0;flex:2">${t().revSave}</button>
         <button class="btn" id="rv-skip" style="margin:0;flex:1;background:transparent;
           border:1px solid var(--line);color:var(--mute)">${t().revSkip}</button>
+        <button class="btn" id="rv-drop" style="margin:0;flex:1;background:transparent;
+          border:1px solid rgba(226,75,74,.4);color:#F09595">${t().revDrop}</button>
       </div>
     </div>`;
 
@@ -1763,10 +1767,9 @@ function renderReview(){
     if (!fixed){ err.textContent = t().revBad; code.focus(); return; }
     if (!seqs.length){ err.textContent = t().revBad; seq.focus(); return; }
     // "14-18" = two customers sharing this bag → one row each (skip repeats)
-    seqs.forEach(n => {
-      if (!scanRows.some(r => r.code === fixed && r.seq === n))
-        scanRows.push({ code: fixed, seq: n, file: scanFails[revIdx].name });
-    });
+    const fresh = seqs.filter(n => !scanRows.some(r => r.code === fixed && r.seq === n));
+    if (!fresh.length){ err.textContent = t().revTaken; return; }
+    fresh.forEach(n => scanRows.push({ code: fixed, seq: n, file: scanFails[revIdx].name }));
     scanFails.splice(revIdx, 1);
     renderReview();
     showScanCounts();
@@ -1775,6 +1778,10 @@ function renderReview(){
 
   $("rv-save").addEventListener("click", save);
   $("rv-skip").addEventListener("click", next);
+  $("rv-drop").addEventListener("click", () => {
+    scanFails.splice(revIdx, 1);
+    renderReview(); showScanCounts(); saveScanDraft();
+  });
   [code, seq].forEach(el => el.addEventListener("keydown", ev => {
     if (ev.key === "Enter"){ ev.preventDefault(); save(); }
   }));
@@ -2959,6 +2966,7 @@ async function runShkoScan(e){
   const cyc = $("sk-cycle").value;
   if (!cyc) return;
 
+  if (sk2Url){ URL.revokeObjectURL(sk2Url); sk2Url = null; }
   sk2Rows = []; sk2Fails = []; sk2Idx = 0;
   if (sk2Url){ URL.revokeObjectURL(sk2Url); sk2Url = null; }
   $("sk2-results").innerHTML = ""; $("sk2-review").innerHTML = "";
@@ -3108,11 +3116,7 @@ function renderShkoReview(){
   if (sk2Url){ URL.revokeObjectURL(sk2Url); sk2Url = null; }
   if (!sk2Fails.length){ box.classList.add("hide"); box.innerHTML = ""; return; }
   box.classList.remove("hide");
-  if (sk2Idx >= sk2Fails.length){
-    box.innerHTML = `<div style="background:rgba(29,158,117,.10);border:1px solid rgba(29,158,117,.35);
-      border-radius:12px;padding:16px;text-align:center;color:var(--teal);font-size:13px">${t().revDone}</div>`;
-    return;
-  }
+  if (sk2Idx >= sk2Fails.length) sk2Idx = 0;   // skipped items cycle back
   const item = sk2Fails[sk2Idx];
   sk2Url = URL.createObjectURL(item.file);
   box.innerHTML = `
@@ -3126,7 +3130,8 @@ function renderShkoReview(){
         background:#000;border-radius:8px;margin-bottom:12px">
       ${item.why === "dup" ? `<div style="color:#EFC368;font-size:12.5px;line-height:1.8;margin-bottom:8px">
         ${t().revDupHint} <b class="num" dir="ltr">${$("sk-cycle").value}-${String(item.guess).padStart(4,"0")}</b>
-        <span dir="ltr">${sk2Orders[item.guess]?.customers?.instagram_username || ""}</span></div>` : ""}
+        <span dir="ltr">${sk2Orders[item.guess]?.customers?.instagram_username || ""}</span><br>
+        ${t().revDupDrop}</div>` : ""}
       ${item.why === "swapped" ? `<div style="color:#EFC368;font-size:12.5px;line-height:1.8;margin-bottom:8px">
         ${t().revSwapHint}</div>` : ""}
       <div class="f" style="margin-bottom:8px"><label>${t().revSeq}</label>
@@ -3136,6 +3141,8 @@ function renderShkoReview(){
         <button class="btn" id="sk2-rv-save" style="margin:0;flex:2">${t().revSave}</button>
         <button class="btn" id="sk2-rv-skip" style="margin:0;flex:1;background:transparent;
           border:1px solid var(--line);color:var(--mute)">${t().revSkip}</button>
+        <button class="btn" id="sk2-rv-drop" style="margin:0;flex:1;background:transparent;
+          border:1px solid rgba(226,75,74,.4);color:#F09595">${t().revDrop}</button>
       </div>
     </div>`;
   const inp = $("sk2-rv");
@@ -3154,6 +3161,7 @@ function renderShkoReview(){
   };
   $("sk2-rv-save").addEventListener("click", save);
   $("sk2-rv-skip").addEventListener("click", () => { sk2Idx++; renderShkoReview(); });
+  $("sk2-rv-drop").addEventListener("click", () => { sk2Fails.splice(sk2Idx, 1); renderShkoScan(); });
   inp.addEventListener("keydown", ev => { if (ev.key === "Enter"){ ev.preventDefault(); save(); } });
   inp.focus();
 }
@@ -3189,6 +3197,7 @@ async function applyShkoScan(){
   b.disabled = false; b.textContent = t().shkoApply;
   say("sk-msg", `${rows.length} ✓ · 🖼 ${attached}` +
     (moved ? ` · ${t().shkoMoved}: ${moved}` : ""), "ok", 0);
+  if (sk2Url){ URL.revokeObjectURL(sk2Url); sk2Url = null; }
   sk2Rows = []; sk2Fails = []; sk2Idx = 0;
   $("sk2-results").innerHTML = ""; $("sk2-review").innerHTML = "";
   $("sk2-review").classList.add("hide"); $("sk2-apply").classList.add("hide");
