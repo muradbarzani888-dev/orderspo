@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v77</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v78</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -356,8 +356,8 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
         </div>
         <div id="sk2-count" class="num" style="color:var(--mute);font-size:12px;text-align:center;margin-top:8px"></div>
       </div>
-      <div id="sk2-results"></div>
       <div id="sk2-review" class="hide"></div>
+      <div id="sk2-results"></div>
       <button class="btn hide" id="sk2-apply" data-t="shkoApply"></button>
       <div id="sk-list"></div>
       <h2 style="margin-top:28px;font-size:15px" data-t="shkoReceived"></h2>
@@ -517,6 +517,8 @@ const T = {
   scFound:"دۆزرایەوە",scFailed:"نەخوێنرایەوە",scNoOrder:"کۆدی کڕیار نەدۆزرایەوە",avgOrder:"ناوەندی داواکاری",
   revTitle:"بەدەست نووسینەوە",revOf:"لە",revBag:"کۆدی جانتا",revSeq:"کۆدی کڕیار",
   revSave:"تۆمار و دواتر",revSkip:"بازدان",revDone:"هەموویان تەواوبوون",
+  revDupHint:"ئەم کۆدە پێشتر لە وێنەیەکی ترەوە خوێنرایەوە — کۆدی ئەم وێنەیە بنووسە:",
+  revSwapHint:"وێنەیەکی تر شوێنی ئەمەی گرتەوە — کۆدی ڕاستی ئەم وێنەیە بنووسە",
   scRestored:"دووبارە هێنرایەوە",revBad:"کۆد دروست نییە — ٦ پیتی وەک یەک و ژمارەیەک",revFixed:"چاککرا",
   scOther:"لەم مانگەدا نییە، بەڵام لە مانگی پێشوودا هەیە",scPrevAuto:"لە کاتی تۆمارکردن خۆکارانە لە مانگی خۆیان تۆمار دەکرێن",scClosed:"پێشتر گەیەندراوە — تۆمار نەکرا",scPartial:"جانتای ماوە — دۆخ نەگۆڕدرا",scSwitch:"گۆڕین بۆ",
   exportCsv:"داگرتنی Excel",exportCourier:"Excel بۆ شەرکەی گەیاندن",noOrders:"هیچ داواکاریەک نییە",
@@ -547,6 +549,8 @@ const T = {
   scFound:"انلكى",scFailed:"ما انقرا",scNoOrder:"رمز الزبون مو موجود",avgOrder:"متوسط الطلب",
   revTitle:"كتابة يدوية",revOf:"من",revBag:"رمز الكيس",revSeq:"رمز الزبون",
   revSave:"احفظ وكمّل",revSkip:"تخطي",revDone:"خلصت كلها",
+  revDupHint:"هذا الرمز انقرا قبل من صورة ثانية — اكتب رمز هاي الصورة:",
+  revSwapHint:"صورة ثانية اخذت مكان هاي — اكتب الرمز الصحيح لهاي الصورة",
   scRestored:"رجعت البيانات",revBad:"الرمز مو صحيح — ٦ حروف نفسها ورقم",revFixed:"انصلح",
   scOther:"مو بهذا الشهر، بس موجود بالشهر اللي قبله",scPrevAuto:"عند الحفظ تنحفظ تلقائياً كل وحدة بشهرها",scClosed:"مسلَّم من قبل — ما انحفظ",scPartial:"أكياس ناقصة — الحالة ما تغيّرت",scSwitch:"غيّر إلى",
   exportCsv:"تحميل Excel",exportCourier:"Excel لشركة التوصيل",noOrders:"ما في طلبات",
@@ -3059,7 +3063,9 @@ async function runShkoScan(e){
       if (hit != null && !sk2Rows.some(r => r.seq === hit))
         sk2Rows.push({ seq: hit, file: files[i] });
       else if (hit != null)
-        ;  // second photo of the same customer: first one keeps the slot
+        // two photos read as the same code: one of them is likely misread,
+        // so this one goes to manual review instead of being dropped
+        sk2Fails.push({ file: files[i], guess: hit, why: "dup" });
       else sk2Fails.push({ file: files[i], guess, why: "no-code" });
       if (bmp.close) bmp.close();
     } catch (err){
@@ -3118,8 +3124,13 @@ function renderShkoReview(){
       </div>
       <img src="${sk2Url}" alt="" style="width:100%;max-height:340px;object-fit:contain;
         background:#000;border-radius:8px;margin-bottom:12px">
+      ${item.why === "dup" ? `<div style="color:#EFC368;font-size:12.5px;line-height:1.8;margin-bottom:8px">
+        ${t().revDupHint} <b class="num" dir="ltr">${$("sk-cycle").value}-${String(item.guess).padStart(4,"0")}</b>
+        <span dir="ltr">${sk2Orders[item.guess]?.customers?.instagram_username || ""}</span></div>` : ""}
+      ${item.why === "swapped" ? `<div style="color:#EFC368;font-size:12.5px;line-height:1.8;margin-bottom:8px">
+        ${t().revSwapHint}</div>` : ""}
       <div class="f" style="margin-bottom:8px"><label>${t().revSeq}</label>
-        <input id="sk2-rv" dir="ltr" inputmode="numeric" autocomplete="off" value="${item.guess ?? ""}"></div>
+        <input id="sk2-rv" dir="ltr" inputmode="numeric" autocomplete="off" value="${item.why === "dup" ? "" : item.guess ?? ""}"></div>
       <div id="sk2-rv-err" style="color:#F09595;font-size:12px;min-height:16px;margin-bottom:8px"></div>
       <div style="display:flex;gap:10px">
         <button class="btn" id="sk2-rv-save" style="margin:0;flex:2">${t().revSave}</button>
@@ -3131,7 +3142,13 @@ function renderShkoReview(){
   const save = () => {
     const n = parseInt(toEn(inp.value).replace(/[^\d]/g, ""), 10);
     if (!n || !sk2Orders[n]){ $("sk2-rv-err").textContent = t().scNoOrder; inp.focus(); return; }
-    if (!sk2Rows.some(r => r.seq === n)) sk2Rows.push({ seq: n, file: sk2Fails[sk2Idx].file });
+    const taken = sk2Rows.find(r => r.seq === n);
+    if (taken){
+      // the user just confirmed THIS photo shows code n, so it takes the row;
+      // the photo that auto-claimed it comes back for review
+      sk2Fails.push({ file: taken.file, guess: null, why: "swapped" });
+      taken.file = sk2Fails[sk2Idx].file;
+    } else sk2Rows.push({ seq: n, file: sk2Fails[sk2Idx].file });
     sk2Fails.splice(sk2Idx, 1);
     renderShkoScan();
   };
