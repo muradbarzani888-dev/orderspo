@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v72</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v73</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -2748,6 +2748,37 @@ function shkoExtract(txt, valid, cyc){
   return cands;
 }
 
+// The customer code is printed bigger than every other number on the label —
+// so among OCR'd digit-words that match a real customer, the tallest wins.
+function shkoPick(data, valid, cyc){
+  // OCR splits big numbers into pieces ("1" "89"), so judge whole LINES:
+  // join each line's digits — the customer code line yields exactly the code,
+  // the waybill line yields cycle+code, and mixed lines melt into garbage.
+  const cands = {};
+  let wbHit = null;
+  (data.lines || []).forEach(l => {
+    const digits = toEn(String(l.text || "")).replace(/[^\d]/g, "");
+    const h = l.bbox ? (l.bbox.y1 - l.bbox.y0) : 0;
+    if (cyc && digits.length === 8 && digits.startsWith(cyc)){
+      const n = parseInt(digits.slice(4), 10);
+      if (valid.has(n)) wbHit = n;
+    }
+    if (/^\d{1,4}$/.test(digits)){
+      const n = parseInt(digits, 10);
+      if (valid.has(n)) cands[n] = Math.max(cands[n] || 0, h);
+    }
+  });
+  if (wbHit != null) return { hit: wbHit, guess: null };
+  const ranked = Object.entries(cands).map(([n, h]) => ({ n: +n, h })).sort((a, b) => b.h - a.h);
+  if (!ranked.length){
+    const wb = shkoExtract(data.text || "", valid, cyc);
+    return { hit: wb.length === 1 ? wb[0] : null, guess: wb[0] ?? null };
+  }
+  if (ranked.length === 1) return { hit: ranked[0].n, guess: null };
+  if (ranked[0].h >= ranked[1].h * 1.35) return { hit: ranked[0].n, guess: null };
+  return { hit: null, guess: ranked[0].n };
+}
+
 async function runShkoScan(e){
   const files = [...e.target.files];
   e.target.value = "";
@@ -2848,9 +2879,9 @@ async function runShkoScan(e){
         cx.putImageData(im, 0, 0);
         if (psm !== psmNow){ await worker.setParameters({ tessedit_pageseg_mode: psm }); psmNow = psm; }
         const { data } = await worker.recognize(cv);
-        const cands = shkoExtract(data.text, valid, cyc);
-        if (cands.length === 1){ hit = cands[0]; break; }
-        if (cands.length && guess == null) guess = cands[0];
+        const pick = shkoPick(data, valid, cyc);
+        if (pick.hit != null){ hit = pick.hit; break; }
+        if (pick.guess != null && guess == null) guess = pick.guess;
       }
       }
       if (hit != null && !sk2Rows.some(r => r.seq === hit))
