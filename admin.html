@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v74</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v75</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -2895,13 +2895,22 @@ async function runShkoScan(e){
         sk2Rows.push({ seq: hit, file: files[i] });
       else if (hit != null)
         ;  // second photo of the same customer: first one keeps the slot
-      else sk2Fails.push({ file: files[i], guess });
+      else sk2Fails.push({ file: files[i], guess, why: "no-code" });
       bmp.close();
-    } catch (err){ sk2Fails.push({ file: files[i], guess: null }); }
+    } catch (err){
+      console.error("shko scan", files[i].name, err);
+      sk2Fails.push({ file: files[i], guess: null, why: err.message || String(err) });
+    }
   }
   if (worker) await worker.terminate();
   $("sk2-bar").style.width = "100%";
   $("sk2-progress").classList.add("hide");
+  if (!sk2Rows.length && sk2Fails.length){
+    const whys = {};
+    sk2Fails.forEach(f => whys[f.why || "?"] = (whys[f.why || "?"] || 0) + 1);
+    say("sk2-count" && "sk-msg",
+      Object.entries(whys).map(([w, n]) => `${n} × ${w}`).join(" · "), "err", 0);
+  }
   renderShkoScan();
 }
 
