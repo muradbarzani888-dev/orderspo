@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v71</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v72</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -1577,8 +1577,9 @@ async function runScan(e){
         }
         cx.putImageData(im, 0, 0);
 
-        if (psm !== psmNow){ await worker.setParameters({ tessedit_pageseg_mode: psm }); psmNow = psm; }
-        const { data } = await worker.recognize(cv);
+        const w = await getWorker();
+        if (psm !== psmNow){ await w.setParameters({ tessedit_pageseg_mode: psm }); psmNow = psm; }
+        const { data } = await w.recognize(cv);
         const pick = pickCandidate(extractCode(data.text), valid);
         if (pick && pick.sure){ hit = pick; break; }
         if (pick && !guess) guess = pick;   // keep the best unsure read for review
@@ -2767,8 +2768,25 @@ async function runShkoScan(e){
   (os || []).forEach(o => sk2Orders[Number(o.seq)] = o);
   const valid = new Set(Object.keys(sk2Orders).map(Number));
 
-  const worker = await Tesseract.createWorker("eng");
-  await worker.setParameters({ tessedit_char_whitelist: "0123456789-,./ " });
+  // Our labels carry a Code 128 barcode of cycle+code. The browser's native
+  // detector reads it in milliseconds at any angle — OCR is only the fallback
+  // for damaged prints or browsers without the API (iOS Safari).
+  let detector = null;
+  try {
+    if ("BarcodeDetector" in window){
+      const fs = await BarcodeDetector.getSupportedFormats();
+      if (fs.includes("code_128")) detector = new BarcodeDetector({ formats: ["code_128"] });
+    }
+  } catch (e){}
+
+  let worker = null;
+  const getWorker = async () => {
+    if (!worker){
+      worker = await Tesseract.createWorker("eng");
+      await worker.setParameters({ tessedit_char_whitelist: "0123456789-,./ " });
+    }
+    return worker;
+  };
   const PASSES = [
     [0.08, 0.60, "otsu", 2.2, "6"],   // our labels: waybill digits sit high
     [0.00, 1.00, "otsu", 1.6, "6"],
@@ -2785,7 +2803,18 @@ async function runShkoScan(e){
     try {
       const bmp = await createImageBitmap(files[i]);
       let hit = null, guess = null;
-      const PLAN = [
+      if (detector){
+        try {
+          for (const c of await detector.detect(bmp)){
+            const v = String(c.rawValue || "").replace(/\D/g, "");
+            if (v.length === 8 && v.startsWith(cyc)){
+              const n = parseInt(v.slice(4), 10);
+              if (valid.has(n)){ hit = n; break; }
+            }
+          }
+        } catch (e){}
+      }
+      const PLAN = hit != null ? [] : [
         [0, PASSES], [180, [PASSES[1], PASSES[2]]],
         [90, [PASSES[1]]], [270, [PASSES[1]]],
         [12, [PASSES[1]]], [-12, [PASSES[1]]], [192, [PASSES[1]]], [168, [PASSES[1]]]
@@ -2832,7 +2861,7 @@ async function runShkoScan(e){
       bmp.close();
     } catch (err){ sk2Fails.push({ file: files[i], guess: null }); }
   }
-  await worker.terminate();
+  if (worker) await worker.terminate();
   $("sk2-bar").style.width = "100%";
   $("sk2-progress").classList.add("hide");
   renderShkoScan();
