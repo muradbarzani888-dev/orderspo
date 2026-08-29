@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v76</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v77</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -2796,6 +2796,158 @@ function shkoPick(data, valid, cyc){
   return { hit: null, guess: ranked[0].n };
 }
 
+// -- bench-proven photo pipeline (15/20 on the degradation matrix vs 10/20) --
+function skScale(src, w){
+  const sc = Math.min(1, w / src.width);
+  const cv = document.createElement("canvas");
+  cv.width = Math.max(2, Math.round(src.width * sc));
+  cv.height = Math.max(2, Math.round(src.height * sc));
+  cv.getContext("2d").drawImage(src, 0, 0, cv.width, cv.height);
+  return cv;
+}
+function skGrey(cv){                       // in place; returns histogram
+  const cx = cv.getContext("2d", { willReadFrequently: true });
+  const im = cx.getImageData(0, 0, cv.width, cv.height), d = im.data;
+  const hist = new Uint32Array(256);
+  for (let q = 0; q < d.length; q += 4){
+    const g = (d[q] * 0.299 + d[q + 1] * 0.587 + d[q + 2] * 0.114) | 0;
+    d[q] = d[q + 1] = d[q + 2] = g; hist[g]++;
+  }
+  cx.putImageData(im, 0, 0);
+  return hist;
+}
+function skStretchBin(cv){                 // contrast-stretch then otsu binarize
+  const cx = cv.getContext("2d", { willReadFrequently: true });
+  const im = cx.getImageData(0, 0, cv.width, cv.height), d = im.data;
+  let lo = 255, hi = 0;
+  for (let q = 0; q < d.length; q += 40){ const v = d[q]; if (v < lo) lo = v; if (v > hi) hi = v; }
+  const span = Math.max(1, hi - lo), hist = new Uint32Array(256);
+  for (let q = 0; q < d.length; q += 4){
+    const v = Math.max(0, Math.min(255, Math.round((d[q] - lo) * 255 / span)));
+    d[q] = d[q + 1] = d[q + 2] = v; hist[v]++;
+  }
+  const lvl = otsu(hist, cv.width * cv.height);
+  for (let q = 0; q < d.length; q += 4){
+    const v = d[q] < lvl ? 0 : 255; d[q] = d[q + 1] = d[q + 2] = v;
+  }
+  cx.putImageData(im, 0, 0);
+  return cv;
+}
+function skBin(cv){
+  const hist = skGrey(cv);
+  const cx = cv.getContext("2d", { willReadFrequently: true });
+  const im = cx.getImageData(0, 0, cv.width, cv.height), d = im.data;
+  const lvl = otsu(hist, cv.width * cv.height);
+  for (let q = 0; q < d.length; q += 4){
+    const v = d[q] < lvl ? 0 : 255; d[q] = d[q + 1] = d[q + 2] = v;
+  }
+  cx.putImageData(im, 0, 0);
+  return cv;
+}
+// Find the bright label rectangle in the photo (largest near-white blob on a
+// small proxy) and crop to it; falls back to the full frame.
+function skInkCrop(src){
+  const proxy = skScale(src, 256);
+  skGrey(proxy);
+  const cx = proxy.getContext("2d", { willReadFrequently: true });
+  const im = cx.getImageData(0, 0, proxy.width, proxy.height), d = im.data;
+  const W = proxy.width, H = proxy.height;
+  let lo = 255, hi = 0;
+  for (let q = 0; q < d.length; q += 16){ const v = d[q]; if (v < lo) lo = v; if (v > hi) hi = v; }
+  const span = Math.max(1, hi - lo);
+  const bright = y => x => Math.round((d[(y * W + x) * 4] - lo) * 255 / span) >= 235;
+  const at = (x, y) => Math.round((d[(y * W + x) * 4] - lo) * 255 / span) >= 235;
+  const seen = new Uint8Array(W * H);
+  let best = null;
+  for (let y0 = 0; y0 < H; y0 += 4) for (let x0 = 0; x0 < W; x0 += 4){
+    if (seen[y0 * W + x0] || !at(x0, y0)) continue;
+    const stack = [[x0, y0]]; seen[y0 * W + x0] = 1;
+    let n = 0, minx = x0, maxx = x0, miny = y0, maxy = y0;
+    while (stack.length){
+      const [x, y] = stack.pop(); n++;
+      if (x < minx) minx = x; if (x > maxx) maxx = x;
+      if (y < miny) miny = y; if (y > maxy) maxy = y;
+      for (const [dx, dy] of [[1,0],[-1,0],[0,1],[0,-1],[2,0],[-2,0],[0,2],[0,-2]]){
+        const nx = x + dx, ny = y + dy;
+        if (nx >= 0 && nx < W && ny >= 0 && ny < H && !seen[ny * W + nx] && at(nx, ny)){
+          seen[ny * W + nx] = 1; stack.push([nx, ny]);
+        }
+      }
+    }
+    if (!best || n > best.n) best = { n, minx, maxx, miny, maxy };
+  }
+  if (!best || best.n < W * H * 0.03) return src;
+  const sx = src.width / W, sy = src.height / H, pad = 0.06;
+  const bw = best.maxx - best.minx, bh = best.maxy - best.miny;
+  const x0 = Math.max(0, Math.round((best.minx - bw * pad) * sx));
+  const x1 = Math.min(src.width, Math.round((best.maxx + bw * pad) * sx));
+  const y0 = Math.max(0, Math.round((best.miny - bh * pad) * sy));
+  const y1 = Math.min(src.height, Math.round((best.maxy + bh * pad) * sy));
+  if (x1 - x0 < src.width * 0.08 || y1 - y0 < src.height * 0.08) return src;
+  const out = document.createElement("canvas");
+  out.width = x1 - x0; out.height = y1 - y0;
+  out.getContext("2d").drawImage(src, x0, y0, out.width, out.height, 0, 0, out.width, out.height);
+  return out;
+}
+// OCR splits big numbers into fragments and scatters them across its own line
+// structure — merge digit words geometrically: same visual row, adjacent.
+function skMerge(words){
+  const ws = words.map(w => ({
+    d: toEn(String(w.text || "")).replace(/[^\d]/g, ""),
+    x0: w.bbox ? w.bbox.x0 : 0, x1: w.bbox ? w.bbox.x1 : 0,
+    yc: w.bbox ? (w.bbox.y0 + w.bbox.y1) / 2 : 0,
+    h: w.bbox ? (w.bbox.y1 - w.bbox.y0) : 0
+  })).filter(w => w.d).sort((a, b) => a.yc - b.yc || a.x0 - b.x0);
+  const rows = [];
+  ws.forEach(w => {
+    const R = rows.find(r => Math.abs(r.yc - w.yc) < Math.max(r.h, w.h) * 0.7);
+    if (R){ R.items.push(w); R.yc = (R.yc + w.yc) / 2; R.h = Math.max(R.h, w.h); }
+    else rows.push({ yc: w.yc, h: w.h, items: [w] });
+  });
+  const toks = [];
+  rows.forEach(R => {
+    let cur = null;
+    R.items.sort((a, b) => a.x0 - b.x0).forEach(w => {
+      if (cur && w.x0 - cur.x1 < Math.max(cur.h, w.h) * 1.6){
+        cur.d += w.d; cur.x1 = w.x1; cur.h = Math.max(cur.h, w.h);
+      } else { if (cur) toks.push(cur); cur = { ...w, yc: R.yc }; }
+    });
+    if (cur) toks.push(cur);
+  });
+  return toks;
+}
+// waybill wins outright; else the tallest valid code in the LOWER half is a
+// strong vote (barcode garbage lives up top), anything else a weak one.
+function skAnalyse(words, imgH, valid, cyc){
+  const toks = skMerge(words);
+  const hs = toks.map(t => t.h).sort((a, b) => a - b);
+  const med = hs.length ? hs[hs.length >> 1] : 0;
+  const cands = [];
+  for (const t of toks){
+    const d = t.d;
+    if (cyc && d.length === 8 && d.startsWith(cyc)){
+      const n = parseInt(d.slice(4), 10);
+      if (valid.has(n)) return { wb: n };
+    }
+    if (/^\d{1,4}$/.test(d)){
+      const n = parseInt(d, 10);
+      if (!valid.has(n)) continue;
+      if (med && t.h > med * 2.8) continue;
+      cands.push({ n, h: t.h, low: t.yc > imgH * 0.5 });
+    }
+  }
+  const tallest = (pool, margin) => {
+    const byN = {};
+    pool.forEach(c => byN[c.n] = Math.max(byN[c.n] || 0, c.h));
+    const r = Object.entries(byN).map(([n, h]) => ({ n: +n, h })).sort((a, b) => b.h - a.h);
+    if (r.length === 1) return r[0].n;
+    if (r.length > 1 && r[0].h >= r[1].h * margin) return r[0].n;
+    return null;
+  };
+  const low = cands.filter(c => c.low);
+  return { strong: low.length ? tallest(low, 1.30) : null, weak: cands.length ? tallest(cands, 1.20) : null };
+}
+
 async function runShkoScan(e){
   const files = [...e.target.files];
   e.target.value = "";
@@ -2842,14 +2994,6 @@ async function runShkoScan(e){
     }
     return worker;
   };
-  const PASSES = [
-    [0.30, 0.85, "otsu", 2.8, "6"],   // label usually centered in the photo
-    [0.00, 1.00, "otsu", 2.0, "11"],  // sparse mode finds small isolated text
-    [0.00, 1.00, "otsu", 1.6, "6"],
-    [0.45, 1.00, "otsu", 2.4, "6"],
-    [0.00, 1.00, "gray", 1.8, "11"]
-  ];
-  const MAX_W = 2600;
   let psmNow = null;
 
   for (let i = 0; i < files.length; i++){
@@ -2869,44 +3013,48 @@ async function runShkoScan(e){
           }
         } catch (e){}
       }
-      const PLAN = hit != null ? [] : [
-        [0, PASSES], [180, [PASSES[1], PASSES[2]]],
-        [90, [PASSES[1]]], [270, [PASSES[1]]],
-        [12, [PASSES[1]]], [-12, [PASSES[1]]], [192, [PASSES[1]]], [168, [PASSES[1]]]
-      ];
-      const srcCache = {};
-      for (const [deg, plist] of PLAN){
-      if (hit != null) break;
-      const src = srcCache[deg] || (srcCache[deg] = deg === 0 ? bmp : rotSrc(bmp, deg, MAX_W));
-      for (const [top0, bot0, cut, zoom, psm] of plist){
-        const top = deg === 0 ? top0 : 0, bot = deg === 0 ? bot0 : 1;
-        const cv = document.createElement("canvas");
-        const sy = Math.round(src.height * top);
-        const sh = Math.round(src.height * (bot - top));
-        const scale = Math.min(zoom, MAX_W / src.width);
-        cv.width = Math.max(320, Math.round(src.width * scale));
-        cv.height = Math.max(120, Math.round(sh * scale));
-        const cx = cv.getContext("2d", { willReadFrequently: true });
-        cx.drawImage(src, 0, sy, src.width, sh, 0, 0, cv.width, cv.height);
-        const im = cx.getImageData(0, 0, cv.width, cv.height);
-        const d = im.data, hist = new Uint32Array(256);
-        for (let q = 0; q < d.length; q += 4){
-          const g = (d[q]*0.299 + d[q+1]*0.587 + d[q+2]*0.114) | 0;
-          d[q] = d[q+1] = d[q+2] = g; hist[g]++;
+      if (hit == null){
+        const w = await getWorker();
+        // the bench winner: crop hi-res sparse first, then full-frame block,
+        // crop block, full sparse, stretched-binarized crop sparse
+        const full = skScale(bmp, 2600); skGrey(full);
+        const fb = skBin(skScale(bmp, 2600));
+        const crop = skInkCrop(bmp);
+        const hi = skScale(crop, 2400); skGrey(hi);
+        const nhib = skStretchBin(skScale(crop, 2400));
+        const plans = [[hi, "11"], [fb, "6"], [hi, "6"], [fb, "11"], [nhib, "11"]];
+        const strongs = [], weaks = [];
+        for (const [cv, psm] of plans){
+          if (psm !== psmNow){ await w.setParameters({ tessedit_pageseg_mode: psm }); psmNow = psm; }
+          const { data } = await w.recognize(cv);
+          const r = skAnalyse(data.words || [], cv.height, valid, cyc);
+          if (r.wb != null){ hit = r.wb; break; }
+          if (r.strong != null){
+            strongs.push(r.strong);
+            if (strongs.filter(x => x === r.strong).length >= 2){ hit = r.strong; break; }
+          }
+          if (r.weak != null) weaks.push(r.weak);
         }
-        let level = 0;
-        if (cut === "otsu") level = otsu(hist, cv.width * cv.height);
-        else if (typeof cut === "number") level = cut;
-        if (level > 0) for (let q = 0; q < d.length; q += 4){
-          const v = d[q] < level ? 0 : 255; d[q] = d[q+1] = d[q+2] = v;
+        if (hit == null){
+          // photo taken sideways or upside down: one full binarized pass each
+          for (const deg of [180, 90, 270]){
+            const rb = skBin(skScale(rotSrc(bmp, deg, 2600), 2600));
+            if (psmNow !== "11"){ await w.setParameters({ tessedit_pageseg_mode: "11" }); psmNow = "11"; }
+            const { data } = await w.recognize(rb);
+            const r = skAnalyse(data.words || [], rb.height, valid, cyc);
+            if (r.wb != null){ hit = r.wb; break; }
+            if (r.strong != null){ hit = r.strong; break; }
+          }
         }
-        cx.putImageData(im, 0, 0);
-        if (psm !== psmNow){ await worker.setParameters({ tessedit_pageseg_mode: psm }); psmNow = psm; }
-        const { data } = await worker.recognize(cv);
-        const pick = shkoPick(data, valid, cyc);
-        if (pick.hit != null){ hit = pick.hit; break; }
-        if (pick.guess != null && guess == null) guess = pick.guess;
-      }
+        if (hit == null && strongs.length){
+          const cnt = {}; strongs.forEach(x => cnt[x] = (cnt[x] || 0) + 1);
+          hit = +Object.entries(cnt).sort((a, b) => b[1] - a[1])[0][0];
+        }
+        if (hit == null && weaks.length){
+          const cnt = {}; weaks.forEach(x => cnt[x] = (cnt[x] || 0) + 1);
+          const [n, c] = Object.entries(cnt).sort((a, b) => b[1] - a[1])[0];
+          if (c >= 2) hit = +n; else guess = +n;
+        }
       }
       if (hit != null && !sk2Rows.some(r => r.seq === hit))
         sk2Rows.push({ seq: hit, file: files[i] });
