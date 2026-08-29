@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v70</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v71</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -2724,8 +2724,22 @@ let sk2Rows = [], sk2Fails = [], sk2Idx = 0, sk2Url = null, sk2Orders = {};
 
 // Everything on the label that is NOT the customer code is longer digits:
 // waybill (8), phones (11), amounts (5+ once commas drop), and the date.
-function shkoExtract(txt, valid){
-  let up = toEn(String(txt || "")).replace(/[|]/g, "1").replace(/[,\.]/g, "");
+function shkoExtract(txt, valid, cyc){
+  let up = toEn(String(txt || "")).replace(/[|]/g, "1");
+  // Our own labels carry the waybill as big spaced digits: 2 6 0 8 0 1 8 9.
+  // cycle + a valid 4-digit code is unmistakable — read it first.
+  if (cyc){
+    const re = new RegExp(cyc.split("").join("[\\s.,-]*") +
+      "[\\s.,-]*(\\d)[\\s.,-]*(\\d)[\\s.,-]*(\\d)[\\s.,-]*(\\d)(?!\\s*\\d)", "g");
+    const hits = new Set();
+    let m;
+    while ((m = re.exec(up)) !== null){
+      const n = parseInt(m[1] + m[2] + m[3] + m[4], 10);
+      if (n > 0 && valid.has(n)) hits.add(n);
+    }
+    if (hits.size === 1) return [...hits];
+  }
+  up = up.replace(/[,\.]/g, "");
   up = up.replace(/\b\d{1,2}\s*[-–—\/]\s*\d{1,2}\s*[-–—\/]\s*\d{2,4}\b/g, " ");  // dates
   up = up.replace(/\d{5,}/g, " ");                                              // long runs
   const cands = [...new Set((up.match(/\b\d{1,4}\b/g) || [])
@@ -2756,8 +2770,9 @@ async function runShkoScan(e){
   const worker = await Tesseract.createWorker("eng");
   await worker.setParameters({ tessedit_char_whitelist: "0123456789-,./ " });
   const PASSES = [
-    [0.45, 1.00, "otsu", 2.0, "6"],   // the code bar lives in the lower half
+    [0.08, 0.60, "otsu", 2.2, "6"],   // our labels: waybill digits sit high
     [0.00, 1.00, "otsu", 1.6, "6"],
+    [0.45, 1.00, "otsu", 2.0, "6"],   // code bar in the lower half
     [0.00, 1.00, "gray", 1.6, "11"],
     [0.30, 0.90, 130,    2.2, "6"]
   ];
@@ -2804,7 +2819,7 @@ async function runShkoScan(e){
         cx.putImageData(im, 0, 0);
         if (psm !== psmNow){ await worker.setParameters({ tessedit_pageseg_mode: psm }); psmNow = psm; }
         const { data } = await worker.recognize(cv);
-        const cands = shkoExtract(data.text, valid);
+        const cands = shkoExtract(data.text, valid, cyc);
         if (cands.length === 1){ hit = cands[0]; break; }
         if (cands.length && guess == null) guess = cands[0];
       }
