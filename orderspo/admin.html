@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v81</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v82</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -359,7 +359,10 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
       <div id="sk2-review" class="hide"></div>
       <div id="sk2-results"></div>
       <button class="btn hide" id="sk2-apply" data-t="shkoApply"></button>
-      <div style="display:flex;align-items:center;gap:10px;margin-top:20px;margin-bottom:6px">
+      <div class="f" style="margin-top:20px;margin-bottom:6px">
+        <input id="sk-q" dir="ltr" autocomplete="off" placeholder="398 / rosse">
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
         <h2 style="margin:0;font-size:15px" data-t="shkoOpenList"></h2>
         <span id="sk-open-n" class="num" style="color:var(--teal);font-size:13px;font-weight:600"></span>
         <button id="sk-clear-open" class="hide" style="margin-inline-start:auto;padding:7px 12px;border-radius:10px;
@@ -2047,6 +2050,7 @@ async function initShko(){
     $("sk2-apply").addEventListener("click", applyShkoScan);
     $("sk-clear").addEventListener("click", clearShkoRecv);
     $("sk-clear-open").addEventListener("click", clearShkoOpen);
+    $("sk-q").addEventListener("input", renderShko);
   }
   await loadShko();
 }
@@ -2085,17 +2089,24 @@ function shipRow(r, done){
 }
 
 function renderShko(){
-  const open = skRows.filter(r => !r.received);
-  const recv = skRows.filter(r => r.received);
+  const allOpen = skRows.filter(r => !r.received);
+  const allRecv = skRows.filter(r => r.received);
+  const q = toEn($("sk-q").value || "").trim().toLowerCase();
+  const hit = r => !q
+    || String(r.seq).includes(q)
+    || `${r.cycle_code}-${String(r.seq).padStart(4, "0")}`.includes(q)
+    || (r.username || "").toLowerCase().includes(q);
+  const open = allOpen.filter(hit);
+  const recv = allRecv.filter(hit);
   const sum = a => a.reduce((x, r) => x + Number(r.amount_iqd || 0), 0);
-  $("sk-remaining").textContent = iqd(sum(open));
-  $("sk-remaining-sub").textContent = `${open.length} ${t().orders}`;
+  $("sk-remaining").textContent = iqd(sum(allOpen));
+  $("sk-remaining-sub").textContent = `${allOpen.length} ${t().orders}`;
   const ym = d => String(d).slice(0, 7);
-  $("sk-all").textContent = iqd(sum(recv));
+  $("sk-all").textContent = iqd(sum(allRecv));
   $("sk-list").innerHTML = open.length ? open.map(r => shipRow(r, false)).join("")
     : `<div style="color:var(--faint);font-size:12.5px">${t().shkoEmpty}</div>`;
   const m = {};
-  recv.forEach(r => { if (r.received_at){ const k = ym(r.received_at); m[k] = (m[k] || 0) + Number(r.amount_iqd || 0); } });
+  allRecv.forEach(r => { if (r.received_at){ const k = ym(r.received_at); m[k] = (m[k] || 0) + Number(r.amount_iqd || 0); } });
   $("sk-months").innerHTML = Object.keys(m).sort().reverse().map(k =>
     `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(44,66,73,.5)">
        <span class="num" dir="ltr">${k}</span><span class="num" style="color:var(--teal)">${iqd(m[k])}</span></div>`).join("");
