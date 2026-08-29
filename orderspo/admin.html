@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v73</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v74</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -2810,22 +2810,29 @@ async function runShkoScan(e){
     }
   } catch (e){}
 
-  let worker = null;
+  let worker = null, workerDead = false;
   const getWorker = async () => {
+    if (workerDead) throw new Error("ocr-unavailable");
     if (!worker){
-      worker = await Tesseract.createWorker("eng");
-      await worker.setParameters({ tessedit_char_whitelist: "0123456789-,./ " });
+      try {
+        worker = await Tesseract.createWorker("eng");
+        await worker.setParameters({ tessedit_char_whitelist: "0123456789-,./ " });
+      } catch (e){
+        workerDead = true;
+        say("sk-msg", "OCR: " + e.message, "err", 0);
+        throw e;
+      }
     }
     return worker;
   };
   const PASSES = [
-    [0.08, 0.60, "otsu", 2.2, "6"],   // our labels: waybill digits sit high
+    [0.30, 0.85, "otsu", 2.8, "6"],   // label usually centered in the photo
+    [0.00, 1.00, "otsu", 2.0, "11"],  // sparse mode finds small isolated text
     [0.00, 1.00, "otsu", 1.6, "6"],
-    [0.45, 1.00, "otsu", 2.0, "6"],   // code bar in the lower half
-    [0.00, 1.00, "gray", 1.6, "11"],
-    [0.30, 0.90, 130,    2.2, "6"]
+    [0.45, 1.00, "otsu", 2.4, "6"],
+    [0.00, 1.00, "gray", 1.8, "11"]
   ];
-  const MAX_W = 2200;
+  const MAX_W = 2600;
   let psmNow = null;
 
   for (let i = 0; i < files.length; i++){
