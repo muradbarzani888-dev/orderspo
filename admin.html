@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v87</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v88</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -657,7 +657,8 @@ function lateBagRows(behind, erbil, now){
   const byOrder = {};
   behind.forEach(b => {
     const o = b.orders;
-    if (!o || ["delivered", "cancelled"].includes(o.status)) return;
+    // an order out with the courier has left the warehouse — bag lag is moot
+    if (!o || ["delivered", "cancelled", "out_for_delivery"].includes(o.status)) return;
     if (!arrived[b.order_id]) return;
     const days = (now - arrived[b.order_id]) / 864e5;
     if (days < 7) return;
@@ -675,7 +676,7 @@ async function loadLateBags(){
       .in("status", ["received", "purchased", "at_dubai", "in_transit"]).limit(2000);
     if (!behind || !behind.length) return [];
     const ids = [...new Set(behind
-      .filter(b => b.orders && !["delivered", "cancelled"].includes(b.orders.status))
+      .filter(b => b.orders && !["delivered", "cancelled", "out_for_delivery"].includes(b.orders.status))
       .map(b => b.order_id))].slice(0, 500);
     if (!ids.length) return [];
     const { data: erbil } = await db.from("bags")
