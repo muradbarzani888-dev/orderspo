@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v82</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v83</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -360,7 +360,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
       <div id="sk2-results"></div>
       <button class="btn hide" id="sk2-apply" data-t="shkoApply"></button>
       <div class="f" style="margin-top:20px;margin-bottom:6px">
-        <input id="sk-q" dir="ltr" autocomplete="off" placeholder="398 / rosse">
+        <input id="sk-q" dir="ltr" autocomplete="off" placeholder="398 / rosse / 62,000">
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
         <h2 style="margin:0;font-size:15px" data-t="shkoOpenList"></h2>
@@ -2092,10 +2092,14 @@ function renderShko(){
   const allOpen = skRows.filter(r => !r.received);
   const allRecv = skRows.filter(r => r.received);
   const q = toEn($("sk-q").value || "").trim().toLowerCase();
+  // amount lookup kicks in from 4 digits so short queries stay code searches
+  const qd = q.replace(/[,،٫٬.\s]/g, "");
+  const byAmount = qd.length >= 4 && /^\d+$/.test(qd);
   const hit = r => !q
     || String(r.seq).includes(q)
     || `${r.cycle_code}-${String(r.seq).padStart(4, "0")}`.includes(q)
-    || (r.username || "").toLowerCase().includes(q);
+    || (r.username || "").toLowerCase().includes(q)
+    || (byAmount && String(r.amount_iqd || 0).startsWith(qd));
   const open = allOpen.filter(hit);
   const recv = allRecv.filter(hit);
   const sum = a => a.reduce((x, r) => x + Number(r.amount_iqd || 0), 0);
