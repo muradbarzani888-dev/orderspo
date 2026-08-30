@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v88</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v89</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -163,6 +163,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
         <button data-go="new" data-t="newOrder"></button>
         <button data-go="paste" data-t="pasteMany"></button>
         <button data-go="dash" data-t="dashboard" id="nav-dash" class="hide"></button>
+        <button data-go="cust" data-t="custTitle" id="nav-cust" class="hide"></button>
         <button data-go="scan" data-t="scanBags" id="nav-scan" class="hide"></button>
         <button data-go="shko" data-t="shkoTitle" id="nav-shko" class="hide"></button>
         <button data-go="cost" data-t="costTitle" id="nav-cost" class="hide"></button>
@@ -452,6 +453,22 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
       <iframe id="lb-frame" style="display:none"></iframe>
     </div>
 
+    <div id="v-cust" class="hide">
+      <button class="back" data-go="home" data-t="back"></button>
+      <h2 data-t="custTitle"></h2>
+      <div id="cu-msg"></div>
+      <div id="cu-main">
+        <div class="tiles">
+          <div class="tile"><div class="k">💎 <span data-t="custVips"></span></div><div class="v num" id="cu-vipn">—</div><div class="sub num" id="cu-vipshare"></div></div>
+          <div class="tile"><div class="k">⭐ <span data-t="custRepeat"></span></div><div class="v num" id="cu-repn">—</div></div>
+        </div>
+        <div class="f"><input id="cu-q" dir="ltr" autocomplete="off" placeholder="rosse / 0750..."></div>
+        <button class="btn ghost" id="cu-copy" data-t="custCopy"></button>
+        <div id="cu-list" style="margin-top:14px"></div>
+      </div>
+      <div id="cu-prof" class="hide"></div>
+    </div>
+
     <div id="v-batch" class="hide">
       <button class="back" data-go="home" data-t="back"></button>
       <h2 data-t="moveBatch"></h2>
@@ -545,7 +562,10 @@ const T = {
   moveBatch:"گواستنەوەی کۆمەڵ",searchLbl:"گەڕان بە کۆد، ناو یان ژمارە",search:"گەڕان",back:"گەڕانەوە",
   username:"ناوی ئینستاگرام",phone:"ژمارەی مۆبایل",address:"ناونیشان",total:"کۆی گشتی",
   deposit:"پارەی پێشەکی",due:"بڕی ماوە",items:"ژمارەی بەرهەم",save:"تۆمارکردن",
-  setStatus:"دۆخی نوێ",update:"نوێکردنەوە",collected:"پارەی کۆکراوە",collectedAsk:"چەند پارە کۆکرایەوە؟",shkoTitle:"شحنەکانی SHKO",shkoRemaining:"پارە لای SHKO (ماوە)",shkoThisMonth:"وەرگیراوی ئەم مانگە",shkoAllRecv:"کۆی وەرگیراو",shkoAddOfd:"زیادکردنی هەموو «لە گەیاندندایە»",shkoAdd:"زیادکردن",shkoReceived:"وەرگیراوەکان",shkoEmpty:"هیچ نەماوە — هەمووی وەرگیراوە ✓",shkoNone:"هیچ داواکارییەک نییە",shkoDel:"سڕینەوە",shkoClearAll:"سڕینەوەی هەمووی",shkoRecvN:"وەرگیراوە",shkoOpenList:"لای SHKO",shkoShipN:"شحنە",shkoScanHelp:"وێنەی لەیبڵەکان هەڵبژێرە — سیستەم کۆدی کڕیار دەخوێنێتەوە، بڕی ماوە و ناو لە داواکارییەکەوە دێن",shkoApply:"تۆمارکردنی شحنەکان",shkoImgDel:"سڕینەوەی وێنە",lblTitle:"چاپکردنی لەیبڵ",lblHelp:"کۆد یان مەودا بنووسە (1-50 398) یان هەموو دۆخێک زیاد بکە، دواتر چاپکردن — هەر لەیبڵێک 100×100mm. ژمارەی بارکۆد = مانگ + کۆدی کڕیار.",lblAddStatus:"زیادکردنی هەموو",lblPrint:"چاپکردن",lblName:"ناو",lblPhone:"مۆبایلی کڕیار",lblCity:"شار",lblAddr:"ناونیشان",lblDue:"بڕی ماوە",alTitle:"داواکاری گیرماوەکان",alDays:"ڕۆژ",alFix:"گۆڕینی دۆخ",alBagLate:"جانتای دواکەوتوو",costTitle:"کۆست و قازانج",revenue:"داهاتی مانگ",totalCost:"کۆی کۆستەکان",netProfit:"قازانجی سافی",margin:"ڕێژەی قازانج",seedFixed:"زیادکردنی کۆستە جێگیرەکانی مانگ",addCost:"زیادکردنی کۆست",costCat:"جۆر",costLabel:"ناو",costQty:"ژمارە",costUsd:"نرخ بە دۆلار",costFx:"نرخی دۆلار",costIqd:"یان بڕ بە دینار",saveCost:"تۆمارکردن",costSettings:"ڕێکخستنەکانی کۆست",perKg:"دۆلار بۆ کیلۆ",baghdad:"بەغدا",south:"باشوور",saveSettings:"پاشەکەوتکردن",catFixed:"جێگیر",catCards:"کارتی شەین",catAds:"ڕیکلامی مێتا",catAgent:"ئاژانسی دوبەی",catShko:"گەیاندنی SHKO",catOther:"کۆستی تر",autoCalc:"خۆکار",kgRec:"کیلۆی تۆمارکراو",deliv:"گەیەندراو",unknownGov:"نادیار",shkoFile:"فایلی SHKO بار بکە",pickCol:"ستوونی کرێی گەیاندن هەڵبژێرە ⬇",rowsN:"ڕیز",shkoMoved:"گۆڕدرا بۆ «لە گەیاندندایە»",delivDebt:"قەرزی گەیەندراو (کۆنەکراوەتەوە)",saveAmounts:"تۆمارکردنی بڕەکان",from:"لە دۆخی",to:"بۆ دۆخی",month:"مانگ",codeFrom:"لە کۆدی",codeTo:"بۆ کۆدی",
+  setStatus:"دۆخی نوێ",update:"نوێکردنەوە",collected:"پارەی کۆکراوە",collectedAsk:"چەند پارە کۆکرایەوە؟",shkoTitle:"شحنەکانی SHKO",shkoRemaining:"پارە لای SHKO (ماوە)",shkoThisMonth:"وەرگیراوی ئەم مانگە",shkoAllRecv:"کۆی وەرگیراو",shkoAddOfd:"زیادکردنی هەموو «لە گەیاندندایە»",shkoAdd:"زیادکردن",shkoReceived:"وەرگیراوەکان",shkoEmpty:"هیچ نەماوە — هەمووی وەرگیراوە ✓",shkoNone:"هیچ داواکارییەک نییە",shkoDel:"سڕینەوە",shkoClearAll:"سڕینەوەی هەمووی",shkoRecvN:"وەرگیراوە",shkoOpenList:"لای SHKO",shkoShipN:"شحنە",shkoScanHelp:"وێنەی لەیبڵەکان هەڵبژێرە — سیستەم کۆدی کڕیار دەخوێنێتەوە، بڕی ماوە و ناو لە داواکارییەکەوە دێن",shkoApply:"تۆمارکردنی شحنەکان",shkoImgDel:"سڕینەوەی وێنە",lblTitle:"چاپکردنی لەیبڵ",lblHelp:"کۆد یان مەودا بنووسە (1-50 398) یان هەموو دۆخێک زیاد بکە، دواتر چاپکردن — هەر لەیبڵێک 100×100mm. ژمارەی بارکۆد = مانگ + کۆدی کڕیار.",lblAddStatus:"زیادکردنی هەموو",lblPrint:"چاپکردن",lblName:"ناو",lblPhone:"مۆبایلی کڕیار",lblCity:"شار",lblAddr:"ناونیشان",lblDue:"بڕی ماوە",alTitle:"داواکاری گیرماوەکان",alDays:"ڕۆژ",alFix:"گۆڕینی دۆخ",alBagLate:"جانتای دواکەوتوو",
+  custTitle:"کڕیارەکان",custVips:"کڕیاری VIP",custRepeat:"کڕیاری دووبارە",custCopy:"کۆپی لیستی VIP بۆ Close Friends",
+  custSpend:"کۆی کڕین",custDebt:"قەرز",custOpen:"لە ڕێگادایە",custOrdersN:"داواکاری",custDeliv:"گەیەندراو",
+  custCanc:"هەڵوەشاوە",custBack:"گەڕانەوە بۆ لیست",copied:"کۆپی کرا ✓",custShare:"لە داهات",costTitle:"کۆست و قازانج",revenue:"داهاتی مانگ",totalCost:"کۆی کۆستەکان",netProfit:"قازانجی سافی",margin:"ڕێژەی قازانج",seedFixed:"زیادکردنی کۆستە جێگیرەکانی مانگ",addCost:"زیادکردنی کۆست",costCat:"جۆر",costLabel:"ناو",costQty:"ژمارە",costUsd:"نرخ بە دۆلار",costFx:"نرخی دۆلار",costIqd:"یان بڕ بە دینار",saveCost:"تۆمارکردن",costSettings:"ڕێکخستنەکانی کۆست",perKg:"دۆلار بۆ کیلۆ",baghdad:"بەغدا",south:"باشوور",saveSettings:"پاشەکەوتکردن",catFixed:"جێگیر",catCards:"کارتی شەین",catAds:"ڕیکلامی مێتا",catAgent:"ئاژانسی دوبەی",catShko:"گەیاندنی SHKO",catOther:"کۆستی تر",autoCalc:"خۆکار",kgRec:"کیلۆی تۆمارکراو",deliv:"گەیەندراو",unknownGov:"نادیار",shkoFile:"فایلی SHKO بار بکە",pickCol:"ستوونی کرێی گەیاندن هەڵبژێرە ⬇",rowsN:"ڕیز",shkoMoved:"گۆڕدرا بۆ «لە گەیاندندایە»",delivDebt:"قەرزی گەیەندراو (کۆنەکراوەتەوە)",saveAmounts:"تۆمارکردنی بڕەکان",from:"لە دۆخی",to:"بۆ دۆخی",month:"مانگ",codeFrom:"لە کۆدی",codeTo:"بۆ کۆدی",
   rangeHint:"بەتاڵی بهێڵەرەوە بۆ هەمووی",
   willMove:"داواکاری دەگوازرێتەوە",moveAll:"گواستنەوەی هەموویان",noRes:"هیچ نەدۆزرایەوە",
   saved:"تۆمارکرا",need:"ناو و کۆی گشتی پێویستە",moved:"داواکاری گوازرایەوە",
@@ -579,7 +599,10 @@ const T = {
   moveBatch:"تحديث مجموعة",searchLbl:"دور بالرمز أو الاسم أو الرقم",search:"دور",back:"رجوع",
   username:"اسم الانستغرام",phone:"رقم الموبايل",address:"العنوان",total:"المجموع",
   deposit:"المدفوع",due:"المتبقي",items:"عدد القطع",save:"حفظ",
-  setStatus:"الحالة الجديدة",update:"تحديث",collected:"المبلغ المستلم",collectedAsk:"شكد انستلم؟",shkoTitle:"شحنات SHKO",shkoRemaining:"الفلوس عند SHKO (باقية)",shkoThisMonth:"مستلم هذا الشهر",shkoAllRecv:"مجموع المستلم",shkoAddOfd:"إضافة كل «قيد التوصيل»",shkoAdd:"إضافة",shkoReceived:"المستلمة",shkoEmpty:"ما باقي شي — كله مستلم ✓",shkoNone:"ما في طلبات",shkoDel:"حذف",shkoClearAll:"حذف الكل",shkoRecvN:"مستلم",shkoOpenList:"عند SHKO",shkoShipN:"شحنة",shkoScanHelp:"اختار صور الليبلات — النظام يقرا رمز الزبون، والمبلغ الباقي والاسم ييجون من الطلب",shkoApply:"حفظ الشحنات",shkoImgDel:"حذف الصورة",lblTitle:"طباعة الليبلات",lblHelp:"اكتب الرموز أو مدى (1-50 398) أو ضيف حالة كاملة ثم اطبع — كل ليبل 100×100mm. رقم الباركود = الشهر + رمز الزبون.",lblAddStatus:"إضافة الكل",lblPrint:"طباعة",lblName:"الاسم",lblPhone:"موبايل الزبون",lblCity:"المدينة",lblAddr:"العنوان",lblDue:"المبلغ المتبقي",alTitle:"طلبات عالقة",alDays:"يوم",alFix:"تغيير الحالة",alBagLate:"كيس متأخر",costTitle:"التكاليف والأرباح",revenue:"دخل الشهر",totalCost:"مجموع التكاليف",netProfit:"صافي الربح",margin:"نسبة الربح",seedFixed:"إضافة التكاليف الثابتة للشهر",addCost:"إضافة تكلفة",costCat:"النوع",costLabel:"الاسم",costQty:"العدد",costUsd:"السعر بالدولار",costFx:"سعر الدولار",costIqd:"أو المبلغ بالدينار",saveCost:"حفظ",costSettings:"إعدادات التكاليف",perKg:"دولار للكيلو",baghdad:"بغداد",south:"الجنوب",saveSettings:"حفظ",catFixed:"ثابتة",catCards:"كارتات شي إن",catAds:"إعلانات ميتا",catAgent:"وكيل دبي",catShko:"توصيل SHKO",catOther:"تكاليف أخرى",autoCalc:"تلقائي",kgRec:"كيلو مسجّل",deliv:"مسلَّم",unknownGov:"غير معروف",shkoFile:"ارفع ملف SHKO",pickCol:"اختر عمود أجرة التوصيل ⬇",rowsN:"صف",shkoMoved:"تحوّلت إلى «قيد التوصيل»",delivDebt:"دين المسلَّم (غير مستلم)",saveAmounts:"حفظ المبالغ",from:"من حالة",to:"إلى حالة",month:"الشهر",codeFrom:"من رمز",codeTo:"إلى رمز",
+  setStatus:"الحالة الجديدة",update:"تحديث",collected:"المبلغ المستلم",collectedAsk:"شكد انستلم؟",shkoTitle:"شحنات SHKO",shkoRemaining:"الفلوس عند SHKO (باقية)",shkoThisMonth:"مستلم هذا الشهر",shkoAllRecv:"مجموع المستلم",shkoAddOfd:"إضافة كل «قيد التوصيل»",shkoAdd:"إضافة",shkoReceived:"المستلمة",shkoEmpty:"ما باقي شي — كله مستلم ✓",shkoNone:"ما في طلبات",shkoDel:"حذف",shkoClearAll:"حذف الكل",shkoRecvN:"مستلم",shkoOpenList:"عند SHKO",shkoShipN:"شحنة",shkoScanHelp:"اختار صور الليبلات — النظام يقرا رمز الزبون، والمبلغ الباقي والاسم ييجون من الطلب",shkoApply:"حفظ الشحنات",shkoImgDel:"حذف الصورة",lblTitle:"طباعة الليبلات",lblHelp:"اكتب الرموز أو مدى (1-50 398) أو ضيف حالة كاملة ثم اطبع — كل ليبل 100×100mm. رقم الباركود = الشهر + رمز الزبون.",lblAddStatus:"إضافة الكل",lblPrint:"طباعة",lblName:"الاسم",lblPhone:"موبايل الزبون",lblCity:"المدينة",lblAddr:"العنوان",lblDue:"المبلغ المتبقي",alTitle:"طلبات عالقة",alDays:"يوم",alFix:"تغيير الحالة",alBagLate:"كيس متأخر",
+  custTitle:"الزبائن",custVips:"زبون VIP",custRepeat:"زبون متكرر",custCopy:"انسخ قائمة VIP لـ Close Friends",
+  custSpend:"مجموع الشراء",custDebt:"دين",custOpen:"بالطريق",custOrdersN:"طلب",custDeliv:"مسلَّم",
+  custCanc:"ملغى",custBack:"رجوع للقائمة",copied:"تم النسخ ✓",custShare:"من الدخل",costTitle:"التكاليف والأرباح",revenue:"دخل الشهر",totalCost:"مجموع التكاليف",netProfit:"صافي الربح",margin:"نسبة الربح",seedFixed:"إضافة التكاليف الثابتة للشهر",addCost:"إضافة تكلفة",costCat:"النوع",costLabel:"الاسم",costQty:"العدد",costUsd:"السعر بالدولار",costFx:"سعر الدولار",costIqd:"أو المبلغ بالدينار",saveCost:"حفظ",costSettings:"إعدادات التكاليف",perKg:"دولار للكيلو",baghdad:"بغداد",south:"الجنوب",saveSettings:"حفظ",catFixed:"ثابتة",catCards:"كارتات شي إن",catAds:"إعلانات ميتا",catAgent:"وكيل دبي",catShko:"توصيل SHKO",catOther:"تكاليف أخرى",autoCalc:"تلقائي",kgRec:"كيلو مسجّل",deliv:"مسلَّم",unknownGov:"غير معروف",shkoFile:"ارفع ملف SHKO",pickCol:"اختر عمود أجرة التوصيل ⬇",rowsN:"صف",shkoMoved:"تحوّلت إلى «قيد التوصيل»",delivDebt:"دين المسلَّم (غير مستلم)",saveAmounts:"حفظ المبالغ",from:"من حالة",to:"إلى حالة",month:"الشهر",codeFrom:"من رمز",codeTo:"إلى رمز",
   rangeHint:"خليها فارغة للكل",
   willMove:"طلب راح ينتقل",moveAll:"حدث الكل",noRes:"ما لكيت شي",
   saved:"انحفظ",need:"لازم الاسم والمجموع",moved:"الطلبات انتقلت",
@@ -629,7 +652,7 @@ function say(box, text, kind, ms){
   if (text && hold) setTimeout(() => { if ($(box)) $(box).innerHTML = ""; }, hold);
 }
 function view(n){
-  ["home","new","paste","dash","scan","detail","batch","shko","cost","lbl"].forEach(v => $("v-" + v).classList.toggle("hide", v !== n));
+  ["home","new","paste","dash","scan","detail","batch","shko","cost","lbl","cust"].forEach(v => $("v-" + v).classList.toggle("hide", v !== n));
   window.scrollTo(0,0);
 }
 function paintLang(){
@@ -768,6 +791,7 @@ async function loadHome(){
   const sum = k => live.reduce((a, r) => a + Number(r[k] || 0), 0);
   $("h-money").classList.toggle("hide", me.role !== "admin");
   $("nav-dash").classList.toggle("hide", me.role !== "admin");
+  $("nav-cust").classList.toggle("hide", me.role !== "admin");
   $("nav-scan").classList.toggle("hide", me.role !== "admin");
   $("nav-shko").classList.toggle("hide", me.role !== "admin" || !hasShip);
   $("nav-cost").classList.toggle("hide", me.role !== "admin" || !hasCosts);
@@ -809,6 +833,92 @@ async function search(){
     r.addEventListener("click", () => openOrder(r.dataset.id)));
 }
 
+// ---------- Customers: profiles, VIP ranking, debt flags ----------
+let cuRows = [], cuInit = false;
+const cuBadge = r => (r.is_vip ? "💎" : (r.orders_n >= 2 ? "⭐" : "")) +
+                     ((Number(r.debt_iqd) > 0 || r.cancelled_n >= 2) ? "⚠" : "");
+
+async function initCust(){
+  if (!cuInit){
+    cuInit = true;
+    $("cu-q").addEventListener("input", renderCustList);
+    $("cu-copy").addEventListener("click", async () => {
+      const names = cuRows.filter(r => r.is_vip && r.instagram_username)
+        .map(r => "@" + r.instagram_username).join("\n");
+      try { await navigator.clipboard.writeText(names); say("cu-msg", t().copied, "ok"); }
+      catch (e){ prompt("copy:", names); }
+    });
+  }
+  $("cu-prof").classList.add("hide"); $("cu-main").classList.remove("hide");
+  const { data, error } = await db.from("customer_stats").select("*")
+    .gt("orders_n", 0).order("spend_iqd", { ascending: false }).limit(600);
+  if (error) return say("cu-msg", error.message, "err");
+  cuRows = data || [];
+  const vips = cuRows.filter(r => r.is_vip);
+  const tot = cuRows.reduce((a, r) => a + Number(r.spend_iqd || 0), 0);
+  const vtot = vips.reduce((a, r) => a + Number(r.spend_iqd || 0), 0);
+  $("cu-vipn").textContent = vips.length;
+  $("cu-vipshare").textContent = tot ? `${Math.round(100*vtot/tot)}% ${t().custShare}` : "";
+  $("cu-repn").textContent = cuRows.filter(r => r.orders_n >= 2).length;
+  renderCustList();
+}
+
+function renderCustList(){
+  const q = toEn($("cu-q").value || "").trim().toLowerCase();
+  const hit = r => !q || (r.instagram_username || "").toLowerCase().includes(q)
+    || String(r.phone || "").replace(/\D/g, "").includes(q.replace(/\D/g, "") || "\u0000");
+  const rows = cuRows.filter(hit)
+    .sort((a, b) => (b.is_vip - a.is_vip) || (b.spend_iqd - a.spend_iqd))
+    .slice(0, 120);
+  $("cu-list").innerHTML = rows.map(r => `
+    <div class="row" data-cust="${r.customer_id}">
+      <div class="l"><div class="c" dir="ltr">${cuBadge(r)} ${r.instagram_username || "—"}</div>
+        <div class="u num" dir="ltr">${r.orders_n} ${t().custOrdersN}${r.phone ? " · " + r.phone : ""}</div></div>
+      <div style="text-align:left"><div class="b num" style="color:var(--teal)">${iqd(r.spend_iqd)}</div>
+        ${Number(r.debt_iqd) > 0 ? `<div class="num" style="color:#F09595;font-size:12px">${t().custDebt} ${iqd(r.debt_iqd)}</div>` : ""}</div>
+    </div>`).join("");
+  $("cu-list").querySelectorAll("[data-cust]").forEach(el =>
+    el.addEventListener("click", () => openCustomer(el.dataset.cust)));
+}
+
+async function openCustomer(id){
+  const r = cuRows.find(x => String(x.customer_id) === String(id));
+  if (!r) return;
+  const { data: os } = await db.from("orders")
+    .select("id,cycle_code,seq,status,total_iqd,balance_iqd")
+    .eq("customer_id", id).order("cycle_code", { ascending: false }).order("seq");
+  $("cu-main").classList.add("hide");
+  const box = $("cu-prof"); box.classList.remove("hide");
+  const orows = (os || []).map(o => `
+    <div class="row" data-oid="${o.id}">
+      <div class="l"><div class="c num">${o.cycle_code}-${String(o.seq).padStart(4,"0")}</div>
+        <div class="u">${t().st[o.status] || o.status}</div></div>
+      <div class="b num" style="color:${o.status === "cancelled" ? "var(--faint)" : "var(--teal)"}">${iqd(o.total_iqd)}</div>
+    </div>`).join("");
+  box.innerHTML = `
+    <button class="back" id="cu-back">${t().custBack}</button>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+      <h2 style="margin:0" dir="ltr">${cuBadge(r)} ${r.instagram_username || "—"}</h2>
+    </div>
+    ${r.phone ? `<a href="tel:${String(r.phone).replace(/[^\d+]/g,"")}" class="num" dir="ltr"
+      style="color:var(--mute);text-decoration:none">📞 ${r.phone}</a>` : ""}
+    <div class="tiles" style="margin-top:14px">
+      <div class="tile"><div class="k">${t().custSpend}</div><div class="v num">${iqd(r.spend_iqd)}</div>
+        <div class="sub num">${r.first_cycle || ""} → ${r.last_cycle || ""}</div></div>
+      <div class="tile"><div class="k">${t().custOrdersN}</div><div class="v num">${r.orders_n}</div>
+        <div class="sub num">${t().custDeliv} ${r.delivered_n} · ${t().custCanc} ${r.cancelled_n}</div></div>
+      <div class="tile"><div class="k">${t().custOpen}</div><div class="v num">${iqd(r.open_iqd)}</div></div>
+      <div class="tile"><div class="k">${t().custDebt}</div>
+        <div class="v num" style="color:${Number(r.debt_iqd) > 0 ? "#F09595" : "inherit"}">${iqd(r.debt_iqd)}</div></div>
+    </div>
+    <div style="margin-top:8px">${orows}</div>`;
+  $("cu-back").addEventListener("click", () => {
+    box.classList.add("hide"); $("cu-main").classList.remove("hide");
+  });
+  box.querySelectorAll("[data-oid]").forEach(el =>
+    el.addEventListener("click", () => openOrder(el.dataset.oid)));
+}
+
 async function openOrder(id){
   const { data: o } = await db.from("orders")
     .select("*,customers(instagram_username,phone,address)").eq("id", id).single();
@@ -816,6 +926,14 @@ async function openOrder(id){
   current = o;
   $("d-code").textContent = o.order_code;
   $("d-user").textContent = o.customers?.instagram_username || "—";
+  if (o.customer_id) db.from("customer_stats")
+    .select("is_vip,orders_n,debt_iqd,cancelled_n").eq("customer_id", o.customer_id)
+    .maybeSingle().then(({ data: cs }) => {
+      if (cs && current?.id === o.id){
+        const b = cuBadge(cs);
+        if (b) $("d-user").textContent = `${b} ${o.customers?.instagram_username || "—"}`;
+      }
+    });
   $("d-total").textContent = iqd(o.total_iqd);
   $("d-dep").textContent = iqd(o.deposit_iqd);
   $("d-due").textContent = iqd(o.balance_iqd);
@@ -965,6 +1083,7 @@ document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", 
   if (g === "home") loadHome();
   if (g === "batch") fillCycles().then(countBatch);
   if (g === "dash") initDash();
+  if (g === "cust") initCust();
   if (g === "scan") initScan();
   if (g === "shko") initShko();
   if (g === "cost") initCost();
