@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v83</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v84</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -360,7 +360,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
       <div id="sk2-results"></div>
       <button class="btn hide" id="sk2-apply" data-t="shkoApply"></button>
       <div class="f" style="margin-top:20px;margin-bottom:6px">
-        <input id="sk-q" dir="ltr" autocomplete="off" placeholder="398 / rosse / 62,000">
+        <input id="sk-q" dir="ltr" autocomplete="off" placeholder="398 / rosse / 62,000 / 0750...">
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
         <h2 style="margin:0;font-size:15px" data-t="shkoOpenList"></h2>
@@ -2056,7 +2056,8 @@ async function initShko(){
 }
 
 async function loadShko(){
-  const { data, error } = await db.from("shipments").select("*").order("id", { ascending: false });
+  const { data, error } = await db.from("shipments")
+    .select("*, orders(customers(phone))").order("id", { ascending: false });
   if (error) return say("sk-msg", error.message, "err");
   skRows = data || [];
   renderShko();
@@ -2075,7 +2076,10 @@ function shipRow(r, done){
     <div class="l" style="display:flex;align-items:center;gap:10px">
       ${img}
       <div><div class="c num">${r.cycle_code}-${String(r.seq).padStart(4, "0")}</div>
-      <div class="u" dir="ltr">${r.username || "—"}</div></div>
+      <div class="u" dir="ltr">${r.username || "—"}</div>
+      ${r.orders?.customers?.phone ? `<a href="tel:${String(r.orders.customers.phone).replace(/[^\d+]/g, "")}"
+        class="num" dir="ltr" style="color:var(--mute);font-size:12px;text-decoration:none">
+        📞 ${r.orders.customers.phone}</a>` : ""}</div>
     </div>
     <div style="display:flex;align-items:center;gap:12px">
       <span class="num" style="color:var(--teal);font-weight:600">${iqd(r.amount_iqd)}</span>
@@ -2099,7 +2103,8 @@ function renderShko(){
     || String(r.seq).includes(q)
     || `${r.cycle_code}-${String(r.seq).padStart(4, "0")}`.includes(q)
     || (r.username || "").toLowerCase().includes(q)
-    || (byAmount && String(r.amount_iqd || 0).startsWith(qd));
+    || (byAmount && String(r.amount_iqd || 0).startsWith(qd))
+    || (byAmount && String(r.orders?.customers?.phone || "").replace(/\D/g, "").includes(qd));
   const open = allOpen.filter(hit);
   const recv = allRecv.filter(hit);
   const sum = a => a.reduce((x, r) => x + Number(r.amount_iqd || 0), 0);
