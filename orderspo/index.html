@@ -161,7 +161,7 @@ button.go:disabled{opacity:.5;cursor:default}
     </div>
     <button class="go" id="submit" data-t="cta"></button>
     <p class="hint" data-t="hint"></p>
-    <p style="text-align:center;color:#3E545B;font-size:10px;margin-top:22px;font-family:Archivo,sans-serif">v13</p>
+    <p style="text-align:center;color:#3E545B;font-size:10px;margin-top:22px;font-family:Archivo,sans-serif">v14</p>
   </section>
 
   <section id="result-view" class="hidden">
@@ -210,7 +210,7 @@ document.head.insertAdjacentHTML("beforeend", `<style>
   align-items:center;gap:13px;border:1px solid;position:relative;overflow:hidden}
 .tierbox::after{content:"";position:absolute;top:-60%;left:-30%;width:45%;height:220%;
   transform:rotate(22deg);background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent)}
-.tierbox .ic{font-size:27px;flex:0 0 auto}
+.tierbox .ic{flex:0 0 auto;display:flex;align-items:center}
 .tierbox .tt{font-weight:700;font-size:15px}
 .tierbox .ts{font-size:12px;opacity:.78;margin-top:3px}
 .tier-gold{background:linear-gradient(135deg,rgba(232,194,74,.15),rgba(232,194,74,.03));
@@ -221,20 +221,42 @@ document.head.insertAdjacentHTML("beforeend", `<style>
   border-color:rgba(86,214,202,.55);color:#56D6CA}
 .tier-top{background:linear-gradient(135deg,rgba(232,194,74,.2),rgba(186,104,255,.09));
   border-color:rgba(242,208,107,.65);color:#F2D06B;box-shadow:0 0 24px rgba(232,194,74,.15)}
-.name-gold{color:#F5D165!important;text-shadow:0 0 18px rgba(232,194,74,.55)}
-.name-platinum{background:linear-gradient(100deg,#FFFFFF,#C9DEE8 40%,#FFFFFF 62%,#D9EAF2);
-  -webkit-background-clip:text;background-clip:text;color:transparent!important;
-  filter:drop-shadow(0 0 14px rgba(210,232,240,.55))}
-.name-diamond{background:linear-gradient(100deg,#9FF2E8,#56D6CA 40%,#E4FFFB 62%,#7FE7DC);
-  -webkit-background-clip:text;background-clip:text;color:transparent!important;
-  filter:drop-shadow(0 0 14px rgba(86,214,202,.55))}
-.name-top{background:linear-gradient(100deg,#FFD873,#F6B25C 30%,#FFF7D6 52%,#E7BFFF 82%,#FFD873);
-  background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent!important;
-  filter:drop-shadow(0 0 16px rgba(242,208,107,.6));animation:topshine 3.2s linear infinite}
-@keyframes topshine{from{background-position:0% 0}to{background-position:250% 0}}
 </style>`);
 
-const TIER_UI = { gold:"🥇", platinum:"🏆", diamond:"💎", top:"👑" };
+const TIER_SVG = {
+  gold: `<svg width="46" height="46" viewBox="0 0 46 46" fill="none">
+    <defs><linearGradient id="gG" x1="8" y1="6" x2="38" y2="42">
+      <stop offset="0" stop-color="#FFE08A"/><stop offset=".5" stop-color="#F2C94C"/>
+      <stop offset="1" stop-color="#C9932A"/></linearGradient></defs>
+    <path d="M15 4h16l-4 10h-8z" fill="#2AADA5" opacity=".85"/>
+    <circle cx="23" cy="27" r="14" fill="url(#gG)" stroke="#FFE9AE" stroke-width="1.6"/>
+    <path d="M23 19l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4-3.9-3.8 5.4-.8z" fill="#8A5D14"/>
+  </svg>`,
+  platinum: `<svg width="46" height="46" viewBox="0 0 46 46" fill="none">
+    <defs><linearGradient id="gP" x1="8" y1="6" x2="38" y2="42">
+      <stop offset="0" stop-color="#FFFFFF"/><stop offset=".5" stop-color="#C9DEE8"/>
+      <stop offset="1" stop-color="#8FAAB6"/></linearGradient></defs>
+    <path d="M23 3l17 10v20L23 43 6 33V13z" fill="url(#gP)" stroke="#EAF6FB" stroke-width="1.6"/>
+    <path d="M23 12l9 5.5v11L23 34l-9-5.5v-11z" fill="#22424D"/>
+    <path d="M23 17l5 3v6l-5 3-5-3v-6z" fill="url(#gP)"/>
+  </svg>`,
+  diamond: `<svg width="46" height="46" viewBox="0 0 46 46" fill="none">
+    <defs><linearGradient id="gD" x1="6" y1="10" x2="40" y2="40">
+      <stop offset="0" stop-color="#B8FFF4"/><stop offset=".5" stop-color="#56D6CA"/>
+      <stop offset="1" stop-color="#1E8C84"/></linearGradient></defs>
+    <path d="M13 8h20l8 11-18 20L5 19z" fill="url(#gD)" stroke="#D8FFF9" stroke-width="1.6"/>
+    <path d="M13 8l10 11L33 8M5 19h36M23 19l-6 20m6-20l6 20" stroke="#0F1F24" stroke-width="1.4" opacity=".55"/>
+  </svg>`,
+  top: `<svg width="46" height="46" viewBox="0 0 46 46" fill="none">
+    <defs><linearGradient id="gT" x1="6" y1="10" x2="40" y2="40">
+      <stop offset="0" stop-color="#FFE08A"/><stop offset=".55" stop-color="#F2C94C"/>
+      <stop offset="1" stop-color="#D8A7FF"/></linearGradient></defs>
+    <path d="M6 34l3-19 9 8 5-13 5 13 9-8 3 19z" fill="url(#gT)" stroke="#FFF3C4" stroke-width="1.6"/>
+    <rect x="8" y="35" width="30" height="6" rx="2.4" fill="url(#gT)" stroke="#FFF3C4" stroke-width="1.2"/>
+    <circle cx="23" cy="27" r="2.6" fill="#7A4FA8"/>
+    <circle cx="14" cy="29" r="1.8" fill="#2AADA5"/><circle cx="32" cy="29" r="1.8" fill="#2AADA5"/>
+  </svg>`
+};
 
 const T = {
   ku: {
@@ -334,17 +356,11 @@ function showError(msg){
 function paintTier(){
   const el = $("r-tier");
   const ti = window._tier;
-  const u = $("r-user");
-  u.className = "user" + (ti && ti.tier ? " name-" + ti.tier : "");
-  if (ti && ti.tier){
-    const base = (window._last && window._last.username) || u.textContent.replace(/^[^\w@]*/, "");
-    u.textContent = `${TIER_UI[ti.tier] || ""} ${base}`;
-  }
   if (!ti || !ti.tier){ el.innerHTML = ""; return; }
   const t = T[lang];
   const name = (t.tierT[ti.tier] || "").replace("{n}", ti.rank || "");
   el.innerHTML = `<div class="tierbox tier-${ti.tier}">
-    <span class="ic">${TIER_UI[ti.tier] || ""}</span>
+    <span class="ic">${TIER_SVG[ti.tier] || ""}</span>
     <span><div class="tt">${name}</div><div class="ts">${t.tierSub}</div></span></div>`;
 }
 
