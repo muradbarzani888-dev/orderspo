@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v93</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v94</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -352,6 +352,16 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
       <div class="f">
         <label data-t="shkoScanHelp"></label>
         <input type="file" id="sk-scan" accept="image/*" multiple style="padding:14px;min-height:auto">
+      </div>
+      <button class="btn ghost" id="sk-cam" data-t="camScan" style="margin-bottom:14px"></button>
+      <div id="cam-ov" class="hide" style="position:fixed;inset:0;background:#000;z-index:60;display:flex;flex-direction:column">
+        <video id="cam-v" autoplay playsinline muted style="flex:1;width:100%;object-fit:cover;min-height:0"></video>
+        <div style="position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:linear-gradient(#000c,#0000)">
+          <button id="cam-x" style="background:rgba(226,75,74,.9);color:#fff;border:0;border-radius:12px;padding:10px 18px;font-size:14px;font-family:inherit">✕ <span data-t="camClose"></span></button>
+          <span id="cam-n" class="num" style="color:#fff;font-size:16px;font-weight:700"></span>
+        </div>
+        <div id="cam-toast" style="position:absolute;bottom:26px;left:16px;right:16px;border-radius:14px;padding:14px 16px;font-size:15px;display:none"></div>
+        <div style="position:absolute;top:50%;left:8%;right:8%;height:2px;background:rgba(42,173,165,.65);box-shadow:0 0 12px rgba(42,173,165,.8)"></div>
       </div>
       <div id="sk2-progress" class="hide" style="margin-bottom:14px">
         <div style="background:var(--deep);border-radius:10px;height:8px;overflow:hidden">
@@ -569,6 +579,7 @@ const T = {
   custSpend:"کۆی کڕین",custDebt:"قەرز",custOpen:"لە ڕێگادایە",custOrdersN:"داواکاری",custDeliv:"گەیەندراو",
   custCanc:"هەڵوەشاوە",custBack:"گەڕانەوە بۆ لیست",copied:"کۆپی کرا ✓",custShare:"لە داهات",
   riskWarn:"ئاگاداری — پێشەکی تەواو وەربگرە",riskCanc:"هەڵوەشاوە",riskDebt:"قەرز",
+  camScan:"📷 سکان بە کامێرا — بارکۆدی لەیبڵ",camClose:"داخستن",camRec:"تۆمارکرا",camDup:"پێشتر تۆمارکراوە",
   waslCheck:"پشکنینی وەصڵ — شیت بەرامبەر سیستەم",wcSame:"هاوتان",wcDiff:"جیاوازی",
   wcSheetOnly:"لە شیتدایە، لە سیستەمدا نییە",wcSysOnly:"لە سیستەمدایە، لە شیتدا نییە",
   wcSheet:"شیت",wcSystem:"سیستەم",wcTotal:"کۆ",wcDep:"وەصڵ",
@@ -612,6 +623,7 @@ const T = {
   custSpend:"مجموع الشراء",custDebt:"دين",custOpen:"بالطريق",custOrdersN:"طلب",custDeliv:"مسلَّم",
   custCanc:"ملغى",custBack:"رجوع للقائمة",copied:"تم النسخ ✓",custShare:"من الدخل",
   riskWarn:"تحذير — خذ المبلغ كامل مقدماً",riskCanc:"ملغى",riskDebt:"دين",
+  camScan:"📷 مسح بالكاميرا — باركود الليبل",camClose:"إغلاق",camRec:"تسجّل",camDup:"مسجّل من قبل",
   waslCheck:"فحص الوصل — الشيت مقابل النظام",wcSame:"مطابق",wcDiff:"اختلاف",
   wcSheetOnly:"موجود بالشيت، مو بالنظام",wcSysOnly:"موجود بالنظام، مو بالشيت",
   wcSheet:"الشيت",wcSystem:"النظام",wcTotal:"المجموع",wcDep:"الوصل",
@@ -2382,6 +2394,8 @@ async function initShko(){
     $("sk-add-ofd").addEventListener("click", addAllOfd);
     $("sk-file").addEventListener("change", skUpload);
     $("sk-scan").addEventListener("change", runShkoScan);
+    $("sk-cam").addEventListener("click", startCamScan);
+    $("cam-x").addEventListener("click", stopCamScan);
     $("sk2-apply").addEventListener("click", applyShkoScan);
     $("sk-clear").addEventListener("click", clearShkoRecv);
     $("sk-clear-open").addEventListener("click", clearShkoOpen);
@@ -3352,6 +3366,111 @@ function skAnalyse(words, imgH, valid, cyc){
   return { strong: low.length ? tallest(low, 1.30) : null, weak: cands.length ? tallest(cands, 1.20) : null };
 }
 
+// ---------- live camera barcode scan: the phone IS the scanner ----------
+let camStream = null, camReader = null, camActive = false, camHits = {};
+let camCtx = null;
+function camBeep(fresh){
+  try {
+    camCtx = camCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const o = camCtx.createOscillator(), g = camCtx.createGain();
+    o.frequency.value = fresh ? 1180 : 260;
+    g.gain.setValueAtTime(0.25, camCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, camCtx.currentTime + 0.18);
+    o.connect(g); g.connect(camCtx.destination);
+    o.start(); o.stop(camCtx.currentTime + 0.18);
+  } catch (e){}
+  if (navigator.vibrate) navigator.vibrate(fresh ? 60 : [40, 60, 40]);
+}
+function camToast(n, fresh){
+  const o = sk2Orders[n], el = $("cam-toast");
+  el.style.display = "block";
+  el.style.background = fresh ? "rgba(29,158,117,.92)" : "rgba(60,74,80,.92)";
+  el.style.color = "#fff";
+  el.innerHTML = `<b class="num" dir="ltr">${$("sk-cycle").value}-${String(n).padStart(4,"0")}</b>
+    <span dir="ltr" style="margin-inline-start:8px">${o?.customers?.instagram_username || ""}</span>
+    <span style="float:inline-end">${fresh ? "✓ " + t().camRec : t().camDup}</span>`;
+  clearTimeout(camToast._t);
+  camToast._t = setTimeout(() => { el.style.display = "none"; }, 2200);
+  $("cam-n").textContent = `${sk2Rows.length} ✓`;
+}
+function loadZXing(){
+  return new Promise((res, rej) => {
+    if (window.ZXing) return res();
+    const sc = document.createElement("script");
+    sc.src = "https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js";
+    sc.onload = res; sc.onerror = rej;
+    document.head.appendChild(sc);
+  });
+}
+async function startCamScan(){
+  const cyc = $("sk-cycle").value;
+  if (!cyc) return;
+  await freshSession();
+  const { data: os } = await db.from("orders")
+    .select("id,seq,balance_iqd,status,customers(instagram_username)").eq("cycle_code", cyc);
+  sk2Orders = {};
+  (os || []).forEach(o => sk2Orders[Number(o.seq)] = o);
+  const valid = new Set(Object.keys(sk2Orders).map(Number));
+  camHits = {};
+  $("cam-ov").classList.remove("hide");
+  $("cam-n").textContent = `${sk2Rows.length} ✓`;
+  try {
+    camStream = await navigator.mediaDevices.getUserMedia(
+      { video: { facingMode: "environment", width: { ideal: 1920 } }, audio: false });
+  } catch (e){ stopCamScan(); return say("sk-msg", e.message || String(e), "err"); }
+  const v = $("cam-v");
+  v.srcObject = camStream;
+  try { await v.play(); } catch (e){}
+  camActive = true;
+  const onCode = raw => {
+    if (!camActive) return;
+    const sdig = String(raw || "").replace(/\D/g, "");
+    if (sdig.length !== 8 || !sdig.startsWith(cyc)) return;
+    const n = parseInt(sdig.slice(4), 10);
+    if (!valid.has(n)) return;
+    const now = Date.now();
+    if (camHits[n] && now - camHits[n] < 2500) return;
+    camHits[n] = now;
+    if (!sk2Rows.some(r => r.seq === n)){
+      sk2Rows.push({ seq: n, file: null });
+      renderShkoScan();
+      camBeep(true); camToast(n, true);
+    } else { camBeep(false); camToast(n, false); }
+  };
+  let native = false;
+  try {
+    if ("BarcodeDetector" in window){
+      const fs = await BarcodeDetector.getSupportedFormats();
+      if (fs.includes("code_128")){
+        native = true;
+        const det = new BarcodeDetector({ formats: ["code_128"] });
+        const loop = async () => {
+          if (!camActive) return;
+          try { for (const c of await det.detect(v)) onCode(c.rawValue); } catch (e){}
+          setTimeout(loop, 120);
+        };
+        loop();
+      }
+    }
+  } catch (e){ native = false; }
+  if (!native){
+    try {
+      await loadZXing();
+      const hints = new Map([[ZXing.DecodeHintType.POSSIBLE_FORMATS, [ZXing.BarcodeFormat.CODE_128]]]);
+      camReader = new ZXing.BrowserMultiFormatReader(hints);
+      camReader.decodeFromStream(camStream, v, res => { if (res) onCode(res.getText()); });
+    } catch (e){ stopCamScan(); say("sk-msg", e.message || String(e), "err"); }
+  }
+}
+function stopCamScan(){
+  camActive = false;
+  try { camReader && camReader.reset(); } catch (e){}
+  camReader = null;
+  if (camStream){ camStream.getTracks().forEach(tr => tr.stop()); camStream = null; }
+  $("cam-ov").classList.add("hide");
+  $("cam-toast").style.display = "none";
+}
+
 async function runShkoScan(e){
   const files = [...e.target.files];
   e.target.value = "";
@@ -3580,7 +3699,7 @@ async function applyShkoScan(){
   let attached = 0;
   for (const r of sk2Rows){
     const o = sk2Orders[r.seq], srec = o && byOrder[o.id];
-    if (!srec) continue;
+    if (!srec || !r.file) continue;
     const path = `${cyc}/${r.seq}-${srec.id}.jpg`;
     const { error: ue } = await db.storage.from("labels")
       .upload(path, r.file, { upsert: true, contentType: r.file.type || "image/jpeg" });
