@@ -161,7 +161,7 @@ button.go:disabled{opacity:.5;cursor:default}
     </div>
     <button class="go" id="submit" data-t="cta"></button>
     <p class="hint" data-t="hint"></p>
-    <p style="text-align:center;color:#3E545B;font-size:10px;margin-top:22px;font-family:Archivo,sans-serif">v15</p>
+    <p style="text-align:center;color:#3E545B;font-size:10px;margin-top:22px;font-family:Archivo,sans-serif">v16</p>
   </section>
 
   <section id="result-view" class="hidden">
@@ -181,6 +181,7 @@ button.go:disabled{opacity:.5;cursor:default}
     </div>
     <div class="scene" id="r-scene"></div>
   <div class="tl" id="r-timeline"></div>
+    <div id="r-late" class="hidden"></div>
     <div class="foot">
       <span class="upd" id="r-upd"></span>
       <button id="again" data-t="again"></button>
@@ -270,6 +271,12 @@ const T = {
     paid:"پارەی پێشەکی",
     due:"بڕی ماوە",
     cash:"کاش لە کاتی گەیاندن",
+    stageHint:{received:"بە ئاسایی ٥–٧ ڕۆژ دەخایەنێت تا دەگاتە دوبەی",
+      at_dubai:"بە ئاسایی ٧–١٤ ڕۆژ دەخایەنێت تا دەگاتە هەولێر",
+      at_erbil:"چەند ڕۆژێک بۆ ئامادەکردن و ناردنی گەیاندن",
+      out_for_delivery:"لە ماوەی ١–٣ ڕۆژدا دەگاتە دەستت"},
+    lateQ:"داواکاریەکەت دواکەوتووە؟",lateBtn:"پەیوەندیمان پێوە بکە — واتسئاپ",
+    lateMsg:"سڵاو، داواکاریەکەم دواکەوتووە. کۆدەکەم: ",
     paidLbl:"پارەی گەیاندن — درا",
     paidNote:"✓ درا لە کاتی گەیاندن، سوپاس بۆ کڕینت",
     settled:"هیچ بڕێک نەماوە",
@@ -303,6 +310,12 @@ const T = {
     paid:"المبلغ المدفوع",
     due:"المبلغ المتبقي",
     cash:"نقداً عند التسليم",
+    stageHint:{received:"عادةً ياخذ ٥–٧ أيام حتى يوصل دبي",
+      at_dubai:"عادةً ياخذ ٧–١٤ يوم حتى يوصل أربيل",
+      at_erbil:"كم يوم للتجهيز والإرسال للتوصيل",
+      out_for_delivery:"يوصلك خلال ١–٣ أيام"},
+    lateQ:"طلبك متأخر؟",lateBtn:"راسلنا — واتساب",
+    lateMsg:"مرحباً، طلبي متأخر. الرمز: ",
     paidLbl:"مبلغ التسليم — مدفوع",
     paidNote:"✓ اندفع عند التسليم، شكراً لشرائك",
     settled:"ما بقى شي عليك",
@@ -390,6 +403,23 @@ function render(o){
   $("r-total").textContent = iqd(o.total_iqd);
   $("r-paid").textContent = "− " + iqd(o.deposit_iqd);
   $("r-due").textContent = iqd(o.balance_iqd);
+  // a genuinely late order gets a direct line to us, order code attached
+  const LATE = { received: 7, purchased: 7, at_dubai: 20, in_transit: 20,
+                 at_erbil: 7, out_for_delivery: 7 };
+  const lateEl = $("r-late");
+  const days = o.status_at ? (Date.now() - new Date(o.status_at).getTime()) / 864e5 : 0;
+  if (!["delivered", "cancelled"].includes(o.status) && days > (LATE[o.status] || 30)){
+    const wa = "https://wa.me/9647503856449?text=" +
+      encodeURIComponent(t.lateMsg + o.order_code);
+    lateEl.className = "";
+    lateEl.innerHTML = `<div style="background:rgba(239,159,39,.08);border:1px solid rgba(239,159,39,.35);
+        border-radius:14px;padding:16px;margin-top:18px;text-align:center">
+      <div style="font-size:14px;margin-bottom:12px">${t.lateQ}</div>
+      <a href="${wa}" target="_blank" rel="noopener" style="display:inline-block;background:#25D366;
+        color:#07281a;font-weight:700;text-decoration:none;border-radius:12px;padding:12px 22px;font-size:14px">
+        ${t.lateBtn}</a></div>`;
+  } else { lateEl.className = "hidden"; lateEl.innerHTML = ""; }
+
   // a delivered order owes nothing — the balance was paid at the door
   const lbl = document.querySelector('[data-t="due"]');
   if (o.status === "delivered"){
@@ -451,6 +481,17 @@ function render(o){
     const title = document.createElement("div");
     title.className = "t"; title.textContent = x.label;
     body.append(title);
+    if (i === reached && !dead && o.status !== "delivered"){
+      const hintKey = x.covers[0];
+      const hint = t.stageHint[hintKey];
+      if (hint){
+        const hd = document.createElement("div");
+        hd.className = "d";
+        hd.style.cssText = "color:var(--teal);opacity:.85";
+        hd.textContent = hint;
+        body.append(hd);
+      }
+    }
     if (meta){
       const d = document.createElement("div");
       d.className = "d"; d.textContent = meta;
