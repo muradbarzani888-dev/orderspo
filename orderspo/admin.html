@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v89</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v90</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -181,6 +181,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
       <h2 data-t="newOrder"></h2>
       <div id="n-msg"></div>
       <div class="f"><label data-t="username"></label><input id="n-user" dir="ltr" autocomplete="off"></div>
+      <div id="n-flag"></div>
       <div class="f"><label data-t="phone"></label><input id="n-phone" inputmode="tel" dir="ltr" placeholder="7501234567"></div>
       <div class="f"><label data-t="address"></label><textarea id="n-addr"></textarea></div>
       <div class="f"><label data-t="total"></label><input id="n-total" inputmode="numeric" dir="ltr"></div>
@@ -247,6 +248,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
       </div>
       <div class="count"><div class="n num" id="p-n">0</div><div class="t" data-t="willAdd"></div></div>
       <div id="p-preview" style="margin-bottom:14px"></div>
+      <div id="p-flag"></div>
       <button class="btn" id="p-go" data-t="addAll"></button>
 
       <div id="bag-box" class="hide" style="margin-top:30px;padding-top:22px;
@@ -565,7 +567,9 @@ const T = {
   setStatus:"دۆخی نوێ",update:"نوێکردنەوە",collected:"پارەی کۆکراوە",collectedAsk:"چەند پارە کۆکرایەوە؟",shkoTitle:"شحنەکانی SHKO",shkoRemaining:"پارە لای SHKO (ماوە)",shkoThisMonth:"وەرگیراوی ئەم مانگە",shkoAllRecv:"کۆی وەرگیراو",shkoAddOfd:"زیادکردنی هەموو «لە گەیاندندایە»",shkoAdd:"زیادکردن",shkoReceived:"وەرگیراوەکان",shkoEmpty:"هیچ نەماوە — هەمووی وەرگیراوە ✓",shkoNone:"هیچ داواکارییەک نییە",shkoDel:"سڕینەوە",shkoClearAll:"سڕینەوەی هەمووی",shkoRecvN:"وەرگیراوە",shkoOpenList:"لای SHKO",shkoShipN:"شحنە",shkoScanHelp:"وێنەی لەیبڵەکان هەڵبژێرە — سیستەم کۆدی کڕیار دەخوێنێتەوە، بڕی ماوە و ناو لە داواکارییەکەوە دێن",shkoApply:"تۆمارکردنی شحنەکان",shkoImgDel:"سڕینەوەی وێنە",lblTitle:"چاپکردنی لەیبڵ",lblHelp:"کۆد یان مەودا بنووسە (1-50 398) یان هەموو دۆخێک زیاد بکە، دواتر چاپکردن — هەر لەیبڵێک 100×100mm. ژمارەی بارکۆد = مانگ + کۆدی کڕیار.",lblAddStatus:"زیادکردنی هەموو",lblPrint:"چاپکردن",lblName:"ناو",lblPhone:"مۆبایلی کڕیار",lblCity:"شار",lblAddr:"ناونیشان",lblDue:"بڕی ماوە",alTitle:"داواکاری گیرماوەکان",alDays:"ڕۆژ",alFix:"گۆڕینی دۆخ",alBagLate:"جانتای دواکەوتوو",
   custTitle:"کڕیارەکان",custVips:"کڕیاری VIP",custRepeat:"کڕیاری دووبارە",custCopy:"کۆپی لیستی VIP بۆ Close Friends",
   custSpend:"کۆی کڕین",custDebt:"قەرز",custOpen:"لە ڕێگادایە",custOrdersN:"داواکاری",custDeliv:"گەیەندراو",
-  custCanc:"هەڵوەشاوە",custBack:"گەڕانەوە بۆ لیست",copied:"کۆپی کرا ✓",custShare:"لە داهات",costTitle:"کۆست و قازانج",revenue:"داهاتی مانگ",totalCost:"کۆی کۆستەکان",netProfit:"قازانجی سافی",margin:"ڕێژەی قازانج",seedFixed:"زیادکردنی کۆستە جێگیرەکانی مانگ",addCost:"زیادکردنی کۆست",costCat:"جۆر",costLabel:"ناو",costQty:"ژمارە",costUsd:"نرخ بە دۆلار",costFx:"نرخی دۆلار",costIqd:"یان بڕ بە دینار",saveCost:"تۆمارکردن",costSettings:"ڕێکخستنەکانی کۆست",perKg:"دۆلار بۆ کیلۆ",baghdad:"بەغدا",south:"باشوور",saveSettings:"پاشەکەوتکردن",catFixed:"جێگیر",catCards:"کارتی شەین",catAds:"ڕیکلامی مێتا",catAgent:"ئاژانسی دوبەی",catShko:"گەیاندنی SHKO",catOther:"کۆستی تر",autoCalc:"خۆکار",kgRec:"کیلۆی تۆمارکراو",deliv:"گەیەندراو",unknownGov:"نادیار",shkoFile:"فایلی SHKO بار بکە",pickCol:"ستوونی کرێی گەیاندن هەڵبژێرە ⬇",rowsN:"ڕیز",shkoMoved:"گۆڕدرا بۆ «لە گەیاندندایە»",delivDebt:"قەرزی گەیەندراو (کۆنەکراوەتەوە)",saveAmounts:"تۆمارکردنی بڕەکان",from:"لە دۆخی",to:"بۆ دۆخی",month:"مانگ",codeFrom:"لە کۆدی",codeTo:"بۆ کۆدی",
+  custCanc:"هەڵوەشاوە",custBack:"گەڕانەوە بۆ لیست",copied:"کۆپی کرا ✓",custShare:"لە داهات",
+  riskWarn:"ئاگاداری — پێشەکی تەواو وەربگرە",riskCanc:"هەڵوەشاوە",riskDebt:"قەرز",
+  vipTag:"کڕیاری VIP — بە باشی مامەڵە بکە",costTitle:"کۆست و قازانج",revenue:"داهاتی مانگ",totalCost:"کۆی کۆستەکان",netProfit:"قازانجی سافی",margin:"ڕێژەی قازانج",seedFixed:"زیادکردنی کۆستە جێگیرەکانی مانگ",addCost:"زیادکردنی کۆست",costCat:"جۆر",costLabel:"ناو",costQty:"ژمارە",costUsd:"نرخ بە دۆلار",costFx:"نرخی دۆلار",costIqd:"یان بڕ بە دینار",saveCost:"تۆمارکردن",costSettings:"ڕێکخستنەکانی کۆست",perKg:"دۆلار بۆ کیلۆ",baghdad:"بەغدا",south:"باشوور",saveSettings:"پاشەکەوتکردن",catFixed:"جێگیر",catCards:"کارتی شەین",catAds:"ڕیکلامی مێتا",catAgent:"ئاژانسی دوبەی",catShko:"گەیاندنی SHKO",catOther:"کۆستی تر",autoCalc:"خۆکار",kgRec:"کیلۆی تۆمارکراو",deliv:"گەیەندراو",unknownGov:"نادیار",shkoFile:"فایلی SHKO بار بکە",pickCol:"ستوونی کرێی گەیاندن هەڵبژێرە ⬇",rowsN:"ڕیز",shkoMoved:"گۆڕدرا بۆ «لە گەیاندندایە»",delivDebt:"قەرزی گەیەندراو (کۆنەکراوەتەوە)",saveAmounts:"تۆمارکردنی بڕەکان",from:"لە دۆخی",to:"بۆ دۆخی",month:"مانگ",codeFrom:"لە کۆدی",codeTo:"بۆ کۆدی",
   rangeHint:"بەتاڵی بهێڵەرەوە بۆ هەمووی",
   willMove:"داواکاری دەگوازرێتەوە",moveAll:"گواستنەوەی هەموویان",noRes:"هیچ نەدۆزرایەوە",
   saved:"تۆمارکرا",need:"ناو و کۆی گشتی پێویستە",moved:"داواکاری گوازرایەوە",
@@ -602,7 +606,9 @@ const T = {
   setStatus:"الحالة الجديدة",update:"تحديث",collected:"المبلغ المستلم",collectedAsk:"شكد انستلم؟",shkoTitle:"شحنات SHKO",shkoRemaining:"الفلوس عند SHKO (باقية)",shkoThisMonth:"مستلم هذا الشهر",shkoAllRecv:"مجموع المستلم",shkoAddOfd:"إضافة كل «قيد التوصيل»",shkoAdd:"إضافة",shkoReceived:"المستلمة",shkoEmpty:"ما باقي شي — كله مستلم ✓",shkoNone:"ما في طلبات",shkoDel:"حذف",shkoClearAll:"حذف الكل",shkoRecvN:"مستلم",shkoOpenList:"عند SHKO",shkoShipN:"شحنة",shkoScanHelp:"اختار صور الليبلات — النظام يقرا رمز الزبون، والمبلغ الباقي والاسم ييجون من الطلب",shkoApply:"حفظ الشحنات",shkoImgDel:"حذف الصورة",lblTitle:"طباعة الليبلات",lblHelp:"اكتب الرموز أو مدى (1-50 398) أو ضيف حالة كاملة ثم اطبع — كل ليبل 100×100mm. رقم الباركود = الشهر + رمز الزبون.",lblAddStatus:"إضافة الكل",lblPrint:"طباعة",lblName:"الاسم",lblPhone:"موبايل الزبون",lblCity:"المدينة",lblAddr:"العنوان",lblDue:"المبلغ المتبقي",alTitle:"طلبات عالقة",alDays:"يوم",alFix:"تغيير الحالة",alBagLate:"كيس متأخر",
   custTitle:"الزبائن",custVips:"زبون VIP",custRepeat:"زبون متكرر",custCopy:"انسخ قائمة VIP لـ Close Friends",
   custSpend:"مجموع الشراء",custDebt:"دين",custOpen:"بالطريق",custOrdersN:"طلب",custDeliv:"مسلَّم",
-  custCanc:"ملغى",custBack:"رجوع للقائمة",copied:"تم النسخ ✓",custShare:"من الدخل",costTitle:"التكاليف والأرباح",revenue:"دخل الشهر",totalCost:"مجموع التكاليف",netProfit:"صافي الربح",margin:"نسبة الربح",seedFixed:"إضافة التكاليف الثابتة للشهر",addCost:"إضافة تكلفة",costCat:"النوع",costLabel:"الاسم",costQty:"العدد",costUsd:"السعر بالدولار",costFx:"سعر الدولار",costIqd:"أو المبلغ بالدينار",saveCost:"حفظ",costSettings:"إعدادات التكاليف",perKg:"دولار للكيلو",baghdad:"بغداد",south:"الجنوب",saveSettings:"حفظ",catFixed:"ثابتة",catCards:"كارتات شي إن",catAds:"إعلانات ميتا",catAgent:"وكيل دبي",catShko:"توصيل SHKO",catOther:"تكاليف أخرى",autoCalc:"تلقائي",kgRec:"كيلو مسجّل",deliv:"مسلَّم",unknownGov:"غير معروف",shkoFile:"ارفع ملف SHKO",pickCol:"اختر عمود أجرة التوصيل ⬇",rowsN:"صف",shkoMoved:"تحوّلت إلى «قيد التوصيل»",delivDebt:"دين المسلَّم (غير مستلم)",saveAmounts:"حفظ المبالغ",from:"من حالة",to:"إلى حالة",month:"الشهر",codeFrom:"من رمز",codeTo:"إلى رمز",
+  custCanc:"ملغى",custBack:"رجوع للقائمة",copied:"تم النسخ ✓",custShare:"من الدخل",
+  riskWarn:"تحذير — خذ المبلغ كامل مقدماً",riskCanc:"ملغى",riskDebt:"دين",
+  vipTag:"زبون VIP — عامله زين",costTitle:"التكاليف والأرباح",revenue:"دخل الشهر",totalCost:"مجموع التكاليف",netProfit:"صافي الربح",margin:"نسبة الربح",seedFixed:"إضافة التكاليف الثابتة للشهر",addCost:"إضافة تكلفة",costCat:"النوع",costLabel:"الاسم",costQty:"العدد",costUsd:"السعر بالدولار",costFx:"سعر الدولار",costIqd:"أو المبلغ بالدينار",saveCost:"حفظ",costSettings:"إعدادات التكاليف",perKg:"دولار للكيلو",baghdad:"بغداد",south:"الجنوب",saveSettings:"حفظ",catFixed:"ثابتة",catCards:"كارتات شي إن",catAds:"إعلانات ميتا",catAgent:"وكيل دبي",catShko:"توصيل SHKO",catOther:"تكاليف أخرى",autoCalc:"تلقائي",kgRec:"كيلو مسجّل",deliv:"مسلَّم",unknownGov:"غير معروف",shkoFile:"ارفع ملف SHKO",pickCol:"اختر عمود أجرة التوصيل ⬇",rowsN:"صف",shkoMoved:"تحوّلت إلى «قيد التوصيل»",delivDebt:"دين المسلَّم (غير مستلم)",saveAmounts:"حفظ المبالغ",from:"من حالة",to:"إلى حالة",month:"الشهر",codeFrom:"من رمز",codeTo:"إلى رمز",
   rangeHint:"خليها فارغة للكل",
   willMove:"طلب راح ينتقل",moveAll:"حدث الكل",noRes:"ما لكيت شي",
   saved:"انحفظ",need:"لازم الاسم والمجموع",moved:"الطلبات انتقلت",
@@ -832,6 +838,61 @@ async function search(){
   document.querySelectorAll(".row").forEach(r =>
     r.addEventListener("click", () => openOrder(r.dataset.id)));
 }
+
+// ---------- Order-entry guard: warn before accepting a risky customer ----
+const riskLine = r => {
+  const bits = [];
+  if (r.cancelled_n >= 2) bits.push(`${r.cancelled_n} ${t().riskCanc}`);
+  if (Number(r.debt_iqd) > 0) bits.push(`${t().riskDebt} ${iqd(r.debt_iqd)}`);
+  return bits.join(" · ");
+};
+const riskBanner = r => {
+  if (r && (r.cancelled_n >= 2 || Number(r.debt_iqd) > 0))
+    return `<div style="background:rgba(226,75,74,.10);border:1px solid rgba(226,75,74,.4);
+      border-radius:12px;padding:12px 14px;margin-bottom:14px;color:#F09595;font-size:13px">
+      ⚠ ${t().riskWarn}<span class="num" style="margin-inline-start:8px">${riskLine(r)}</span></div>`;
+  if (r && r.is_vip)
+    return `<div style="background:rgba(29,158,117,.08);border:1px solid rgba(29,158,117,.35);
+      border-radius:12px;padding:12px 14px;margin-bottom:14px;color:var(--teal);font-size:13px">
+      💎 ${t().vipTag}</div>`;
+  return "";
+};
+let nFlagTimer = null;
+$("n-user").addEventListener("input", () => {
+  clearTimeout(nFlagTimer);
+  const v = $("n-user").value.trim();
+  if (!v){ $("n-flag").innerHTML = ""; return; }
+  nFlagTimer = setTimeout(async () => {
+    const { data } = await db.from("customer_stats")
+      .select("is_vip,orders_n,cancelled_n,debt_iqd")
+      .ilike("instagram_username", v).limit(1);
+    if ($("n-user").value.trim() === v)
+      $("n-flag").innerHTML = riskBanner(data && data[0]);
+  }, 500);
+});
+let pFlagTimer = null;
+$("p-box").addEventListener("input", () => {
+  clearTimeout(pFlagTimer);
+  pFlagTimer = setTimeout(async () => {
+    const { rows } = parsePaste();
+    const names = [...new Set(rows.map(r => r.name).filter(Boolean))];
+    if (!names.length){ $("p-flag").innerHTML = ""; return; }
+    const risky = [];
+    for (let i = 0; i < names.length; i += 150){
+      const { data } = await db.from("customer_stats")
+        .select("instagram_username,cancelled_n,debt_iqd")
+        .in("instagram_username", names.slice(i, i+150))
+        .or("cancelled_n.gte.2,debt_iqd.gt.0");
+      (data || []).forEach(r => risky.push(r));
+    }
+    $("p-flag").innerHTML = risky.length ? `<div style="background:rgba(226,75,74,.10);
+      border:1px solid rgba(226,75,74,.4);border-radius:12px;padding:12px 14px;
+      margin-bottom:14px;color:#F09595;font-size:13px;line-height:2">
+      ⚠ ${t().riskWarn}<br>${risky.map(r =>
+        `<span dir="ltr">${r.instagram_username}</span> — <span class="num">${riskLine(r)}</span>`).join("<br>")}
+      </div>` : "";
+  }, 800);
+});
 
 // ---------- Customers: profiles, VIP ranking, debt flags ----------
 let cuRows = [], cuInit = false;
