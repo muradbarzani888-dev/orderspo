@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v96</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v97</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -708,7 +708,9 @@ function paintLang(){
   document.querySelectorAll("[data-ph]").forEach(e => { const v = t()[e.dataset.ph]; if (v) e.placeholder = v; });
   $("l-ku").classList.toggle("on", lang === "ku");
   $("l-ar").classList.toggle("on", lang === "ar");
-  [["d-status", FLOW.concat("cancelled")], ["b-from", FLOW], ["b-to", FLOW]].forEach(([id, list]) => {
+  // the batch mover must never mass-move finished orders backward — a
+  // range sweep once knocked 132 delivered orders back into the pipeline
+  [["d-status", FLOW.concat("cancelled")], ["b-from", FLOW.filter(x => x !== "delivered")], ["b-to", FLOW]].forEach(([id, list]) => {
     const s = $(id); const keep = s.value;
     s.innerHTML = list.map(v => `<option value="${v}">${t().st[v]}</option>`).join("");
     if (keep) s.value = keep;
