@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v95</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v96</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -163,6 +163,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
         <button data-go="paste" data-t="pasteMany"></button>
         <button data-go="dash" data-t="dashboard" id="nav-dash" class="hide"></button>
         <button data-go="cust" data-t="custTitle" id="nav-cust" class="hide"></button>
+        <button data-go="close" data-t="closeTitle" id="nav-close" class="hide"></button>
         <button data-go="scan" data-t="scanBags" id="nav-scan" class="hide"></button>
         <button data-go="shko" data-t="shkoTitle" id="nav-shko" class="hide"></button>
         <button data-go="cost" data-t="costTitle" id="nav-cost" class="hide"></button>
@@ -481,6 +482,19 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
       <div id="cu-prof" class="hide"></div>
     </div>
 
+    <div id="v-close" class="hide">
+      <button class="back" data-go="home" data-t="back"></button>
+      <h2 data-t="closeTitle"></h2>
+      <div id="cl-msg"></div>
+      <div style="display:flex;gap:10px">
+        <div class="f" style="flex:1"><label data-t="closeMonth"></label><select id="cl-a"></select></div>
+        <div class="f" style="flex:1"><label data-t="closeVs"></label><select id="cl-b"></select></div>
+      </div>
+      <div id="cl-cmp"></div>
+      <h2 style="margin-top:26px;font-size:15px" data-t="closeLeft"></h2>
+      <div id="cl-check"></div>
+    </div>
+
     <div id="v-batch" class="hide">
       <button class="back" data-go="home" data-t="back"></button>
       <h2 data-t="moveBatch"></h2>
@@ -579,7 +593,11 @@ const T = {
   custSpend:"کۆی کڕین",custDebt:"قەرز",custOpen:"لە ڕێگادایە",custOrdersN:"داواکاری",custDeliv:"گەیەندراو",
   custCanc:"هەڵوەشاوە",custBack:"گەڕانەوە بۆ لیست",copied:"کۆپی کرا ✓",custShare:"لە داهات",
   riskWarn:"ئاگاداری — پێشەکی تەواو وەربگرە",riskCanc:"هەڵوەشاوە",riskDebt:"قەرز",
-  camScan:"📷 سکان بە کامێرا — بارکۆدی لەیبڵ",camClose:"داخستن",camRec:"تۆمارکرا",camDup:"پێشتر تۆمارکراوە",
+  closeTitle:"داخستنی مانگ و بەراورد",closeMonth:"مانگی داخستن",closeVs:"بەراورد لەگەڵ",
+  closeLeft:"پاشماوەکان — پێش داخستن",clOrders:"داواکاری",clRev:"داهات",clColl:"کۆکراوە",
+  clOwed:"ماوە (لە ڕێگا)",clDebt:"قەرزی گەیەندراو",clCanc:"ڕێژەی هەڵوەشان",clDeliv:"ڕێژەی گەیاندن",
+  clAvg:"ناوەندی داواکاری",clUndeliv:"داواکاری نەگەیەندراو",clShkoOpen:"پارەی SHKO وەرنەگیراو",
+  clNoPhone:"بێ ژمارەی مۆبایل",clClean:"هیچ نەماوە ✓",camClose:"داخستن",camRec:"تۆمارکرا",camDup:"پێشتر تۆمارکراوە",
   waslCheck:"پشکنینی وەصڵ — شیت بەرامبەر سیستەم",wcSame:"هاوتان",wcDiff:"جیاوازی",
   wcSheetOnly:"لە شیتدایە، لە سیستەمدا نییە",wcSysOnly:"لە سیستەمدایە، لە شیتدا نییە",
   wcSheet:"شیت",wcSystem:"سیستەم",wcTotal:"کۆ",wcDep:"وەصڵ",
@@ -623,7 +641,11 @@ const T = {
   custSpend:"مجموع الشراء",custDebt:"دين",custOpen:"بالطريق",custOrdersN:"طلب",custDeliv:"مسلَّم",
   custCanc:"ملغى",custBack:"رجوع للقائمة",copied:"تم النسخ ✓",custShare:"من الدخل",
   riskWarn:"تحذير — خذ المبلغ كامل مقدماً",riskCanc:"ملغى",riskDebt:"دين",
-  camScan:"📷 مسح بالكاميرا — باركود الليبل",camClose:"إغلاق",camRec:"تسجّل",camDup:"مسجّل من قبل",
+  closeTitle:"إغلاق الشهر والمقارنة",closeMonth:"شهر الإغلاق",closeVs:"مقارنة مع",
+  closeLeft:"المتبقيات — قبل الإغلاق",clOrders:"الطلبات",clRev:"الدخل",clColl:"المحصَّل",
+  clOwed:"المتبقي (بالطريق)",clDebt:"دين المسلَّم",clCanc:"نسبة الإلغاء",clDeliv:"نسبة التسليم",
+  clAvg:"متوسط الطلب",clUndeliv:"طلبات غير مسلَّمة",clShkoOpen:"فلوس SHKO غير مستلمة",
+  clNoPhone:"بدون رقم موبايل",clClean:"ما باقي شي ✓",camClose:"إغلاق",camRec:"تسجّل",camDup:"مسجّل من قبل",
   waslCheck:"فحص الوصل — الشيت مقابل النظام",wcSame:"مطابق",wcDiff:"اختلاف",
   wcSheetOnly:"موجود بالشيت، مو بالنظام",wcSysOnly:"موجود بالنظام، مو بالشيت",
   wcSheet:"الشيت",wcSystem:"النظام",wcTotal:"المجموع",wcDep:"الوصل",
@@ -678,7 +700,7 @@ function say(box, text, kind, ms){
   if (text && hold) setTimeout(() => { if ($(box)) $(box).innerHTML = ""; }, hold);
 }
 function view(n){
-  ["home","new","paste","dash","scan","detail","batch","shko","cost","lbl","cust"].forEach(v => $("v-" + v).classList.toggle("hide", v !== n));
+  ["home","new","paste","dash","scan","detail","batch","shko","cost","lbl","cust","close"].forEach(v => $("v-" + v).classList.toggle("hide", v !== n));
   window.scrollTo(0,0);
 }
 function paintLang(){
@@ -818,6 +840,7 @@ async function loadHome(){
   $("h-money").classList.toggle("hide", me.role !== "admin");
   $("nav-dash").classList.toggle("hide", me.role !== "admin");
   $("nav-cust").classList.toggle("hide", me.role !== "admin");
+  $("nav-close").classList.toggle("hide", me.role !== "admin");
   $("nav-scan").classList.toggle("hide", me.role !== "admin");
   $("nav-shko").classList.toggle("hide", me.role !== "admin" || !hasShip);
   $("nav-cost").classList.toggle("hide", me.role !== "admin" || !hasCosts);
@@ -855,6 +878,107 @@ async function search(){
     : `<div class="empty">${t().noRes}</div>`;
   document.querySelectorAll(".row").forEach(r =>
     r.addEventListener("click", () => openOrder(r.dataset.id)));
+}
+
+// ---------- Month close: side-by-side comparison + leftovers checklist ----
+let clInit = false;
+async function initClose(){
+  if (!clInit){
+    clInit = true;
+    $("cl-a").addEventListener("change", runClose);
+    $("cl-b").addEventListener("change", runClose);
+  }
+  const { data: used } = await db.from("orders").select("cycle_code");
+  const cycles = [...new Set((used || []).map(o => o.cycle_code))].sort().reverse();
+  const opts = cycles.map(c => `<option value="${c}">${c}</option>`).join("");
+  $("cl-a").innerHTML = opts; $("cl-b").innerHTML = opts;
+  $("cl-a").value = cycles[0] || "";
+  $("cl-b").value = cycles[1] || cycles[0] || "";
+  runClose();
+}
+
+async function clFetch(cyc){
+  const { data: os } = await db.from("orders")
+    .select("seq,status,total_iqd,deposit_iqd,balance_iqd,collected_iqd,customers(phone)")
+    .eq("cycle_code", cyc);
+  const { data: sh } = await db.from("shipments")
+    .select("amount_iqd,received").eq("cycle_code", cyc);
+  return { os: os || [], sh: sh || [] };
+}
+
+function clMetrics({ os, sh }){
+  const live = os.filter(o => o.status !== "cancelled");
+  const canc = os.length - live.length;
+  const deliv = live.filter(o => o.status === "delivered");
+  const sum = (a, f) => a.reduce((x, o) => x + Number(f(o) || 0), 0);
+  return {
+    orders: live.length,
+    revenue: sum(live, o => o.total_iqd),
+    collected: sum(live, o => o.deposit_iqd) + sum(deliv, o => o.collected_iqd),
+    owed: sum(live.filter(o => o.status !== "delivered"), o => o.balance_iqd),
+    debt: sum(deliv, o => Number(o.total_iqd) - Number(o.collected_iqd ?? o.total_iqd)),
+    cancRate: os.length ? canc / os.length : 0,
+    delivRate: live.length ? deliv.length / live.length : 0,
+    avg: live.length ? sum(live, o => o.total_iqd) / live.length : 0,
+    undeliv: live.filter(o => !["delivered"].includes(o.status)),
+    noPhone: live.filter(o => !o.customers?.phone || String(o.customers.phone).replace(/\D/g, "").length < 10),
+    shkoOpen: sh.filter(x => !x.received)
+  };
+}
+
+async function runClose(){
+  const a = $("cl-a").value, b = $("cl-b").value;
+  if (!a) return;
+  const [da, db_] = await Promise.all([clFetch(a), b && b !== a ? clFetch(b) : null]);
+  const A = clMetrics(da), B = db_ ? clMetrics(db_) : null;
+  const pct = v => `${Math.round(v*100)}%`;
+  const rows = [
+    [t().clOrders, A.orders, B && B.orders, v => v, false],
+    [t().clRev, A.revenue, B && B.revenue, iqd, false],
+    [t().clColl, A.collected, B && B.collected, iqd, false],
+    [t().clOwed, A.owed, B && B.owed, iqd, true],
+    [t().clDebt, A.debt, B && B.debt, iqd, true],
+    [t().clCanc, A.cancRate, B && B.cancRate, pct, true],
+    [t().clDeliv, A.delivRate, B && B.delivRate, pct, false],
+    [t().clAvg, Math.round(A.avg), B && Math.round(B.avg), iqd, false],
+  ];
+  $("cl-cmp").innerHTML = `
+    <div style="display:grid;grid-template-columns:1.3fr 1fr 1fr auto;gap:0 10px;margin-top:6px">
+      <div></div>
+      <div class="num" style="color:var(--teal);font-weight:700;padding:8px 0">${a}</div>
+      <div class="num" style="color:var(--mute);font-weight:700;padding:8px 0">${b !== a ? b : ""}</div>
+      <div></div>
+      ${rows.map(([lbl, va, vb, fmt, lowGood]) => {
+        let d = "";
+        if (vb !== null && vb !== false && Number(vb) !== 0){
+          const up = va > vb, good = lowGood ? !up : up;
+          if (va !== vb) d = `<span style="color:${good ? "var(--teal)" : "#F09595"}">${up ? "▲" : "▼"}</span>`;
+        }
+        return `<div style="padding:9px 0;border-top:1px solid rgba(44,66,73,.5);color:var(--mute);font-size:13px">${lbl}</div>
+          <div class="num" style="padding:9px 0;border-top:1px solid rgba(44,66,73,.5)">${fmt(va)}</div>
+          <div class="num" style="padding:9px 0;border-top:1px solid rgba(44,66,73,.5);color:var(--mute)">${vb !== null && vb !== false ? fmt(vb) : ""}</div>
+          <div style="padding:9px 0;border-top:1px solid rgba(44,66,73,.5)">${d}</div>`;
+      }).join("")}
+    </div>`;
+  const item = (label, arr, extra) => `
+    <div class="row" style="cursor:default">
+      <div class="l"><div class="c">${arr.length ? "⚠" : "✓"} ${label}</div>
+        ${arr.length ? `<div class="u num" dir="ltr">${arr.slice(0, 25).map(o => o.seq).join(", ")}${arr.length > 25 ? " +" + (arr.length-25) : ""}</div>` : ""}</div>
+      <div class="b num" style="color:${arr.length ? "#F09595" : "var(--teal)"}">${arr.length || "✓"}${extra || ""}</div>
+    </div>`;
+  const shkoOpenSum = A.shkoOpen.reduce((x, r) => x + Number(r.amount_iqd || 0), 0);
+  const shkoItem = `
+    <div class="row" style="cursor:default">
+      <div class="l"><div class="c">${A.shkoOpen.length ? "⚠" : "✓"} ${t().clShkoOpen}</div></div>
+      <div class="b num" style="color:${A.shkoOpen.length ? "#F09595" : "var(--teal)"}">
+        ${A.shkoOpen.length ? `${A.shkoOpen.length} · ${iqd(shkoOpenSum)}` : "✓"}</div>
+    </div>`;
+  $("cl-check").innerHTML =
+    item(t().clUndeliv, A.undeliv) +
+    shkoItem +
+    item(t().clNoPhone, A.noPhone) +
+    (!A.undeliv.length && !A.shkoOpen.length && !A.noPhone.length && !A.debt
+      ? `<div class="msg ok" style="margin-top:10px">${t().clClean}</div>` : "");
 }
 
 // ---------- Order-entry guard: warn before accepting a risky customer ----
@@ -1183,6 +1307,7 @@ document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", 
   if (g === "batch") fillCycles().then(countBatch);
   if (g === "dash") initDash();
   if (g === "cust") initCust();
+  if (g === "close") initClose();
   if (g === "scan") initScan();
   if (g === "shko") initShko();
   if (g === "cost") initCost();
