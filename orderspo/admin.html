@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v90</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v91</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -569,7 +569,8 @@ const T = {
   custSpend:"کۆی کڕین",custDebt:"قەرز",custOpen:"لە ڕێگادایە",custOrdersN:"داواکاری",custDeliv:"گەیەندراو",
   custCanc:"هەڵوەشاوە",custBack:"گەڕانەوە بۆ لیست",copied:"کۆپی کرا ✓",custShare:"لە داهات",
   riskWarn:"ئاگاداری — پێشەکی تەواو وەربگرە",riskCanc:"هەڵوەشاوە",riskDebt:"قەرز",
-  vipTag:"کڕیاری VIP — بە باشی مامەڵە بکە",costTitle:"کۆست و قازانج",revenue:"داهاتی مانگ",totalCost:"کۆی کۆستەکان",netProfit:"قازانجی سافی",margin:"ڕێژەی قازانج",seedFixed:"زیادکردنی کۆستە جێگیرەکانی مانگ",addCost:"زیادکردنی کۆست",costCat:"جۆر",costLabel:"ناو",costQty:"ژمارە",costUsd:"نرخ بە دۆلار",costFx:"نرخی دۆلار",costIqd:"یان بڕ بە دینار",saveCost:"تۆمارکردن",costSettings:"ڕێکخستنەکانی کۆست",perKg:"دۆلار بۆ کیلۆ",baghdad:"بەغدا",south:"باشوور",saveSettings:"پاشەکەوتکردن",catFixed:"جێگیر",catCards:"کارتی شەین",catAds:"ڕیکلامی مێتا",catAgent:"ئاژانسی دوبەی",catShko:"گەیاندنی SHKO",catOther:"کۆستی تر",autoCalc:"خۆکار",kgRec:"کیلۆی تۆمارکراو",deliv:"گەیەندراو",unknownGov:"نادیار",shkoFile:"فایلی SHKO بار بکە",pickCol:"ستوونی کرێی گەیاندن هەڵبژێرە ⬇",rowsN:"ڕیز",shkoMoved:"گۆڕدرا بۆ «لە گەیاندندایە»",delivDebt:"قەرزی گەیەندراو (کۆنەکراوەتەوە)",saveAmounts:"تۆمارکردنی بڕەکان",from:"لە دۆخی",to:"بۆ دۆخی",month:"مانگ",codeFrom:"لە کۆدی",codeTo:"بۆ کۆدی",
+  vipTag:"— بە باشی مامەڵە بکە",
+  tier:{bronze:"برۆنز",silver:"زیو",gold:"ئاڵتوون",platinum:"پلاتینیۆم",diamond:"دایمۆند",top:"TOP"},costTitle:"کۆست و قازانج",revenue:"داهاتی مانگ",totalCost:"کۆی کۆستەکان",netProfit:"قازانجی سافی",margin:"ڕێژەی قازانج",seedFixed:"زیادکردنی کۆستە جێگیرەکانی مانگ",addCost:"زیادکردنی کۆست",costCat:"جۆر",costLabel:"ناو",costQty:"ژمارە",costUsd:"نرخ بە دۆلار",costFx:"نرخی دۆلار",costIqd:"یان بڕ بە دینار",saveCost:"تۆمارکردن",costSettings:"ڕێکخستنەکانی کۆست",perKg:"دۆلار بۆ کیلۆ",baghdad:"بەغدا",south:"باشوور",saveSettings:"پاشەکەوتکردن",catFixed:"جێگیر",catCards:"کارتی شەین",catAds:"ڕیکلامی مێتا",catAgent:"ئاژانسی دوبەی",catShko:"گەیاندنی SHKO",catOther:"کۆستی تر",autoCalc:"خۆکار",kgRec:"کیلۆی تۆمارکراو",deliv:"گەیەندراو",unknownGov:"نادیار",shkoFile:"فایلی SHKO بار بکە",pickCol:"ستوونی کرێی گەیاندن هەڵبژێرە ⬇",rowsN:"ڕیز",shkoMoved:"گۆڕدرا بۆ «لە گەیاندندایە»",delivDebt:"قەرزی گەیەندراو (کۆنەکراوەتەوە)",saveAmounts:"تۆمارکردنی بڕەکان",from:"لە دۆخی",to:"بۆ دۆخی",month:"مانگ",codeFrom:"لە کۆدی",codeTo:"بۆ کۆدی",
   rangeHint:"بەتاڵی بهێڵەرەوە بۆ هەمووی",
   willMove:"داواکاری دەگوازرێتەوە",moveAll:"گواستنەوەی هەموویان",noRes:"هیچ نەدۆزرایەوە",
   saved:"تۆمارکرا",need:"ناو و کۆی گشتی پێویستە",moved:"داواکاری گوازرایەوە",
@@ -608,7 +609,8 @@ const T = {
   custSpend:"مجموع الشراء",custDebt:"دين",custOpen:"بالطريق",custOrdersN:"طلب",custDeliv:"مسلَّم",
   custCanc:"ملغى",custBack:"رجوع للقائمة",copied:"تم النسخ ✓",custShare:"من الدخل",
   riskWarn:"تحذير — خذ المبلغ كامل مقدماً",riskCanc:"ملغى",riskDebt:"دين",
-  vipTag:"زبون VIP — عامله زين",costTitle:"التكاليف والأرباح",revenue:"دخل الشهر",totalCost:"مجموع التكاليف",netProfit:"صافي الربح",margin:"نسبة الربح",seedFixed:"إضافة التكاليف الثابتة للشهر",addCost:"إضافة تكلفة",costCat:"النوع",costLabel:"الاسم",costQty:"العدد",costUsd:"السعر بالدولار",costFx:"سعر الدولار",costIqd:"أو المبلغ بالدينار",saveCost:"حفظ",costSettings:"إعدادات التكاليف",perKg:"دولار للكيلو",baghdad:"بغداد",south:"الجنوب",saveSettings:"حفظ",catFixed:"ثابتة",catCards:"كارتات شي إن",catAds:"إعلانات ميتا",catAgent:"وكيل دبي",catShko:"توصيل SHKO",catOther:"تكاليف أخرى",autoCalc:"تلقائي",kgRec:"كيلو مسجّل",deliv:"مسلَّم",unknownGov:"غير معروف",shkoFile:"ارفع ملف SHKO",pickCol:"اختر عمود أجرة التوصيل ⬇",rowsN:"صف",shkoMoved:"تحوّلت إلى «قيد التوصيل»",delivDebt:"دين المسلَّم (غير مستلم)",saveAmounts:"حفظ المبالغ",from:"من حالة",to:"إلى حالة",month:"الشهر",codeFrom:"من رمز",codeTo:"إلى رمز",
+  vipTag:"— عامله زين",
+  tier:{bronze:"برونز",silver:"فضة",gold:"ذهب",platinum:"بلاتينيوم",diamond:"دايموند",top:"TOP"},costTitle:"التكاليف والأرباح",revenue:"دخل الشهر",totalCost:"مجموع التكاليف",netProfit:"صافي الربح",margin:"نسبة الربح",seedFixed:"إضافة التكاليف الثابتة للشهر",addCost:"إضافة تكلفة",costCat:"النوع",costLabel:"الاسم",costQty:"العدد",costUsd:"السعر بالدولار",costFx:"سعر الدولار",costIqd:"أو المبلغ بالدينار",saveCost:"حفظ",costSettings:"إعدادات التكاليف",perKg:"دولار للكيلو",baghdad:"بغداد",south:"الجنوب",saveSettings:"حفظ",catFixed:"ثابتة",catCards:"كارتات شي إن",catAds:"إعلانات ميتا",catAgent:"وكيل دبي",catShko:"توصيل SHKO",catOther:"تكاليف أخرى",autoCalc:"تلقائي",kgRec:"كيلو مسجّل",deliv:"مسلَّم",unknownGov:"غير معروف",shkoFile:"ارفع ملف SHKO",pickCol:"اختر عمود أجرة التوصيل ⬇",rowsN:"صف",shkoMoved:"تحوّلت إلى «قيد التوصيل»",delivDebt:"دين المسلَّم (غير مستلم)",saveAmounts:"حفظ المبالغ",from:"من حالة",to:"إلى حالة",month:"الشهر",codeFrom:"من رمز",codeTo:"إلى رمز",
   rangeHint:"خليها فارغة للكل",
   willMove:"طلب راح ينتقل",moveAll:"حدث الكل",noRes:"ما لكيت شي",
   saved:"انحفظ",need:"لازم الاسم والمجموع",moved:"الطلبات انتقلت",
@@ -851,10 +853,10 @@ const riskBanner = r => {
     return `<div style="background:rgba(226,75,74,.10);border:1px solid rgba(226,75,74,.4);
       border-radius:12px;padding:12px 14px;margin-bottom:14px;color:#F09595;font-size:13px">
       ⚠ ${t().riskWarn}<span class="num" style="margin-inline-start:8px">${riskLine(r)}</span></div>`;
-  if (r && r.is_vip)
+  if (r && Number(r.spend_iqd) > 1000000)
     return `<div style="background:rgba(29,158,117,.08);border:1px solid rgba(29,158,117,.35);
       border-radius:12px;padding:12px 14px;margin-bottom:14px;color:var(--teal);font-size:13px">
-      💎 ${t().vipTag}</div>`;
+      ${tierIcon(r)} ${tierName(r)} ${t().vipTag}</div>`;
   return "";
 };
 let nFlagTimer = null;
@@ -864,7 +866,7 @@ $("n-user").addEventListener("input", () => {
   if (!v){ $("n-flag").innerHTML = ""; return; }
   nFlagTimer = setTimeout(async () => {
     const { data } = await db.from("customer_stats")
-      .select("is_vip,orders_n,cancelled_n,debt_iqd")
+      .select("spend_iqd,spend_rank,orders_n,cancelled_n,debt_iqd")
       .ilike("instagram_username", v).limit(1);
     if ($("n-user").value.trim() === v)
       $("n-flag").innerHTML = riskBanner(data && data[0]);
@@ -896,15 +898,29 @@ $("p-box").addEventListener("input", () => {
 
 // ---------- Customers: profiles, VIP ranking, debt flags ----------
 let cuRows = [], cuInit = false;
-const cuBadge = r => (r.is_vip ? "💎" : (r.orders_n >= 2 ? "⭐" : "")) +
-                     ((Number(r.debt_iqd) > 0 || r.cancelled_n >= 2) ? "⚠" : "");
+// spend ladder: bronze <=500k, silver <=1M, gold <=2M, platinum <=5M,
+// diamond <=10M; past 10M the five biggest wear the crown, ranked.
+function custTier(r){
+  const sp = Number(r.spend_iqd || 0);
+  if (sp > 10000000 && Number(r.spend_rank) <= 5) return { k: "top", rank: Number(r.spend_rank) };
+  if (sp > 5000000)  return { k: "diamond" };
+  if (sp > 2000000)  return { k: "platinum" };
+  if (sp > 1000000)  return { k: "gold" };
+  if (sp > 500000)   return { k: "silver" };
+  return { k: "bronze" };
+}
+const TIER_ICON = { bronze: "🥉", silver: "🥈", gold: "🥇", platinum: "🏆", diamond: "💎", top: "👑" };
+const tierIcon = r => { const tr = custTier(r); return tr.k === "top" ? `👑#${tr.rank}` : TIER_ICON[tr.k]; };
+const tierName = r => { const tr = custTier(r); return tr.k === "top" ? `TOP #${tr.rank}` : t().tier[tr.k]; };
+const isRisky = r => Number(r.debt_iqd) > 0 || r.cancelled_n >= 2;
+const cuBadge = r => tierIcon(r) + (isRisky(r) ? "⚠" : "");
 
 async function initCust(){
   if (!cuInit){
     cuInit = true;
     $("cu-q").addEventListener("input", renderCustList);
     $("cu-copy").addEventListener("click", async () => {
-      const names = cuRows.filter(r => r.is_vip && r.instagram_username)
+      const names = cuRows.filter(r => Number(r.spend_iqd) > 1000000 && r.instagram_username)
         .map(r => "@" + r.instagram_username).join("\n");
       try { await navigator.clipboard.writeText(names); say("cu-msg", t().copied, "ok"); }
       catch (e){ prompt("copy:", names); }
@@ -915,11 +931,15 @@ async function initCust(){
     .gt("orders_n", 0).order("spend_iqd", { ascending: false }).limit(600);
   if (error) return say("cu-msg", error.message, "err");
   cuRows = data || [];
-  const vips = cuRows.filter(r => r.is_vip);
+  const cnt = {};
+  cuRows.forEach(r => { const k = custTier(r).k; cnt[k] = (cnt[k] || 0) + 1; });
+  const parts = ["top", "diamond", "platinum", "gold", "silver"]
+    .filter(k => cnt[k]).map(k => `${TIER_ICON[k]} ${cnt[k]}`);
+  $("cu-vipn").textContent = parts.join(" · ") || "—";
   const tot = cuRows.reduce((a, r) => a + Number(r.spend_iqd || 0), 0);
-  const vtot = vips.reduce((a, r) => a + Number(r.spend_iqd || 0), 0);
-  $("cu-vipn").textContent = vips.length;
-  $("cu-vipshare").textContent = tot ? `${Math.round(100*vtot/tot)}% ${t().custShare}` : "";
+  const gtot = cuRows.filter(r => Number(r.spend_iqd) > 1000000)
+    .reduce((a, r) => a + Number(r.spend_iqd || 0), 0);
+  $("cu-vipshare").textContent = tot ? `${Math.round(100*gtot/tot)}% ${t().custShare}` : "";
   $("cu-repn").textContent = cuRows.filter(r => r.orders_n >= 2).length;
   renderCustList();
 }
@@ -929,12 +949,12 @@ function renderCustList(){
   const hit = r => !q || (r.instagram_username || "").toLowerCase().includes(q)
     || String(r.phone || "").replace(/\D/g, "").includes(q.replace(/\D/g, "") || "\u0000");
   const rows = cuRows.filter(hit)
-    .sort((a, b) => (b.is_vip - a.is_vip) || (b.spend_iqd - a.spend_iqd))
+    .sort((a, b) => b.spend_iqd - a.spend_iqd)
     .slice(0, 120);
   $("cu-list").innerHTML = rows.map(r => `
     <div class="row" data-cust="${r.customer_id}">
       <div class="l"><div class="c" dir="ltr">${cuBadge(r)} ${r.instagram_username || "—"}</div>
-        <div class="u num" dir="ltr">${r.orders_n} ${t().custOrdersN}${r.phone ? " · " + r.phone : ""}</div></div>
+        <div class="u num" dir="ltr">${tierName(r)} · ${r.orders_n} ${t().custOrdersN}${r.phone ? " · " + r.phone : ""}</div></div>
       <div style="text-align:left"><div class="b num" style="color:var(--teal)">${iqd(r.spend_iqd)}</div>
         ${Number(r.debt_iqd) > 0 ? `<div class="num" style="color:#F09595;font-size:12px">${t().custDebt} ${iqd(r.debt_iqd)}</div>` : ""}</div>
     </div>`).join("");
@@ -958,8 +978,10 @@ async function openCustomer(id){
     </div>`).join("");
   box.innerHTML = `
     <button class="back" id="cu-back">${t().custBack}</button>
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap">
       <h2 style="margin:0" dir="ltr">${cuBadge(r)} ${r.instagram_username || "—"}</h2>
+      <span class="num" style="border:1px solid var(--line);border-radius:20px;padding:4px 12px;
+        color:var(--teal);font-size:12.5px">${tierName(r)}</span>
     </div>
     ${r.phone ? `<a href="tel:${String(r.phone).replace(/[^\d+]/g,"")}" class="num" dir="ltr"
       style="color:var(--mute);text-decoration:none">📞 ${r.phone}</a>` : ""}
@@ -988,7 +1010,7 @@ async function openOrder(id){
   $("d-code").textContent = o.order_code;
   $("d-user").textContent = o.customers?.instagram_username || "—";
   if (o.customer_id) db.from("customer_stats")
-    .select("is_vip,orders_n,debt_iqd,cancelled_n").eq("customer_id", o.customer_id)
+    .select("spend_iqd,spend_rank,orders_n,debt_iqd,cancelled_n").eq("customer_id", o.customer_id)
     .maybeSingle().then(({ data: cs }) => {
       if (cs && current?.id === o.id){
         const b = cuBadge(cs);
