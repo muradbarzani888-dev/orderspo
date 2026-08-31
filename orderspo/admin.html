@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v91</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v92</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -157,7 +157,6 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
         <div class="tile"><div class="k" data-t="billed"></div><div class="v num" id="h-billed">—</div></div>
         <div class="tile"><div class="k" data-t="paidUp"></div><div class="v num" id="h-paid">—</div></div>
         <div class="tile"><div class="k" data-t="cod"></div><div class="v num" id="h-cash" style="color:var(--teal)">—</div></div>
-        <div class="tile"><div class="k" data-t="codPending"></div><div class="v num" id="h-pending" style="color:var(--teal)">—</div></div>
       </div>
       <div class="nav">
         <button data-go="new" data-t="newOrder"></button>
@@ -285,7 +284,6 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
         <div class="tile"><div class="k" data-t="billed"></div><div class="v num" id="dh-billed">—</div></div>
         <div class="tile"><div class="k" data-t="paidUp"></div><div class="v num" id="dh-paid">—</div></div>
         <div class="tile"><div class="k" data-t="cod"></div><div class="v num" id="dh-cod" style="color:var(--teal)">—</div></div>
-        <div class="tile"><div class="k" data-t="codPending"></div><div class="v num" id="dh-cod-pending" style="color:var(--teal)">—</div><div class="sub" id="dh-cod-pending-sub"></div></div>
         <div class="tile wide hide" id="dh-debt-tile"><div class="k" data-t="delivDebt"></div><div class="v num" id="dh-debt" style="color:#F09595">—</div><div class="sub" id="dh-debt-sub"></div></div>
       </div>
 
@@ -808,8 +806,6 @@ async function loadHome(){
     $("h-billed").textContent = iqd(sum("total_iqd"));
     $("h-paid").textContent   = iqd(sum("deposit_iqd"));
     $("h-cash").textContent   = iqd(sum("balance_iqd"));
-    $("h-pending").textContent = iqd(live.filter(r => r.status !== "delivered")
-      .reduce((a, r) => a + Number(r.balance_iqd || 0), 0));
   }
 }
 
@@ -1424,8 +1420,6 @@ function paintTotals(){
   const pend = live.filter(r => r.status !== "delivered");
   const pendSum = pend.reduce((a,r)=>a+Number(r.balance_iqd||0),0);
   const delivSum = sum("balance_iqd") - pendSum;
-  $("dh-cod-pending").textContent = iqd(pendSum);
-  $("dh-cod-pending-sub").textContent = `${pend.length} ${t().orders} · ${t().st.delivered}: ${iqd(delivSum)}`;
   // delivered orders where the recorded cash is short of the balance = real debt
   $("dh-debt-tile").classList.toggle("hide", !hasCollect);
   if (hasCollect){
