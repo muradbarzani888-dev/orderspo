@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v94</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v95</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -3432,9 +3432,24 @@ async function startCamScan(){
     if (camHits[n] && now - camHits[n] < 2500) return;
     camHits[n] = now;
     if (!sk2Rows.some(r => r.seq === n)){
-      sk2Rows.push({ seq: n, file: null });
+      const row = { seq: n, file: null };
+      sk2Rows.push(row);
       renderShkoScan();
       camBeep(true); camToast(n, true);
+      // freeze the frame the camera saw at the beep: that photo is the proof,
+      // attached to the shipment exactly like the photo-upload flow
+      try {
+        const cv = document.createElement("canvas");
+        const sc = Math.min(1, 1400 / (v.videoWidth || 1400));
+        cv.width = Math.round((v.videoWidth || 0) * sc);
+        cv.height = Math.round((v.videoHeight || 0) * sc);
+        if (cv.width && cv.height){
+          cv.getContext("2d").drawImage(v, 0, 0, cv.width, cv.height);
+          cv.toBlob(bl => {
+            if (bl) row.file = new File([bl], `${cyc}-${n}.jpg`, { type: "image/jpeg" });
+          }, "image/jpeg", 0.85);
+        }
+      } catch (e){}
     } else { camBeep(false); camToast(n, false); }
   };
   let native = false;
