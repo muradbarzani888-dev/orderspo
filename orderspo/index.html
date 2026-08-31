@@ -161,7 +161,7 @@ button.go:disabled{opacity:.5;cursor:default}
     </div>
     <button class="go" id="submit" data-t="cta"></button>
     <p class="hint" data-t="hint"></p>
-    <p style="text-align:center;color:#3E545B;font-size:10px;margin-top:22px;font-family:Archivo,sans-serif">v10</p>
+    <p style="text-align:center;color:#3E545B;font-size:10px;margin-top:22px;font-family:Archivo,sans-serif">v11</p>
   </section>
 
   <section id="result-view" class="hidden">
@@ -169,6 +169,7 @@ button.go:disabled{opacity:.5;cursor:default}
       <span class="user" id="r-user"></span>
       <span class="code num" id="r-code"></span>
     </div>
+    <div id="r-tier"></div>
     <div class="money">
       <div class="row"><span data-t="total"></span><span class="num" id="r-total"></span></div>
       <div class="row sep"><span data-t="paid"></span><span class="num" id="r-paid"></span></div>
@@ -204,6 +205,26 @@ delivered:`<svg viewBox="0 0 340 170" preserveAspectRatio="xMidYMid meet"><rect 
 
 const FLOW = ["received","purchased","at_dubai","in_transit","at_erbil","out_for_delivery","delivered"];
 
+document.head.insertAdjacentHTML("beforeend", `<style>
+.tierbox{border-radius:14px;padding:14px 16px;margin-bottom:16px;display:flex;
+  align-items:center;gap:13px;border:1px solid;position:relative;overflow:hidden}
+.tierbox::after{content:"";position:absolute;top:-60%;left:-30%;width:45%;height:220%;
+  transform:rotate(22deg);background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent)}
+.tierbox .ic{font-size:27px;flex:0 0 auto}
+.tierbox .tt{font-weight:700;font-size:15px}
+.tierbox .ts{font-size:12px;opacity:.78;margin-top:3px}
+.tier-gold{background:linear-gradient(135deg,rgba(232,194,74,.15),rgba(232,194,74,.03));
+  border-color:rgba(232,194,74,.5);color:#E8C24A}
+.tier-platinum{background:linear-gradient(135deg,rgba(196,215,222,.14),rgba(196,215,222,.03));
+  border-color:rgba(196,215,222,.5);color:#CFE0E6}
+.tier-diamond{background:linear-gradient(135deg,rgba(86,214,202,.16),rgba(42,173,165,.04));
+  border-color:rgba(86,214,202,.55);color:#56D6CA}
+.tier-top{background:linear-gradient(135deg,rgba(232,194,74,.2),rgba(186,104,255,.09));
+  border-color:rgba(242,208,107,.65);color:#F2D06B;box-shadow:0 0 24px rgba(232,194,74,.15)}
+</style>`);
+
+const TIER_UI = { gold:"🥇", platinum:"🏆", diamond:"💎", top:"👑" };
+
 const T = {
   ku: {
     title:"بەدواداچوونی داواکاریەکەت",
@@ -223,6 +244,8 @@ const T = {
     empty:"تکایە کۆد و ٤ ژمارەی کۆتایی مۆبایلەکەت بنووسە.",
     neterr:"کێشەیەک ڕوویدا. تکایە دواتر هەوڵ بدەرەوە.",
     cancelled:"ئەم داواکارییە هەڵوەشێنراوەتەوە",
+    tierT:{gold:"کڕیاری ئاڵتوون",platinum:"کڕیاری پلاتینیۆم",diamond:"کڕیاری دایمۆند",top:"TOP #{n} — باشترین کڕیارانی Sheinspo"},
+    tierSub:"سوپاس بۆ متمانە و وەفاداریت 🌸",
     st:{
       received:"داواکاری وەرگیرا",
       purchased:"کڕدرا لە شەین",
@@ -252,6 +275,8 @@ const T = {
     empty:"اكتب الرمز وآخر ٤ أرقام من موبايلك.",
     neterr:"صارت مشكلة. جرب بعدين.",
     cancelled:"هذا الطلب ملغي",
+    tierT:{gold:"زبون ذهبي",platinum:"زبون بلاتينيوم",diamond:"زبون دايموند",top:"TOP #{n} — من أفضل زبائن Sheinspo"},
+    tierSub:"شكراً لثقتك ووفائك 🌸",
     st:{
       received:"تم استلام الطلب",
       purchased:"تم الشراء من شي إن",
@@ -279,7 +304,7 @@ function applyLang(){
   });
   $("ku").setAttribute("aria-pressed", lang === "ku");
   $("ar").setAttribute("aria-pressed", lang === "ar");
-  if (!$("result-view").classList.contains("hidden") && window._last) render(window._last);
+  if (!$("result-view").classList.contains("hidden") && window._last){ render(window._last); paintTier(); }
 }
 
 function fmtDate(iso){
@@ -293,6 +318,30 @@ function showError(msg){
   const e = $("err");
   e.textContent = msg;
   e.classList.remove("hidden");
+}
+
+function paintTier(){
+  const el = $("r-tier");
+  const ti = window._tier;
+  if (!ti || !ti.tier){ el.innerHTML = ""; return; }
+  const t = T[lang];
+  const name = (t.tierT[ti.tier] || "").replace("{n}", ti.rank || "");
+  el.innerHTML = `<div class="tierbox tier-${ti.tier}">
+    <span class="ic">${TIER_UI[ti.tier] || ""}</span>
+    <span><div class="tt">${name}</div><div class="ts">${t.tierSub}</div></span></div>`;
+}
+
+async function fetchTier(code, last4){
+  window._tier = null; paintTier();
+  try {
+    const res = await fetch(SUPABASE_URL + "/rest/v1/rpc/track_tier", {
+      method: "POST",
+      headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY,
+                 "Content-Type": "application/json" },
+      body: JSON.stringify({ p_code: code, p_last4: last4 })
+    });
+    if (res.ok){ window._tier = await res.json(); paintTier(); }
+  } catch (e) {}
 }
 
 function render(o){
@@ -404,6 +453,7 @@ async function lookup(){
     if (!rows || !rows.length){ showError(t.notfound); return; }
     try { localStorage.setItem("spo_track", JSON.stringify({ code, last4 })); } catch (e) {}
     render(rows[0]);
+    fetchTier(code, last4);
   } catch (e) {
     showError(t.neterr);
   } finally {
