@@ -161,7 +161,7 @@ button.go:disabled{opacity:.5;cursor:default}
     </div>
     <button class="go" id="submit" data-t="cta"></button>
     <p class="hint" data-t="hint"></p>
-    <p style="text-align:center;color:#3E545B;font-size:10px;margin-top:22px;font-family:Archivo,sans-serif">v14</p>
+    <p style="text-align:center;color:#3E545B;font-size:10px;margin-top:22px;font-family:Archivo,sans-serif">v15</p>
   </section>
 
   <section id="result-view" class="hidden">
@@ -270,6 +270,8 @@ const T = {
     paid:"پارەی پێشەکی",
     due:"بڕی ماوە",
     cash:"کاش لە کاتی گەیاندن",
+    paidLbl:"پارەی گەیاندن — درا",
+    paidNote:"✓ درا لە کاتی گەیاندن، سوپاس بۆ کڕینت",
     settled:"هیچ بڕێک نەماوە",
     again:"گەڕان بۆ داواکارییەکی تر",
     updated:"نوێکرایەوە",
@@ -301,6 +303,8 @@ const T = {
     paid:"المبلغ المدفوع",
     due:"المبلغ المتبقي",
     cash:"نقداً عند التسليم",
+    paidLbl:"مبلغ التسليم — مدفوع",
+    paidNote:"✓ اندفع عند التسليم، شكراً لشرائك",
     settled:"ما بقى شي عليك",
     again:"دور على طلب ثاني",
     updated:"آخر تحديث",
@@ -386,7 +390,17 @@ function render(o){
   $("r-total").textContent = iqd(o.total_iqd);
   $("r-paid").textContent = "− " + iqd(o.deposit_iqd);
   $("r-due").textContent = iqd(o.balance_iqd);
-  $("r-note").textContent = o.balance_iqd > 0 ? t.cash : t.settled;
+  // a delivered order owes nothing — the balance was paid at the door
+  const lbl = document.querySelector('[data-t="due"]');
+  if (o.status === "delivered"){
+    lbl.textContent = t.paidLbl;
+    $("r-note").textContent = t.paidNote;
+    $("r-note").style.color = "var(--teal)";
+  } else {
+    lbl.textContent = t.due;
+    $("r-note").textContent = o.balance_iqd > 0 ? t.cash : t.settled;
+    $("r-note").style.color = "";
+  }
 
   const seen = {};
   (o.history || []).forEach(h => { if (!seen[h.status]) seen[h.status] = h.at; });
