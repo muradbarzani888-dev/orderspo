@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v97</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v98</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -180,6 +180,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
       <button class="back" data-go="home" data-t="back"></button>
       <h2 data-t="newOrder"></h2>
       <div id="n-msg"></div>
+      <div class="f"><label data-t="month"></label><select id="n-cycle"></select></div>
       <div class="f"><label data-t="username"></label><input id="n-user" dir="ltr" autocomplete="off"></div>
       <div id="n-flag"></div>
       <div class="f"><label data-t="phone"></label><input id="n-phone" inputmode="tel" dir="ltr" placeholder="7501234567"></div>
@@ -245,6 +246,8 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
       <p style="color:var(--mute);font-size:12.5px;line-height:1.9;margin-bottom:14px" data-t="pasteHelp"></p>
       <div class="f">
         <textarea id="p-box" dir="ltr" style="min-height:190px;font-family:Archivo,monospace;font-size:13px"></textarea>
+      </div>
+      <div class="f"><label data-t="month"></label><select id="p-cycle"></select>
       </div>
       <div class="count"><div class="n num" id="p-n">0</div><div class="t" data-t="willAdd"></div></div>
       <div id="p-preview" style="margin-bottom:14px"></div>
@@ -1303,10 +1306,25 @@ $("out").addEventListener("click", async () => { await db.auth.signOut(); locati
   lang = l; localStorage.setItem("spo_a", l); paintLang();
   if (current && !$("v-detail").classList.contains("hide")) openOrder(current.id);
 }));
+async function fillAddCycles(){
+  const { data: used } = await db.from("orders").select("cycle_code");
+  const have = [...new Set((used || []).map(o => o.cycle_code))];
+  if (cycle && !have.includes(cycle)) have.push(cycle);
+  have.sort().reverse();
+  const opts = have.map(c => `<option value="${c}">${c}</option>`).join("");
+  ["n-cycle", "p-cycle"].forEach(id => {
+    const el = $(id); if (!el) return;
+    const keep = el.value;
+    el.innerHTML = opts;
+    el.value = keep && have.includes(keep) ? keep : cycle;
+  });
+}
+
 document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => {
   const g = b.dataset.go;
   if (g === "home") loadHome();
   if (g === "batch") fillCycles().then(countBatch);
+  if (g === "new" || g === "paste") fillAddCycles();
   if (g === "dash") initDash();
   if (g === "cust") initCust();
   if (g === "close") initClose();
@@ -1377,7 +1395,7 @@ function previewPaste(){
   $("p-n").textContent = rows.length;
   $("p-preview").innerHTML = rows.slice(0, 3).map(r =>
     `<div class="row" style="cursor:default"><div class="l">
-       <div class="c num">${cycle}-${String(r.seq).padStart(4,"0")}</div>
+       <div class="c num">${($("p-cycle").value || cycle)}-${String(r.seq).padStart(4,"0")}</div>
        <div class="u">${r.name}</div>
        <div class="s num">${r.phone || "—"} · ${iqd(r.deposit)}</div></div>
      <div class="b num">${iqd(r.total)}</div></div>`).join("")
@@ -1391,8 +1409,9 @@ $("p-check").addEventListener("click", async () => {
   const rep = $("p-report");
   if (!rows.length){ rep.innerHTML = ""; return say("p-msg", t().badRows, "err"); }
   const b = $("p-check"); b.disabled = true;
+  const chkCyc = $("p-cycle").value || cycle;
   const { data: os, error } = await db.from("orders")
-    .select("id,seq,total_iqd,deposit_iqd,status").eq("cycle_code", cycle);
+    .select("id,seq,total_iqd,deposit_iqd,status").eq("cycle_code", chkCyc);
   b.disabled = false;
   if (error) return say("p-msg", error.message, "err");
   const bySeq = {};
@@ -1419,7 +1438,7 @@ $("p-check").addEventListener("click", async () => {
     </div>
     ${diffs.map(({ r, o, dT, dD }) => `
       <div class="row" data-wcid="${o.id}">
-        <div class="l"><div class="c num">${cycle}-${String(r.seq).padStart(4,"0")}</div>
+        <div class="l"><div class="c num">${chkCyc}-${String(r.seq).padStart(4,"0")}</div>
           <div class="u" dir="ltr">${r.name}</div>
           <div style="display:flex;flex-direction:column;gap:2px;margin-top:4px">
             ${dT ? cell(t().wcTotal, r.total, o.total_iqd, true) : ""}
@@ -1440,8 +1459,9 @@ $("p-go").addEventListener("click", async () => {
   if (!rows.length) return;
   if (!confirm(`${rows.length}?`)) return;
   const b = $("p-go"); b.disabled = true; b.innerHTML = '<span class="spin"></span>';
+  const addCyc = $("p-cycle").value || cycle;
   const { data, error } = await db.rpc("bulk_add_orders",
-    { p_cycle: cycle, p_rows: rows.map(({ bags, ...rest }) => rest) });
+    { p_cycle: addCyc, p_rows: rows.map(({ bags, ...rest }) => rest) });
   b.disabled = false; b.textContent = t().addAll;
   if (error) return say("p-msg", error.message, "err");
   const r = data[0];
@@ -1450,7 +1470,7 @@ $("p-go").addEventListener("click", async () => {
     .map(x => ({ seq: x.seq, codes: [...new Set(x.bags)], note: null }));
   let bagNote = "";
   if (bagRows.length){
-    const { data: bd, error: be } = await db.rpc("add_bags", { p_cycle: cycle, p_rows: bagRows });
+    const { data: bd, error: be } = await db.rpc("add_bags", { p_cycle: addCyc, p_rows: bagRows });
     bagNote = be ? ` · 🎒 ${be.message}` : ` · 🎒 ${bd?.[0]?.bags_added ?? 0} ✓`;
   }
   say("p-msg", `${r.created} — ${r.codes}` + (r.skipped ? ` · ${r.skipped} ✕` : "") + bagNote, "ok", 0);
@@ -1505,15 +1525,16 @@ $("n-go").addEventListener("click", async () => {
       if (error) throw error;
       cid = c.id;
     }
-    const { data: seq, error: se } = await db.rpc("next_seq", { p_cycle: cycle });
+    const addCyc = $("n-cycle").value || cycle;
+    const { data: seq, error: se } = await db.rpc("next_seq", { p_cycle: addCyc });
     if (se) throw se;
     const { error: oe } = await db.from("orders").insert({
-      cycle_code: cycle, seq, customer_id: cid, total_iqd: total,
+      cycle_code: addCyc, seq, customer_id: cid, total_iqd: total,
       deposit_iqd: Number(toEn($("n-dep").value).replace(/\D/g,"")) || 0,
       items_count: Number(toEn($("n-items").value).replace(/\D/g,"")) || null
     });
     if (oe) throw oe;
-    say("n-msg", `${t().saved} — ${cycle}-${String(seq).padStart(4,"0")}`);
+    say("n-msg", `${t().saved} — ${addCyc}-${String(seq).padStart(4,"0")}`);
     ["n-user","n-phone","n-addr","n-total","n-items"].forEach(i => $(i).value = "");
     $("n-dep").value = "0";
   } catch(e){ say("n-msg", e.message, "err"); }
