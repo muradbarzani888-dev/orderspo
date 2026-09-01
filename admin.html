@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v99</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v100</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -2562,6 +2562,7 @@ async function initShko(){
     const sel = $("sk-cycle");
     const { data: used } = await db.from("orders").select("cycle_code");
     const have = [...new Set((used || []).map(o => o.cycle_code))];
+    if (cycle && !have.includes(cycle)) have.push(cycle);
     const { data } = await db.from("cycles").select("code,label")
       .in("code", have.length ? have : [""]).order("code", { ascending: false });
     sel.innerHTML = (data || []).map(c => `<option value="${c.code}">${c.label || c.code}</option>`).join("");
@@ -2885,6 +2886,7 @@ async function initLbl(){
     const sel = $("lb-cycle");
     const { data: used } = await db.from("orders").select("cycle_code");
     const have = [...new Set((used || []).map(o => o.cycle_code))];
+    if (cycle && !have.includes(cycle)) have.push(cycle);
     const { data } = await db.from("cycles").select("code,label")
       .in("code", have.length ? have : [""]).order("code", { ascending: false });
     sel.innerHTML = (data || []).map(c => `<option value="${c.code}">${c.label || c.code}</option>`).join("");
@@ -3041,6 +3043,7 @@ async function initCost(){
     const sel = $("ct-cycle");
     const { data: used } = await db.from("orders").select("cycle_code");
     const have = [...new Set((used || []).map(o => o.cycle_code))];
+    if (cycle && !have.includes(cycle)) have.push(cycle);
     const { data } = await db.from("cycles").select("code,label")
       .in("code", have.length ? have : [""]).order("code", { ascending: false });
     sel.innerHTML = (data || []).map(c => `<option value="${c.code}">${c.label || c.code}</option>`).join("");
