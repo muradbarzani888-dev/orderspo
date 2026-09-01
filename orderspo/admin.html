@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v98</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v99</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -596,6 +596,7 @@ const T = {
   custSpend:"کۆی کڕین",custDebt:"قەرز",custOpen:"لە ڕێگادایە",custOrdersN:"داواکاری",custDeliv:"گەیەندراو",
   custCanc:"هەڵوەشاوە",custBack:"گەڕانەوە بۆ لیست",copied:"کۆپی کرا ✓",custShare:"لە داهات",
   riskWarn:"ئاگاداری — پێشەکی تەواو وەربگرە",riskCanc:"هەڵوەشاوە",riskDebt:"قەرز",
+  updNew:"نوسخەی نوێ بەردەستە — کلیک بکە بۆ نوێکردنەوە",
   closeTitle:"داخستنی مانگ و بەراورد",closeMonth:"مانگی داخستن",closeVs:"بەراورد لەگەڵ",
   closeLeft:"پاشماوەکان — پێش داخستن",clOrders:"داواکاری",clRev:"داهات",clColl:"کۆکراوە",
   clOwed:"ماوە (لە ڕێگا)",clDebt:"قەرزی گەیەندراو",clCanc:"ڕێژەی هەڵوەشان",clDeliv:"ڕێژەی گەیاندن",
@@ -644,6 +645,7 @@ const T = {
   custSpend:"مجموع الشراء",custDebt:"دين",custOpen:"بالطريق",custOrdersN:"طلب",custDeliv:"مسلَّم",
   custCanc:"ملغى",custBack:"رجوع للقائمة",copied:"تم النسخ ✓",custShare:"من الدخل",
   riskWarn:"تحذير — خذ المبلغ كامل مقدماً",riskCanc:"ملغى",riskDebt:"دين",
+  updNew:"نسخة جديدة متوفرة — اضغط للتحديث",
   closeTitle:"إغلاق الشهر والمقارنة",closeMonth:"شهر الإغلاق",closeVs:"مقارنة مع",
   closeLeft:"المتبقيات — قبل الإغلاق",clOrders:"الطلبات",clRev:"الدخل",clColl:"المحصَّل",
   clOwed:"المتبقي (بالطريق)",clDebt:"دين المسلَّم",clCanc:"نسبة الإلغاء",clDeliv:"نسبة التسليم",
@@ -1301,6 +1303,33 @@ $("lg-go").addEventListener("click", async () => {
   b.disabled = false; b.textContent = "چوونەژوورەوە";
   if (error) say("lg-msg", error.message, "err");
 });
+// Phones keep the tab alive for days: on wake, refresh what's on screen and
+// nudge toward a newer deploy instead of silently showing yesterday's data.
+async function checkFresh(){
+  try {
+    const html = await (await fetch(location.pathname, { cache: "no-store" })).text();
+    const server = (html.match(/>v(\d+)<\/span>/) || [])[1];
+    const mine = (document.documentElement.innerHTML.match(/>v(\d+)<\/span>/) || [])[1];
+    if (server && mine && +server > +mine && !document.getElementById("upd-bar")){
+      const d = document.createElement("div");
+      d.id = "upd-bar";
+      d.style.cssText = "position:fixed;bottom:14px;left:14px;right:14px;z-index:99;" +
+        "background:var(--teal);color:#07281a;font-weight:700;border-radius:12px;" +
+        "padding:14px;text-align:center;cursor:pointer;font-size:14px";
+      d.textContent = t().updNew;
+      d.onclick = () => location.reload();
+      document.body.appendChild(d);
+    }
+  } catch (e){}
+}
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden || !me) return;
+  checkFresh();
+  if (!$("v-shko").classList.contains("hide")) loadShko();
+  if (!$("v-home").classList.contains("hide")) loadHome();
+});
+setInterval(checkFresh, 600000);
+
 $("out").addEventListener("click", async () => { await db.auth.signOut(); location.reload(); });
 ["ku","ar"].forEach(l => $("l-" + l).addEventListener("click", () => {
   lang = l; localStorage.setItem("spo_a", l); paintLang();
