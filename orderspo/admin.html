@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v100</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v101</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -769,7 +769,7 @@ async function loadAlerts(){
   // per-stage patience: SHEIN->Dubai runs 5-7 days, so at 7 the order should
   // already be in Dubai; Dubai->Erbil 7-14d -> flag at 20; after that it's in
   // our hands (labels + SHKO), so a week is already too long.
-  const LIMITS = { received: 7, purchased: 7, at_dubai: 20, in_transit: 20,
+  const LIMITS = { received: 7, purchased: 7, at_dubai: 7, in_transit: 20,
                    at_erbil: 7, out_for_delivery: 7 };
   const days = r => r.since ? (Date.now() - new Date(r.since)) / 864e5 : 999;
   const late = data.filter(r => days(r) > (LIMITS[r.status] ?? 25))
