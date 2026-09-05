@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v101</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v102</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -2895,6 +2895,16 @@ async function initLbl(){
     $("lb-status").innerHTML = FLOW.map(v => `<option value="${v}">${t().st[v]}</option>`).join("");
     $("lb-add").addEventListener("click", lbAddCodes);
     $("lb-codes").addEventListener("keydown", e => { if (e.key === "Enter") lbAddCodes(); });
+    $("lb-codes").addEventListener("paste", e => {   // multiline lists: the browser fuses
+      e.preventDefault();                            // pasted lines, so insert them ourselves
+      const el = $("lb-codes");
+      const txt = (e.clipboardData || window.clipboardData).getData("text");
+      const v = el.value, s = el.selectionStart ?? v.length, en = el.selectionEnd ?? v.length;
+      const head = (v.slice(0, s) + " " + txt).replace(/\s+/g, " ").replace(/^ /, "");
+      el.value = (head + " " + v.slice(en)).replace(/\s+/g, " ").trim();
+      const pos = Math.min(head.trimEnd().length, el.value.length);
+      el.setSelectionRange(pos, pos);
+    });
     $("lb-add-st").addEventListener("click", lbAddStatus);
     $("lb-print").addEventListener("click", lbPrint);
     $("lb-pdf").addEventListener("click", lbPdf);
@@ -2905,7 +2915,11 @@ async function initLbl(){
 
 function lbParse(txt){
   const out = new Set();
-  toEn(String(txt || "")).split(/[\s,+]+/).forEach(tok => {
+  // quotes/brackets/dots strip from token EDGES only; a token with junk inside
+  // (a dot-price, a date, a username) is dropped whole rather than shattered
+  // into phantom codes. Commas keep their v101 meaning: they separate codes.
+  toEn(String(txt || "")).replace(/[–—]/g, "-").split(/[\s,+،؛;]+/).forEach(tok => {
+    tok = tok.replace(/^["'«»“”‘’()\[\]{}.:]+/, "").replace(/["'«»“”‘’()\[\]{}.:-]+$/, "");
     const m = tok.match(/^(\d{1,4})-(\d{1,4})$/);
     if (m){ for (let i = +m[1]; i <= +m[2] && i - +m[1] < 1000; i++) out.add(i); }
     else if (/^\d{1,4}$/.test(tok)) out.add(+tok);
@@ -2923,7 +2937,8 @@ async function lbAddCodes(){
   (data || []).forEach(o => lbSel.set(Number(o.seq), o));
   const found = new Set((data || []).map(o => Number(o.seq)));
   const miss = seqs.filter(q => !found.has(q));
-  if (miss.length) say("lb-msg", `${t().scNoOrder}: ${miss.join(" ")}`, "err");
+  if (miss.length) say("lb-msg", `✓ ${(data || []).length} · ${t().scNoOrder}: ${miss.join(" ")}`, "err");
+  else say("lb-msg", `✓ ${(data || []).length}`, "ok");
   $("lb-codes").value = "";
   lbRender();
 }
