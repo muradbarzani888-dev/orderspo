@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v104</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v105</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -502,11 +502,20 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
     <div id="v-open" class="hide">
       <button class="back" data-go="home" data-t="back"></button>
       <h2 data-t="openTitle"></h2>
+      <div id="op-msg"></div>
       <p style="color:var(--mute);font-size:12.5px;line-height:1.9;margin-bottom:14px" data-t="opHelp"></p>
       <div class="f"><label data-t="month"></label><select id="op-cycle"></select></div>
       <div id="op-sum" style="display:flex;gap:8px;margin-bottom:14px"></div>
       <div class="f"><input id="op-q" placeholder="312"></div>
       <div id="op-list"></div>
+      <div id="op-bar" class="hide" style="position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--deep);
+        border-top:1px solid var(--line);padding:12px 16px;display:flex;gap:10px;align-items:center">
+        <button id="op-bar-x" style="flex:0 0 auto;width:36px;height:36px;border-radius:9px;border:1px solid var(--line);
+          background:transparent;color:var(--mute)">✕</button>
+        <span class="num" id="op-bar-n" style="flex:0 0 auto;font-weight:600;font-size:13px"></span>
+        <select id="op-bar-st" style="flex:1;min-height:40px"></select>
+        <button class="btn" id="op-bar-go" data-t="update" style="width:auto;min-height:40px;margin:0;padding:0 18px;flex:0 0 auto"></button>
+      </div>
     </div>
 
     <div id="v-batch" class="hide">
@@ -610,7 +619,7 @@ const T = {
   moveBatch:"گواستنەوەی کۆمەڵ",searchLbl:"گەڕان بە کۆد، ناو یان ژمارە",search:"گەڕان",back:"گەڕانەوە",
   username:"ناوی ئینستاگرام",phone:"ژمارەی مۆبایل",address:"ناونیشان",total:"کۆی گشتی",
   deposit:"پارەی پێشەکی",due:"بڕی ماوە",items:"ژمارەی بەرهەم",save:"تۆمارکردن",
-  setStatus:"دۆخی نوێ",update:"نوێکردنەوە",collected:"پارەی کۆکراوە",collectedAsk:"چەند پارە کۆکرایەوە؟",shkoTitle:"شحنەکانی SHKO",shkoRemaining:"پارە لای SHKO (ماوە)",shkoThisMonth:"وەرگیراوی ئەم مانگە",shkoAllRecv:"کۆی وەرگیراو",shkoAddOfd:"زیادکردنی هەموو «لە گەیاندندایە»",shkoAdd:"زیادکردن",shkoReceived:"وەرگیراوەکان",shkoEmpty:"هیچ نەماوە — هەمووی وەرگیراوە ✓",shkoNone:"هیچ داواکارییەک نییە",shkoDel:"سڕینەوە",shkoClearAll:"سڕینەوەی هەمووی",shkoRecvN:"وەرگیراوە",shkoOpenList:"لای SHKO",shkoShipN:"شحنە",shkoScanHelp:"وێنەی لەیبڵەکان هەڵبژێرە — سیستەم کۆدی کڕیار دەخوێنێتەوە، بڕی ماوە و ناو لە داواکارییەکەوە دێن",shkoApply:"تۆمارکردنی شحنەکان",shkoImgDel:"سڕینەوەی وێنە",lblTitle:"چاپکردنی لەیبڵ",lblHelp:"کۆد یان مەودا بنووسە (1-50 398) یان هەموو دۆخێک زیاد بکە، دواتر چاپکردن — هەر لەیبڵێک 100×100mm. ژمارەی بارکۆد = مانگ + کۆدی کڕیار.",lblAddStatus:"زیادکردنی هەموو",lblPrint:"چاپکردن",lblName:"ناو",lblPhone:"مۆبایلی کڕیار",lblCity:"شار",lblAddr:"ناونیشان",lblDue:"بڕی ماوە",alTitle:"داواکاری گیرماوەکان",alDays:"ڕۆژ",alFix:"گۆڕینی دۆخ",alBagLate:"جانتای دواکەوتوو",openTitle:"بۆردی داواکارییە کراوەکان",opHelp:"هەموو داواکارییەک کە هێشتا نەگەیەندراوە، بەپێی ماوەی مانەوەی لە دۆخەکەیدا: سەوز = باشە، زەرد = نزیک لە سنوور، سوور = زۆر دواکەوتووە. لێی بدە بۆ گۆڕینی دۆخ.",opRed:"زۆر دواکەوتوو",opYellow:"ئاگاداربە",opGreen:"باشە",opLimit:"سنوور",opNone:"هیچ داواکارییەکی کراوە نییە ✓",
+  setStatus:"دۆخی نوێ",update:"نوێکردنەوە",collected:"پارەی کۆکراوە",collectedAsk:"چەند پارە کۆکرایەوە؟",shkoTitle:"شحنەکانی SHKO",shkoRemaining:"پارە لای SHKO (ماوە)",shkoThisMonth:"وەرگیراوی ئەم مانگە",shkoAllRecv:"کۆی وەرگیراو",shkoAddOfd:"زیادکردنی هەموو «لە گەیاندندایە»",shkoAdd:"زیادکردن",shkoReceived:"وەرگیراوەکان",shkoEmpty:"هیچ نەماوە — هەمووی وەرگیراوە ✓",shkoNone:"هیچ داواکارییەک نییە",shkoDel:"سڕینەوە",shkoClearAll:"سڕینەوەی هەمووی",shkoRecvN:"وەرگیراوە",shkoOpenList:"لای SHKO",shkoShipN:"شحنە",shkoScanHelp:"وێنەی لەیبڵەکان هەڵبژێرە — سیستەم کۆدی کڕیار دەخوێنێتەوە، بڕی ماوە و ناو لە داواکارییەکەوە دێن",shkoApply:"تۆمارکردنی شحنەکان",shkoImgDel:"سڕینەوەی وێنە",lblTitle:"چاپکردنی لەیبڵ",lblHelp:"کۆد یان مەودا بنووسە (1-50 398) یان هەموو دۆخێک زیاد بکە، دواتر چاپکردن — هەر لەیبڵێک 100×100mm. ژمارەی بارکۆد = مانگ + کۆدی کڕیار.",lblAddStatus:"زیادکردنی هەموو",lblPrint:"چاپکردن",lblName:"ناو",lblPhone:"مۆبایلی کڕیار",lblCity:"شار",lblAddr:"ناونیشان",lblDue:"بڕی ماوە",alTitle:"داواکاری گیرماوەکان",alDays:"ڕۆژ",alFix:"گۆڕینی دۆخ",alBagLate:"جانتای دواکەوتوو",openTitle:"بۆردی داواکارییە کراوەکان",opHelp:"هەموو داواکارییەک کە هێشتا نەگەیەندراوە، بەپێی ماوەی مانەوەی لە دۆخەکەیدا: سەوز = باشە، زەرد = نزیک لە سنوور، سوور = زۆر دواکەوتووە. لێی بدە بۆ گۆڕینی دۆخ.",opRed:"زۆر دواکەوتوو",opYellow:"ئاگاداربە",opGreen:"باشە",opLimit:"سنوور",opNone:"هیچ داواکارییەکی کراوە نییە ✓",opSelAll:"هەڵبژاردنی هەمووی",opSelected:"هەڵبژێردراو",
   custTitle:"کڕیارەکان",custVips:"کڕیاری VIP",custRepeat:"کڕیاری دووبارە",custCopy:"کۆپی لیستی VIP بۆ Close Friends",
   custSpend:"کۆی کڕین",custDebt:"قەرز",custOpen:"لە ڕێگادایە",custOrdersN:"داواکاری",custDeliv:"گەیەندراو",
   custCanc:"هەڵوەشاوە",custBack:"گەڕانەوە بۆ لیست",copied:"کۆپی کرا ✓",custShare:"لە داهات",
@@ -660,7 +669,7 @@ const T = {
   moveBatch:"تحديث مجموعة",searchLbl:"دور بالرمز أو الاسم أو الرقم",search:"دور",back:"رجوع",
   username:"اسم الانستغرام",phone:"رقم الموبايل",address:"العنوان",total:"المجموع",
   deposit:"المدفوع",due:"المتبقي",items:"عدد القطع",save:"حفظ",
-  setStatus:"الحالة الجديدة",update:"تحديث",collected:"المبلغ المستلم",collectedAsk:"شكد انستلم؟",shkoTitle:"شحنات SHKO",shkoRemaining:"الفلوس عند SHKO (باقية)",shkoThisMonth:"مستلم هذا الشهر",shkoAllRecv:"مجموع المستلم",shkoAddOfd:"إضافة كل «قيد التوصيل»",shkoAdd:"إضافة",shkoReceived:"المستلمة",shkoEmpty:"ما باقي شي — كله مستلم ✓",shkoNone:"ما في طلبات",shkoDel:"حذف",shkoClearAll:"حذف الكل",shkoRecvN:"مستلم",shkoOpenList:"عند SHKO",shkoShipN:"شحنة",shkoScanHelp:"اختار صور الليبلات — النظام يقرا رمز الزبون، والمبلغ الباقي والاسم ييجون من الطلب",shkoApply:"حفظ الشحنات",shkoImgDel:"حذف الصورة",lblTitle:"طباعة الليبلات",lblHelp:"اكتب الرموز أو مدى (1-50 398) أو ضيف حالة كاملة ثم اطبع — كل ليبل 100×100mm. رقم الباركود = الشهر + رمز الزبون.",lblAddStatus:"إضافة الكل",lblPrint:"طباعة",lblName:"الاسم",lblPhone:"موبايل الزبون",lblCity:"المدينة",lblAddr:"العنوان",lblDue:"المبلغ المتبقي",alTitle:"طلبات عالقة",alDays:"يوم",alFix:"تغيير الحالة",alBagLate:"كيس متأخر",openTitle:"لوحة الطلبات المفتوحة",opHelp:"كل طلب بعده ما تسلّم، حسب مدة بقائه بحالته: أخضر = تمام، أصفر = قرب الحد، أحمر = متأخر جداً. اضغط عليه لتغيير الحالة.",opRed:"متأخر جداً",opYellow:"انتبه",opGreen:"تمام",opLimit:"الحد",opNone:"ما في طلبات مفتوحة ✓",
+  setStatus:"الحالة الجديدة",update:"تحديث",collected:"المبلغ المستلم",collectedAsk:"شكد انستلم؟",shkoTitle:"شحنات SHKO",shkoRemaining:"الفلوس عند SHKO (باقية)",shkoThisMonth:"مستلم هذا الشهر",shkoAllRecv:"مجموع المستلم",shkoAddOfd:"إضافة كل «قيد التوصيل»",shkoAdd:"إضافة",shkoReceived:"المستلمة",shkoEmpty:"ما باقي شي — كله مستلم ✓",shkoNone:"ما في طلبات",shkoDel:"حذف",shkoClearAll:"حذف الكل",shkoRecvN:"مستلم",shkoOpenList:"عند SHKO",shkoShipN:"شحنة",shkoScanHelp:"اختار صور الليبلات — النظام يقرا رمز الزبون، والمبلغ الباقي والاسم ييجون من الطلب",shkoApply:"حفظ الشحنات",shkoImgDel:"حذف الصورة",lblTitle:"طباعة الليبلات",lblHelp:"اكتب الرموز أو مدى (1-50 398) أو ضيف حالة كاملة ثم اطبع — كل ليبل 100×100mm. رقم الباركود = الشهر + رمز الزبون.",lblAddStatus:"إضافة الكل",lblPrint:"طباعة",lblName:"الاسم",lblPhone:"موبايل الزبون",lblCity:"المدينة",lblAddr:"العنوان",lblDue:"المبلغ المتبقي",alTitle:"طلبات عالقة",alDays:"يوم",alFix:"تغيير الحالة",alBagLate:"كيس متأخر",openTitle:"لوحة الطلبات المفتوحة",opHelp:"كل طلب بعده ما تسلّم، حسب مدة بقائه بحالته: أخضر = تمام، أصفر = قرب الحد، أحمر = متأخر جداً. اضغط عليه لتغيير الحالة.",opRed:"متأخر جداً",opYellow:"انتبه",opGreen:"تمام",opLimit:"الحد",opNone:"ما في طلبات مفتوحة ✓",opSelAll:"اختيار الكل",opSelected:"محدد",
   custTitle:"الزبائن",custVips:"زبون VIP",custRepeat:"زبون متكرر",custCopy:"انسخ قائمة VIP لـ Close Friends",
   custSpend:"مجموع الشراء",custDebt:"دين",custOpen:"بالطريق",custOrdersN:"طلب",custDeliv:"مسلَّم",
   custCanc:"ملغى",custBack:"رجوع للقائمة",copied:"تم النسخ ✓",custShare:"من الدخل",
@@ -3113,8 +3122,25 @@ function lbPrint(){
 // Every order not yet delivered, coloured by how long it has sat in its
 // current stage against STAGE_LIMITS: green under 60% of the limit, yellow
 // approaching it, red past it.
-let opInit = false, opRows = [], opFilter = null;
+let opInit = false, opRows = [], opFilter = null, opSel = new Set();
 const OP_COL = { red: "#E24B4A", yellow: "#EF9F27", green: "#2AADA5" };
+const OP_STATUSES = FLOW.concat("cancelled");
+
+function opBar(){
+  $("op-bar").classList.toggle("hide", !opSel.size);
+  $("op-bar-n").textContent = opSel.size ? `${opSel.size} ${t().opSelected}` : "";
+  $("op-list").style.paddingBottom = opSel.size ? "90px" : "0";
+}
+
+async function opSet(ids, st, collected){
+  if (!ids.length) return;
+  const upd = { status: st };
+  if (collected != null) upd.collected_iqd = collected;
+  const { error } = await db.from("orders").update(upd).in("id", ids);
+  say("op-msg", error ? error.message : `${ids.length} ${t().moved} → ${t().st[st]}`, error ? "err" : "ok");
+  opSel.clear(); opBar();
+  loadOpen();
+}
 function opTone(st, days){
   const lim = STAGE_LIMITS[st] ?? 25;
   return days >= lim ? "red" : days >= Math.ceil(lim * 0.6) ? "yellow" : "green";
@@ -3131,8 +3157,15 @@ async function initOpen(){
       .in("code", have.length ? have : [""]).order("code", { ascending: false });
     sel.innerHTML = (data || []).map(c => `<option value="${c.code}">${c.label || c.code}</option>`).join("");
     if (cycle && [...sel.options].some(o => o.value === cycle)) sel.value = cycle;
-    sel.addEventListener("change", loadOpen);
+    sel.addEventListener("change", () => { opSel.clear(); opBar(); loadOpen(); });
     $("op-q").addEventListener("input", renderOpen);
+    $("op-bar-st").innerHTML = OP_STATUSES.map(s => `<option value="${s}">${t().st[s]}</option>`).join("");
+    $("op-bar-go").addEventListener("click", () => {
+      const st = $("op-bar-st").value;
+      if (!opSel.size || !confirm(`${opSel.size} → ${t().st[st]}?`)) return;
+      opSet([...opSel], st, null);
+    });
+    $("op-bar-x").addEventListener("click", () => { opSel.clear(); renderOpen(); });
   }
   await loadOpen();
 }
@@ -3174,19 +3207,49 @@ function renderOpen(){
   }
   const by = {};
   rows.forEach(o => (by[o.status] = by[o.status] || []).push(o));
+  const opts = cur => OP_STATUSES.map(s =>
+    `<option value="${s}"${s === cur ? " selected" : ""}>${t().st[s]}</option>`).join("");
   $("op-list").innerHTML = Object.keys(by).sort((a, b) => FLOW.indexOf(a) - FLOW.indexOf(b)).map(st => {
     const list = by[st].sort((a, b) => (b.days ?? 999) - (a.days ?? 999));
-    return `<div style="display:flex;justify-content:space-between;align-items:baseline;margin:18px 0 8px">
-        <span style="font-weight:600;font-size:14px">${t().st[st] || st}</span>
-        <span class="num" style="color:var(--faint);font-size:12px">${list.length} · ${t().opLimit} ${STAGE_LIMITS[st] ?? 25} ${t().alDays}</span></div>` +
-      list.map(o => `<div class="row" data-open="${o.id}">
-        <div class="l"><div class="c num">${o.order_code}</div>
+    const allOn = list.every(o => opSel.has(o.id));
+    return `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin:18px 0 8px">
+        <span style="font-weight:600;font-size:14px">${t().st[st] || st}
+          <span class="num" style="color:var(--faint);font-size:12px;font-weight:400"> · ${list.length} · ${t().opLimit} ${STAGE_LIMITS[st] ?? 25} ${t().alDays}</span></span>
+        <button data-selgrp="${st}" style="flex:0 0 auto;padding:6px 12px;border-radius:9px;font-size:12px;
+          border:1px solid ${allOn ? "var(--teal)" : "var(--line)"};background:transparent;color:${allOn ? "var(--teal)" : "var(--mute)"}">${t().opSelAll}</button></div>` +
+      list.map(o => `<div class="row" style="cursor:default;gap:9px;padding:11px 12px">
+        <input type="checkbox" data-sel="${o.id}"${opSel.has(o.id) ? " checked" : ""}
+          style="width:22px;height:22px;min-height:0;flex:0 0 auto;margin:0;accent-color:var(--teal)">
+        <div class="l" data-open="${o.id}" style="cursor:pointer"><div class="c num">${o.order_code}</div>
           <div class="u" dir="ltr">${lbEsc(o.customers?.instagram_username || "—")}</div></div>
-        <span class="num" style="flex:0 0 auto;padding:5px 11px;border-radius:9px;font-size:12.5px;font-weight:600;
+        <span class="num" style="flex:0 0 auto;padding:4px 8px;border-radius:9px;font-size:12px;font-weight:600;white-space:nowrap;
           color:${OP_COL[o.tone]};background:${OP_COL[o.tone]}22;border:1px solid ${OP_COL[o.tone]}66">${o.days ?? "?"} ${t().alDays}</span>
+        <select data-st="${o.id}" style="width:auto;max-width:36%;min-height:36px;padding:0 6px;font-size:12px;flex:0 0 auto">${opts(o.status)}</select>
       </div>`).join("");
   }).join("");
-  $("op-list").querySelectorAll("[data-open]").forEach(el => el.onclick = () => openOrder(+el.dataset.open));
+  const L = $("op-list");
+  L.querySelectorAll("[data-open]").forEach(el => el.onclick = () => openOrder(+el.dataset.open));
+  L.querySelectorAll("[data-sel]").forEach(cb => cb.onchange = () => {
+    cb.checked ? opSel.add(+cb.dataset.sel) : opSel.delete(+cb.dataset.sel); opBar();
+  });
+  L.querySelectorAll("[data-selgrp]").forEach(b => b.onclick = () => {
+    const ids = by[b.dataset.selgrp].map(o => o.id);
+    const all = ids.every(id => opSel.has(id));
+    ids.forEach(id => all ? opSel.delete(id) : opSel.add(id));
+    renderOpen();
+  });
+  // inline status change per row: delivered asks for the cash, like the detail page
+  L.querySelectorAll("[data-st]").forEach(sel => sel.onchange = () => {
+    const id = +sel.dataset.st, o = opRows.find(r => r.id === id), st = sel.value;
+    let col = null;
+    if (st === "delivered" && hasCollect){
+      const a = prompt(t().collectedAsk, o.balance_iqd ?? "");
+      if (a === null){ sel.value = o.status; return; }
+      col = Number(toEn(a).replace(/\D/g, "")) || 0;
+    }
+    opSet([id], st, col);
+  });
+  opBar();
 }
 
 // ---------- Costs & profit ----------
