@@ -141,7 +141,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v106</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v107</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -149,7 +149,6 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
   <main>
     <div id="v-home">
       <div id="h-online" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"></div>
-      <div id="h-alerts" style="margin-bottom:6px"></div>
       <div class="tiles">
         <div class="tile"><div class="k" data-t="cycle"></div><div class="v num" id="h-cycle">—</div></div>
         <div class="tile"><div class="k" data-t="orders"></div><div class="v num" id="h-count">—</div></div>
@@ -505,6 +504,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
       <h2 data-t="openTitle"></h2>
       <div id="op-msg"></div>
       <p style="color:var(--mute);font-size:12.5px;line-height:1.9;margin-bottom:14px" data-t="opHelp"></p>
+      <div id="h-alerts" style="margin-bottom:6px"></div>
       <div class="f"><label data-t="month"></label><select id="op-cycle"></select></div>
       <div id="op-sum" style="display:flex;gap:8px;margin-bottom:14px"></div>
       <div class="f"><input id="op-q" placeholder="312"></div>
@@ -796,30 +796,10 @@ async function loadLateBags(){
   } catch (e){ return []; }
 }
 
+// Late-bag alert, shown on the open-orders board (stuck orders themselves are
+// the board's red rows, so only the bag-level warning lives here).
 async function loadAlerts(){
-  const { data, error } = await db.from("stuck_orders").select("cycle_code,seq,order_code,status,since");
-  if (error || !data){ $("h-alerts").innerHTML = ""; return; }
-  const LIMITS = STAGE_LIMITS;
-  const days = r => r.since ? (Date.now() - new Date(r.since)) / 864e5 : 999;
-  const late = data.filter(r => days(r) > (LIMITS[r.status] ?? 25))
-    .sort((x, y) => days(y) - days(x));
-  const byStatus = {};
-  late.forEach(r => (byStatus[r.status] = byStatus[r.status] || []).push(r));
-  alertGroups = byStatus;
   let h = "";
-  Object.keys(byStatus).sort((a, b) => FLOW.indexOf(a) - FLOW.indexOf(b)).forEach(st => {
-    const list = byStatus[st];
-    const codes = list.slice(0, 12).map(r =>
-      `<span class="num" dir="ltr">${r.order_code}</span>`).join("، ");
-    h += `<div style="padding:10px 0;border-top:1px solid rgba(239,159,39,.22)">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
-        <span style="color:#EF9F27;font-size:13px;font-weight:600">${list.length} × ${t().st[st] || st} — +${LIMITS[st] ?? 25} ${t().alDays}</span>
-        <button data-fix="${st}" style="margin-inline-start:auto;flex:0 0 auto;padding:6px 12px;border-radius:9px;
-          border:1px solid rgba(239,159,39,.5);background:transparent;color:#EF9F27;font-size:12px">${t().alFix} ←</button>
-      </div>
-      <div style="color:var(--mute);font-size:11.5px;line-height:2">${codes}${list.length > 12 ? ` +${list.length - 12}` : ""}</div>
-    </div>`;
-  });
   const lateBags = await loadLateBags();
   if (lateBags.length){
     const lines = lateBags.slice(0, 12).map(r =>
@@ -836,38 +816,12 @@ async function loadAlerts(){
   $("h-alerts").innerHTML = h ? `<div style="background:rgba(239,159,39,.08);
       border:1px solid rgba(239,159,39,.35);border-radius:14px;padding:4px 16px 6px;margin:14px 0 4px">
       <div style="color:#EF9F27;font-weight:700;font-size:13.5px;padding:12px 0 8px">⚠ ${t().alTitle}</div>${h}</div>` : "";
-  $("h-alerts").querySelectorAll("[data-fix]").forEach(b =>
-    b.addEventListener("click", () => alertToBatch(b.dataset.fix)));
-}
-
-// Jump from an alert group into the batch mover with everything prefilled:
-// the stuck orders' cycle, status, code range, and the natural next stage.
-let alertGroups = {};
-async function alertToBatch(st){
-  const list = alertGroups[st] || [];
-  if (!list.length) return;
-  const byCyc = {};
-  list.forEach(r => (byCyc[r.cycle_code] = byCyc[r.cycle_code] || []).push(r.seq));
-  const cyc = Object.keys(byCyc).sort((a, b) => byCyc[b].length - byCyc[a].length)[0];
-  const seqs = byCyc[cyc];
-  await fillCycles();
-  if ([...$("b-cycle").options].some(o => o.value === cyc)) $("b-cycle").value = cyc;
-  $("b-from").value = st;
-  // where a stuck order realistically went next, not just the formal flow
-  const next = { received: "at_dubai", purchased: "at_dubai", at_dubai: "at_erbil",
-    in_transit: "at_erbil", at_erbil: "out_for_delivery", out_for_delivery: "delivered" }[st];
-  if (next) $("b-to").value = next;
-  $("b-lo").value = Math.min(...seqs);
-  $("b-hi").value = Math.max(...seqs);
-  view("batch");
-  countBatch();
 }
 
 async function loadHome(){
   const { data: c } = await db.from("cycles").select("code,label").eq("is_open", true).maybeSingle();
   if (c) cycle = c.code;
   $("h-cycle").textContent = cycle || "—";
-  loadAlerts();
   const { data: rows } = await db.from("orders")
     .select("balance_iqd,total_iqd,deposit_iqd,status").eq("cycle_code", cycle);
   const live = (rows || []).filter(r => r.status !== "cancelled");
@@ -3174,6 +3128,7 @@ async function initOpen(){
 }
 
 async function loadOpen(){
+  loadAlerts();
   const cyc = $("op-cycle").value || cycle;
   $("op-list").innerHTML = '<div style="text-align:center;padding:20px 0"><span class="spin"></span></div>';
   const [os, ss] = await Promise.all([
