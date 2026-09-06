@@ -140,7 +140,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v102</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v103</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -503,6 +503,9 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
       <h2 data-t="moveBatch"></h2>
       <div id="b-msg"></div>
       <div class="f"><label data-t="month"></label><select id="b-cycle"></select></div>
+      <div class="f"><label data-t="codesLbl"></label>
+        <input id="b-codes" dir="ltr" inputmode="tel" placeholder="244 293 297 …"></div>
+      <p style="color:var(--faint);font-size:11.5px;margin:-6px 0 14px;line-height:1.7" data-t="codesHint"></p>
       <div class="f"><label data-t="from"></label><select id="b-from"></select></div>
       <div style="display:flex;gap:10px">
         <div class="f" style="flex:1"><label data-t="codeFrom"></label>
@@ -609,6 +612,7 @@ const T = {
   tier:{bronze:"برۆنز",silver:"زیو",gold:"ئاڵتوون",platinum:"پلاتینیۆم",diamond:"دایمۆند",top:"TOP"},costTitle:"کۆست و قازانج",revenue:"داهاتی مانگ",totalCost:"کۆی کۆستەکان",netProfit:"قازانجی سافی",margin:"ڕێژەی قازانج",seedFixed:"زیادکردنی کۆستە جێگیرەکانی مانگ",addCost:"زیادکردنی کۆست",costCat:"جۆر",costLabel:"ناو",costQty:"ژمارە",costUsd:"نرخ بە دۆلار",costFx:"نرخی دۆلار",costIqd:"یان بڕ بە دینار",saveCost:"تۆمارکردن",costSettings:"ڕێکخستنەکانی کۆست",perKg:"دۆلار بۆ کیلۆ",baghdad:"بەغدا",south:"باشوور",saveSettings:"پاشەکەوتکردن",catFixed:"جێگیر",catCards:"کارتی شەین",catAds:"ڕیکلامی مێتا",catAgent:"ئاژانسی دوبەی",catShko:"گەیاندنی SHKO",catOther:"کۆستی تر",autoCalc:"خۆکار",kgRec:"کیلۆی تۆمارکراو",deliv:"گەیەندراو",unknownGov:"نادیار",shkoFile:"فایلی SHKO بار بکە",pickCol:"ستوونی کرێی گەیاندن هەڵبژێرە ⬇",rowsN:"ڕیز",shkoMoved:"گۆڕدرا بۆ «لە گەیاندندایە»",delivDebt:"قەرزی گەیەندراو (کۆنەکراوەتەوە)",saveAmounts:"تۆمارکردنی بڕەکان",from:"لە دۆخی",to:"بۆ دۆخی",month:"مانگ",codeFrom:"لە کۆدی",codeTo:"بۆ کۆدی",
   rangeHint:"بەتاڵی بهێڵەرەوە بۆ هەمووی",
   willMove:"داواکاری دەگوازرێتەوە",moveAll:"گواستنەوەی هەموویان",noRes:"هیچ نەدۆزرایەوە",
+  codesLbl:"کۆدەکان (بە کۆمەڵ)",codesHint:"کۆدەکان بنووسە یان بلکێنە — ئەوسا «لە دۆخی» و مەودا پشتگوێ دەخرێن. گەیەندراو و هەڵوەشێنراوەکان ناگۆڕدرێن.",skipped:"پشتگوێخراو (گەیەندراو/هەڵوەشێنراو)",
   saved:"تۆمارکرا",need:"ناو و کۆی گشتی پێویستە",moved:"داواکاری گوازرایەوە",
   st:{received:"وەرگیرا",purchased:"کڕدرا",at_dubai:"لە دوبەی",in_transit:"لە ڕێگادایە",
    at_erbil:"لە هەولێر",out_for_delivery:"لە گەیاندندایە",delivered:"گەیەندرا",cancelled:"هەڵوەشێنراوە"}},
@@ -658,6 +662,7 @@ const T = {
   tier:{bronze:"برونز",silver:"فضة",gold:"ذهب",platinum:"بلاتينيوم",diamond:"دايموند",top:"TOP"},costTitle:"التكاليف والأرباح",revenue:"دخل الشهر",totalCost:"مجموع التكاليف",netProfit:"صافي الربح",margin:"نسبة الربح",seedFixed:"إضافة التكاليف الثابتة للشهر",addCost:"إضافة تكلفة",costCat:"النوع",costLabel:"الاسم",costQty:"العدد",costUsd:"السعر بالدولار",costFx:"سعر الدولار",costIqd:"أو المبلغ بالدينار",saveCost:"حفظ",costSettings:"إعدادات التكاليف",perKg:"دولار للكيلو",baghdad:"بغداد",south:"الجنوب",saveSettings:"حفظ",catFixed:"ثابتة",catCards:"كارتات شي إن",catAds:"إعلانات ميتا",catAgent:"وكيل دبي",catShko:"توصيل SHKO",catOther:"تكاليف أخرى",autoCalc:"تلقائي",kgRec:"كيلو مسجّل",deliv:"مسلَّم",unknownGov:"غير معروف",shkoFile:"ارفع ملف SHKO",pickCol:"اختر عمود أجرة التوصيل ⬇",rowsN:"صف",shkoMoved:"تحوّلت إلى «قيد التوصيل»",delivDebt:"دين المسلَّم (غير مستلم)",saveAmounts:"حفظ المبالغ",from:"من حالة",to:"إلى حالة",month:"الشهر",codeFrom:"من رمز",codeTo:"إلى رمز",
   rangeHint:"خليها فارغة للكل",
   willMove:"طلب راح ينتقل",moveAll:"حدث الكل",noRes:"ما لكيت شي",
+  codesLbl:"الرموز (دفعة)",codesHint:"اكتب أو الصق الرموز — عندها «من حالة» والمدى ينتجاهلون. المسلَّم والملغي ما يتغيرون.",skipped:"متجاوَز (مسلَّم/ملغي)",
   saved:"انحفظ",need:"لازم الاسم والمجموع",moved:"الطلبات انتقلت",
   st:{received:"تم الاستلام",purchased:"تم الشراء",at_dubai:"بدبي",in_transit:"بالطريق",
    at_erbil:"بأربيل",out_for_delivery:"قيد التوصيل",delivered:"تم التسليم",cancelled:"ملغي"}}
@@ -1247,7 +1252,28 @@ async function fillCycles(){
     `<option value="${c.code}">${c.label || c.code}</option>`).join("");
   sel.value = cycle;
 }
+const batchCodes = () => lbParse($("b-codes").value);
+const CLOSED = ["delivered", "cancelled"];
+
 async function countBatch(){
+  const codes = batchCodes();
+  if (codes.length){
+    // pasted list: the from-status and range are ignored; closed orders stay put
+    const { data } = await db.from("orders").select("seq,status")
+      .eq("cycle_code", $("b-cycle").value || cycle).in("seq", codes);
+    const rows = data || [];
+    const open = rows.filter(o => !CLOSED.includes(o.status));
+    $("b-n").textContent = open.length;
+    const found = new Set(rows.map(o => Number(o.seq)));
+    const miss = codes.filter(c => !found.has(c));
+    const bits = [];
+    if (rows.length - open.length) bits.push(`${rows.length - open.length} ${t().skipped}`);
+    if (miss.length) bits.push(`${t().scNoOrder}: ${miss.join(" ")}`);
+    if (bits.length) say("b-msg", bits.join(" · "), miss.length ? "err" : "ok", 0);
+    else $("b-msg").innerHTML = "";
+    showBreakdown(rows);
+    return;
+  }
   const { count } = await batchRange(
     db.from("orders").select("*", { count:"exact", head:true }));
   $("b-n").textContent = count || 0;
@@ -1255,14 +1281,14 @@ async function countBatch(){
 }
 
 // What is actually sitting in the chosen month and code range, by status.
-async function showBreakdown(){
+async function showBreakdown(pre){
   let q = db.from("orders").select("status,seq")
     .eq("cycle_code", $("b-cycle").value || cycle);
   const lo = parseInt(toEn($("b-lo").value), 10), hi = parseInt(toEn($("b-hi").value), 10);
   if (!isNaN(lo)) q = q.gte("seq", lo);
   if (!isNaN(hi)) q = q.lte("seq", hi);
 
-  const { data } = await q;
+  const data = pre || (await q).data;
   const tally = {};
   (data || []).forEach(o => (tally[o.status] = tally[o.status] || []).push(o.seq));
 
@@ -1365,7 +1391,8 @@ document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", 
 }));
 $("q-go").addEventListener("click", search);
 $("q").addEventListener("keydown", e => { if (e.key === "Enter") search(); });
-["b-from","b-lo","b-hi","b-cycle"].forEach(i => $(i).addEventListener("input", countBatch));
+["b-from","b-lo","b-hi","b-cycle","b-codes"].forEach(i => $(i).addEventListener("input", countBatch));
+pasteFlat("b-codes");
 $("b-cycle").addEventListener("change", countBatch);
 $("b-from").addEventListener("change", countBatch);
 
@@ -1599,6 +1626,20 @@ $("d-save").addEventListener("click", async () => {
 $("b-go").addEventListener("click", async () => {
   const n = $("b-n").textContent;
   if (!Number(n)) return;
+  const codes = batchCodes();
+  if (codes.length){
+    const to = $("b-to").value;
+    if (!confirm(`${n} — ${t().st[to]}?`)) return;
+    const b = $("b-go"); b.disabled = true;
+    const { data, error } = await db.from("orders").update({ status: to })
+      .eq("cycle_code", $("b-cycle").value || cycle).in("seq", codes)
+      .not("status", "in", `(${CLOSED.join(",")})`).select("seq");
+    b.disabled = false;
+    say("b-msg", error ? error.message : `${(data || []).length} ${t().moved}`, error ? "err" : "ok");
+    if (!error) $("b-codes").value = "";
+    countBatch();
+    return;
+  }
   const lo = $("b-lo").value.trim(), hi = $("b-hi").value.trim();
   const span = (lo || hi) ? ` (${lo || "1"}–${hi || "…"})` : "";
   if (!confirm(`${n}${span} — ${t().st[$("b-from").value]} → ${t().st[$("b-to").value]}?`)) return;
@@ -2567,8 +2608,9 @@ async function initShko(){
       .in("code", have.length ? have : [""]).order("code", { ascending: false });
     sel.innerHTML = (data || []).map(c => `<option value="${c.code}">${c.label || c.code}</option>`).join("");
     if (cycle && [...sel.options].some(o => o.value === cycle)) sel.value = cycle;
-    $("sk-add").addEventListener("click", () => addShko(parseSeqs($("sk-codes").value)));
-    $("sk-codes").addEventListener("keydown", e => { if (e.key === "Enter") addShko(parseSeqs($("sk-codes").value)); });
+    $("sk-add").addEventListener("click", () => addShko(lbParse($("sk-codes").value)));
+    $("sk-codes").addEventListener("keydown", e => { if (e.key === "Enter") addShko(lbParse($("sk-codes").value)); });
+    pasteFlat("sk-codes");
     $("sk-add-ofd").addEventListener("click", addAllOfd);
     $("sk-file").addEventListener("change", skUpload);
     $("sk-scan").addEventListener("change", runShkoScan);
@@ -2895,22 +2937,29 @@ async function initLbl(){
     $("lb-status").innerHTML = FLOW.map(v => `<option value="${v}">${t().st[v]}</option>`).join("");
     $("lb-add").addEventListener("click", lbAddCodes);
     $("lb-codes").addEventListener("keydown", e => { if (e.key === "Enter") lbAddCodes(); });
-    $("lb-codes").addEventListener("paste", e => {   // multiline lists: the browser fuses
-      e.preventDefault();                            // pasted lines, so insert them ourselves
-      const el = $("lb-codes");
-      const txt = (e.clipboardData || window.clipboardData).getData("text");
-      const v = el.value, s = el.selectionStart ?? v.length, en = el.selectionEnd ?? v.length;
-      const head = (v.slice(0, s) + " " + txt).replace(/\s+/g, " ").replace(/^ /, "");
-      el.value = (head + " " + v.slice(en)).replace(/\s+/g, " ").trim();
-      const pos = Math.min(head.trimEnd().length, el.value.length);
-      el.setSelectionRange(pos, pos);
-    });
+    pasteFlat("lb-codes");
     $("lb-add-st").addEventListener("click", lbAddStatus);
     $("lb-print").addEventListener("click", lbPrint);
     $("lb-pdf").addEventListener("click", lbPdf);
     $("lb-clear").addEventListener("click", () => { lbSel.clear(); lbRender(); });
   }
   lbRender();
+}
+
+// Multiline code lists pasted into a single-line input: the browser fuses the
+// lines, so splice the clipboard in ourselves, flattened and selection-aware.
+function pasteFlat(id){
+  const el = $(id);
+  el.addEventListener("paste", e => {
+    e.preventDefault();
+    const txt = (e.clipboardData || window.clipboardData).getData("text");
+    const v = el.value, s = el.selectionStart ?? v.length, en = el.selectionEnd ?? v.length;
+    const head = (v.slice(0, s) + " " + txt).replace(/\s+/g, " ").replace(/^ /, "");
+    el.value = (head + " " + v.slice(en)).replace(/\s+/g, " ").trim();
+    const pos = Math.min(head.trimEnd().length, el.value.length);
+    el.setSelectionRange(pos, pos);
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+  });
 }
 
 function lbParse(txt){
