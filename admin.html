@@ -141,7 +141,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v107</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v108</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -507,7 +507,9 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
       <div id="h-alerts" style="margin-bottom:6px"></div>
       <div class="f"><label data-t="month"></label><select id="op-cycle"></select></div>
       <div id="op-sum" style="display:flex;gap:8px;margin-bottom:14px"></div>
-      <div class="f"><input id="op-q" placeholder="312"></div>
+      <div class="f" style="margin-bottom:8px"><label data-t="opSearchHint"></label>
+        <input id="op-q" dir="ltr" placeholder="312   345 357 361 …"></div>
+      <div id="op-found" style="margin-bottom:12px"></div>
       <div id="op-list"></div>
       <div id="op-bar" class="hide" style="position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--deep);
         border-top:1px solid var(--line);padding:12px 16px;display:flex;justify-content:center">
@@ -622,7 +624,7 @@ const T = {
   moveBatch:"گواستنەوەی کۆمەڵ",searchLbl:"گەڕان بە کۆد، ناو یان ژمارە",search:"گەڕان",back:"گەڕانەوە",
   username:"ناوی ئینستاگرام",phone:"ژمارەی مۆبایل",address:"ناونیشان",total:"کۆی گشتی",
   deposit:"پارەی پێشەکی",due:"بڕی ماوە",items:"ژمارەی بەرهەم",save:"تۆمارکردن",
-  setStatus:"دۆخی نوێ",update:"نوێکردنەوە",collected:"پارەی کۆکراوە",collectedAsk:"چەند پارە کۆکرایەوە؟",shkoTitle:"شحنەکانی SHKO",shkoRemaining:"پارە لای SHKO (ماوە)",shkoThisMonth:"وەرگیراوی ئەم مانگە",shkoAllRecv:"کۆی وەرگیراو",shkoAddOfd:"زیادکردنی هەموو «لە گەیاندندایە»",shkoAdd:"زیادکردن",shkoReceived:"وەرگیراوەکان",shkoEmpty:"هیچ نەماوە — هەمووی وەرگیراوە ✓",shkoNone:"هیچ داواکارییەک نییە",shkoDel:"سڕینەوە",shkoClearAll:"سڕینەوەی هەمووی",shkoRecvN:"وەرگیراوە",shkoOpenList:"لای SHKO",shkoShipN:"شحنە",shkoScanHelp:"وێنەی لەیبڵەکان هەڵبژێرە — سیستەم کۆدی کڕیار دەخوێنێتەوە، بڕی ماوە و ناو لە داواکارییەکەوە دێن",shkoApply:"تۆمارکردنی شحنەکان",shkoImgDel:"سڕینەوەی وێنە",lblTitle:"چاپکردنی لەیبڵ",lblHelp:"کۆد یان مەودا بنووسە (1-50 398) یان هەموو دۆخێک زیاد بکە، دواتر چاپکردن — هەر لەیبڵێک 100×100mm. ژمارەی بارکۆد = مانگ + کۆدی کڕیار.",lblAddStatus:"زیادکردنی هەموو",lblPrint:"چاپکردن",lblName:"ناو",lblPhone:"مۆبایلی کڕیار",lblCity:"شار",lblAddr:"ناونیشان",lblDue:"بڕی ماوە",alTitle:"داواکاری گیرماوەکان",alDays:"ڕۆژ",alFix:"گۆڕینی دۆخ",alBagLate:"جانتای دواکەوتوو",openTitle:"بۆردی داواکارییە کراوەکان",opHelp:"هەموو داواکارییەک کە هێشتا نەگەیەندراوە، بەپێی ماوەی مانەوەی لە دۆخەکەیدا: سەوز = باشە، زەرد = نزیک لە سنوور، سوور = زۆر دواکەوتووە. لێی بدە بۆ گۆڕینی دۆخ.",opRed:"زۆر دواکەوتوو",opYellow:"ئاگاداربە",opGreen:"باشە",opLimit:"سنوور",opNone:"هیچ داواکارییەکی کراوە نییە ✓",opSelAll:"هەڵبژاردنی هەمووی",opSelected:"هەڵبژێردراو",
+  setStatus:"دۆخی نوێ",update:"نوێکردنەوە",collected:"پارەی کۆکراوە",collectedAsk:"چەند پارە کۆکرایەوە؟",shkoTitle:"شحنەکانی SHKO",shkoRemaining:"پارە لای SHKO (ماوە)",shkoThisMonth:"وەرگیراوی ئەم مانگە",shkoAllRecv:"کۆی وەرگیراو",shkoAddOfd:"زیادکردنی هەموو «لە گەیاندندایە»",shkoAdd:"زیادکردن",shkoReceived:"وەرگیراوەکان",shkoEmpty:"هیچ نەماوە — هەمووی وەرگیراوە ✓",shkoNone:"هیچ داواکارییەک نییە",shkoDel:"سڕینەوە",shkoClearAll:"سڕینەوەی هەمووی",shkoRecvN:"وەرگیراوە",shkoOpenList:"لای SHKO",shkoShipN:"شحنە",shkoScanHelp:"وێنەی لەیبڵەکان هەڵبژێرە — سیستەم کۆدی کڕیار دەخوێنێتەوە، بڕی ماوە و ناو لە داواکارییەکەوە دێن",shkoApply:"تۆمارکردنی شحنەکان",shkoImgDel:"سڕینەوەی وێنە",lblTitle:"چاپکردنی لەیبڵ",lblHelp:"کۆد یان مەودا بنووسە (1-50 398) یان هەموو دۆخێک زیاد بکە، دواتر چاپکردن — هەر لەیبڵێک 100×100mm. ژمارەی بارکۆد = مانگ + کۆدی کڕیار.",lblAddStatus:"زیادکردنی هەموو",lblPrint:"چاپکردن",lblName:"ناو",lblPhone:"مۆبایلی کڕیار",lblCity:"شار",lblAddr:"ناونیشان",lblDue:"بڕی ماوە",alTitle:"داواکاری گیرماوەکان",alDays:"ڕۆژ",alFix:"گۆڕینی دۆخ",alBagLate:"جانتای دواکەوتوو",openTitle:"بۆردی داواکارییە کراوەکان",opHelp:"هەموو داواکارییەک کە هێشتا نەگەیەندراوە، بەپێی ماوەی مانەوەی لە دۆخەکەیدا: سەوز = باشە، زەرد = نزیک لە سنوور، سوور = زۆر دواکەوتووە. لێی بدە بۆ گۆڕینی دۆخ.",opRed:"زۆر دواکەوتوو",opYellow:"ئاگاداربە",opGreen:"باشە",opLimit:"سنوور",opNone:"هیچ داواکارییەکی کراوە نییە ✓",opSelAll:"هەڵبژاردنی هەمووی",opSelected:"هەڵبژێردراو",opSearchHint:"کۆدەکان بلکێنە بۆ گەڕانی کۆمەڵ — یان ناوی کڕیار",opSelShown:"هەڵبژاردنی هەموو ئەوانەی دەرکەوتوون",opNotOpen:"کراوە نییە لەم مانگەدا",
   custTitle:"کڕیارەکان",custVips:"کڕیاری VIP",custRepeat:"کڕیاری دووبارە",custCopy:"کۆپی لیستی VIP بۆ Close Friends",
   custSpend:"کۆی کڕین",custDebt:"قەرز",custOpen:"لە ڕێگادایە",custOrdersN:"داواکاری",custDeliv:"گەیەندراو",
   custCanc:"هەڵوەشاوە",custBack:"گەڕانەوە بۆ لیست",copied:"کۆپی کرا ✓",custShare:"لە داهات",
@@ -672,7 +674,7 @@ const T = {
   moveBatch:"تحديث مجموعة",searchLbl:"دور بالرمز أو الاسم أو الرقم",search:"دور",back:"رجوع",
   username:"اسم الانستغرام",phone:"رقم الموبايل",address:"العنوان",total:"المجموع",
   deposit:"المدفوع",due:"المتبقي",items:"عدد القطع",save:"حفظ",
-  setStatus:"الحالة الجديدة",update:"تحديث",collected:"المبلغ المستلم",collectedAsk:"شكد انستلم؟",shkoTitle:"شحنات SHKO",shkoRemaining:"الفلوس عند SHKO (باقية)",shkoThisMonth:"مستلم هذا الشهر",shkoAllRecv:"مجموع المستلم",shkoAddOfd:"إضافة كل «قيد التوصيل»",shkoAdd:"إضافة",shkoReceived:"المستلمة",shkoEmpty:"ما باقي شي — كله مستلم ✓",shkoNone:"ما في طلبات",shkoDel:"حذف",shkoClearAll:"حذف الكل",shkoRecvN:"مستلم",shkoOpenList:"عند SHKO",shkoShipN:"شحنة",shkoScanHelp:"اختار صور الليبلات — النظام يقرا رمز الزبون، والمبلغ الباقي والاسم ييجون من الطلب",shkoApply:"حفظ الشحنات",shkoImgDel:"حذف الصورة",lblTitle:"طباعة الليبلات",lblHelp:"اكتب الرموز أو مدى (1-50 398) أو ضيف حالة كاملة ثم اطبع — كل ليبل 100×100mm. رقم الباركود = الشهر + رمز الزبون.",lblAddStatus:"إضافة الكل",lblPrint:"طباعة",lblName:"الاسم",lblPhone:"موبايل الزبون",lblCity:"المدينة",lblAddr:"العنوان",lblDue:"المبلغ المتبقي",alTitle:"طلبات عالقة",alDays:"يوم",alFix:"تغيير الحالة",alBagLate:"كيس متأخر",openTitle:"لوحة الطلبات المفتوحة",opHelp:"كل طلب بعده ما تسلّم، حسب مدة بقائه بحالته: أخضر = تمام، أصفر = قرب الحد، أحمر = متأخر جداً. اضغط عليه لتغيير الحالة.",opRed:"متأخر جداً",opYellow:"انتبه",opGreen:"تمام",opLimit:"الحد",opNone:"ما في طلبات مفتوحة ✓",opSelAll:"اختيار الكل",opSelected:"محدد",
+  setStatus:"الحالة الجديدة",update:"تحديث",collected:"المبلغ المستلم",collectedAsk:"شكد انستلم؟",shkoTitle:"شحنات SHKO",shkoRemaining:"الفلوس عند SHKO (باقية)",shkoThisMonth:"مستلم هذا الشهر",shkoAllRecv:"مجموع المستلم",shkoAddOfd:"إضافة كل «قيد التوصيل»",shkoAdd:"إضافة",shkoReceived:"المستلمة",shkoEmpty:"ما باقي شي — كله مستلم ✓",shkoNone:"ما في طلبات",shkoDel:"حذف",shkoClearAll:"حذف الكل",shkoRecvN:"مستلم",shkoOpenList:"عند SHKO",shkoShipN:"شحنة",shkoScanHelp:"اختار صور الليبلات — النظام يقرا رمز الزبون، والمبلغ الباقي والاسم ييجون من الطلب",shkoApply:"حفظ الشحنات",shkoImgDel:"حذف الصورة",lblTitle:"طباعة الليبلات",lblHelp:"اكتب الرموز أو مدى (1-50 398) أو ضيف حالة كاملة ثم اطبع — كل ليبل 100×100mm. رقم الباركود = الشهر + رمز الزبون.",lblAddStatus:"إضافة الكل",lblPrint:"طباعة",lblName:"الاسم",lblPhone:"موبايل الزبون",lblCity:"المدينة",lblAddr:"العنوان",lblDue:"المبلغ المتبقي",alTitle:"طلبات عالقة",alDays:"يوم",alFix:"تغيير الحالة",alBagLate:"كيس متأخر",openTitle:"لوحة الطلبات المفتوحة",opHelp:"كل طلب بعده ما تسلّم، حسب مدة بقائه بحالته: أخضر = تمام، أصفر = قرب الحد، أحمر = متأخر جداً. اضغط عليه لتغيير الحالة.",opRed:"متأخر جداً",opYellow:"انتبه",opGreen:"تمام",opLimit:"الحد",opNone:"ما في طلبات مفتوحة ✓",opSelAll:"اختيار الكل",opSelected:"محدد",opSearchHint:"الصق الرموز للبحث الجماعي — أو اسم الزبون",opSelShown:"اختيار كل الظاهر",opNotOpen:"مو مفتوح بهذا الشهر",
   custTitle:"الزبائن",custVips:"زبون VIP",custRepeat:"زبون متكرر",custCopy:"انسخ قائمة VIP لـ Close Friends",
   custSpend:"مجموع الشراء",custDebt:"دين",custOpen:"بالطريق",custOrdersN:"طلب",custDeliv:"مسلَّم",
   custCanc:"ملغى",custBack:"رجوع للقائمة",copied:"تم النسخ ✓",custShare:"من الدخل",
@@ -3116,6 +3118,7 @@ async function initOpen(){
     if (cycle && [...sel.options].some(o => o.value === cycle)) sel.value = cycle;
     sel.addEventListener("change", () => { opSel.clear(); opBar(); loadOpen(); });
     $("op-q").addEventListener("input", renderOpen);
+    pasteFlat("op-q");
     $("op-bar-st").innerHTML = OP_STATUSES.map(s => `<option value="${s}">${t().st[s]}</option>`).join("");
     $("op-bar-go").addEventListener("click", () => {
       const st = $("op-bar-st").value;
@@ -3145,13 +3148,31 @@ async function loadOpen(){
   renderOpen();
 }
 
+// The search box doubles as a bulk lookup: paste a whole batch of codes (the
+// courier's WhatsApp list) and the board shows exactly those orders, grouped by
+// where each one actually is. Anything with letters searches name / order code.
+function opSearch(){
+  const raw = toEn($("op-q").value).trim();
+  if (!raw) return { rows: opRows, missing: [] };
+  const q = raw.toLowerCase();
+  const codes = /[^\d\s,+\-،؛;]/.test(raw) ? [] : lbParse(raw);
+  if (!codes.length) return {                       // a name, or a full 2608-0514
+    rows: opRows.filter(o => (o.customers?.instagram_username || "").toLowerCase().includes(q) ||
+      (o.order_code || "").toLowerCase().includes(q)), missing: [] };
+  const want = new Set(codes), found = new Set();
+  const rows = opRows.filter(o => {
+    const s = Number(o.seq);
+    if (!want.has(s)) return false;
+    found.add(s); return true;
+  });
+  return { rows, missing: codes.filter(c => !found.has(c)) };
+}
+
 function renderOpen(){
-  const q = toEn($("op-q").value).trim().toLowerCase();
-  const name = o => (o.customers?.instagram_username || "").toLowerCase();
-  const rows = opRows.filter(o => (!opFilter || o.tone === opFilter) &&
-    (!q || String(o.seq) === q || (o.order_code || "").includes(q) || name(o).includes(q)));
+  const { rows: hits, missing } = opSearch();
+  const rows = hits.filter(o => !opFilter || o.tone === opFilter);
   const n = { red: 0, yellow: 0, green: 0 };
-  opRows.forEach(o => n[o.tone]++);
+  hits.forEach(o => n[o.tone]++);   // the tiles count what the search found
   $("op-sum").innerHTML = ["red", "yellow", "green"].map(k => `<div class="tile" data-tone="${k}"
       style="flex:1;cursor:pointer;text-align:center;border:1px solid ${opFilter === k ? OP_COL[k] : "transparent"}">
       <div class="k" style="color:${OP_COL[k]}">${t()["op" + k[0].toUpperCase() + k.slice(1)]}</div>
@@ -3159,6 +3180,18 @@ function renderOpen(){
   $("op-sum").querySelectorAll("[data-tone]").forEach(el => el.onclick = () => {
     opFilter = opFilter === el.dataset.tone ? null : el.dataset.tone; renderOpen();
   });
+  // pasted-batch summary: how many of the codes are here, which ones are not
+  $("op-found").innerHTML = toEn($("op-q").value).trim()
+    ? `<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:12px">
+        <span class="num" style="color:var(--teal);font-weight:600">✓ ${hits.length}</span>
+        ${missing.length ? `<span style="color:#EF9F27">${t().opNotOpen}:
+          <span class="num" dir="ltr">${missing.join(" ")}</span></span>` : ""}
+        ${rows.length ? `<button id="op-sel-shown" style="margin-inline-start:auto;flex:0 0 auto;
+          padding:7px 12px;border-radius:9px;border:1px solid var(--teal);background:transparent;
+          color:var(--teal);font-size:12px">${t().opSelShown}</button>` : ""}
+      </div>` : "";
+  const selShown = $("op-sel-shown");
+  if (selShown) selShown.onclick = () => { rows.forEach(o => opSel.add(o.id)); renderOpen(); };
   if (!rows.length){
     $("op-list").innerHTML = `<div style="color:var(--faint);padding:20px 0;text-align:center">${opRows.length ? t().noRes : t().opNone}</div>`;
     return;
