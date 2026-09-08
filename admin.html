@@ -141,7 +141,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v108</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v109</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -168,6 +168,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
         <button data-go="shko" data-t="shkoTitle" id="nav-shko" class="hide"></button>
         <button data-go="cost" data-t="costTitle" id="nav-cost" class="hide"></button>
         <button data-go="open" data-t="openTitle"></button>
+        <button data-go="carts" data-t="cartTitle" id="nav-carts" class="hide"></button>
         <button data-go="lbl" data-t="lblTitle"></button>
         <button data-go="batch" data-t="moveBatch"></button>
         <button data-go="home" data-t="refresh"></button>
@@ -523,6 +524,27 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
       </div>
     </div>
 
+    <div id="v-carts" class="hide">
+      <button class="back" data-go="home" data-t="back"></button>
+      <h2 data-t="cartTitle"></h2>
+      <div id="ca-msg"></div>
+      <p style="color:var(--mute);font-size:12.5px;line-height:1.9;margin-bottom:14px" data-t="cartHelp"></p>
+      <div class="tiles">
+        <div class="tile"><div class="k" data-t="cartWait"></div><div class="v num" id="ca-n">—</div></div>
+        <div class="tile"><div class="k" data-t="cartBought"></div><div class="v num" id="ca-b" style="color:var(--teal)">—</div></div>
+      </div>
+      <div class="f"><label data-t="cartLink"></label>
+        <textarea id="ca-box" dir="ltr" style="min-height:70px;font-family:Archivo,monospace;font-size:13px"
+          placeholder="https://…"></textarea></div>
+      <div class="f"><label data-t="username"></label><input id="ca-user" dir="ltr" autocomplete="off" placeholder="rosse.k"></div>
+      <button class="btn" id="ca-add" data-t="save"></button>
+      <div style="display:flex;gap:10px;margin-top:18px;align-items:center">
+        <input id="ca-q" dir="ltr" autocomplete="off" placeholder="rosse" style="flex:1;min-height:44px">
+        <button class="btn ghost" id="ca-toggle" style="width:auto;min-height:44px;padding:0 14px;font-size:12.5px;flex:0 0 auto"></button>
+      </div>
+      <div id="ca-list" style="margin-top:12px"></div>
+    </div>
+
     <div id="v-batch" class="hide">
       <button class="back" data-go="home" data-t="back"></button>
       <h2 data-t="moveBatch"></h2>
@@ -644,6 +666,9 @@ const T = {
   willMove:"داواکاری دەگوازرێتەوە",moveAll:"گواستنەوەی هەموویان",noRes:"هیچ نەدۆزرایەوە",
   codesLbl:"کۆدەکان (بە کۆمەڵ)",codesHint:"کۆدەکان بنووسە یان بلکێنە — ئەوسا «لە دۆخی» و مەودا پشتگوێ دەخرێن. گەیەندراو و هەڵوەشێنراوەکان ناگۆڕدرێن.",skipped:"پشتگوێخراو (گەیەندراو/هەڵوەشێنراو)",
   saved:"تۆمارکرا",need:"ناو و کۆی گشتی پێویستە",moved:"داواکاری گوازرایەوە",
+  cartTitle:"لینکی سەبەتەکان",cartHelp:"لینکی سەبەتەی کڕیار لە ئینستاگرام کۆپی بکە و لێرە بیلکێنە، ناوی ئینستاگرامەکەشی بنووسە. کەسی کڕین لیستەکە لێرە دەکاتەوە، لینکەکە دەکاتەوە و دوای کڕین ✓ لێدەدات.",
+  cartWait:"چاوەڕوانی کڕین",cartBought:"کڕدراو",cartLink:"لینکی سەبەتە",cartOpen:"کردنەوە",cartCopy:"کۆپی",cartDone:"کڕدرا",cartUndo:"گەڕاندنەوە بۆ چاوەڕوانی",
+  cartShowBought:"کڕدراوەکان",cartHideBought:"چاوەڕوانەکان",cartNoLink:"هیچ لینکێک نەدۆزرایەوە — لینکەکە بلکێنە",cartNeedUser:"ناوی ئینستاگرام پێویستە",cartDup:"ئەم لینکە پێشتر تۆمارکراوە",cartBy:"لەلایەن",cartEmpty:"هیچ لینکێک نییە",
   st:{received:"وەرگیرا",purchased:"کڕدرا",at_dubai:"لە دوبەی",in_transit:"لە ڕێگادایە",
    at_erbil:"لە هەولێر",out_for_delivery:"لە گەیاندندایە",delivered:"گەیەندرا",cancelled:"هەڵوەشێنراوە"}},
  ar:{cycle:"الشهر",orders:"الطلبات",cod:"المبلغ المتبقي للتحصيل",codPending:"المتبقي للتحصيل (بدون المسلَّم)",billed:"مجموع الشهر",paidUp:"المدفوع مقدماً",
@@ -694,6 +719,9 @@ const T = {
   willMove:"طلب راح ينتقل",moveAll:"حدث الكل",noRes:"ما لكيت شي",
   codesLbl:"الرموز (دفعة)",codesHint:"اكتب أو الصق الرموز — عندها «من حالة» والمدى ينتجاهلون. المسلَّم والملغي ما يتغيرون.",skipped:"متجاوَز (مسلَّم/ملغي)",
   saved:"انحفظ",need:"لازم الاسم والمجموع",moved:"الطلبات انتقلت",
+  cartTitle:"روابط السلات",cartHelp:"انسخ رابط سلة الزبون من الانستغرام والصقه هنا، واكتب اسم حسابه. المشتري يفتح القائمة من هنا، يفتح الرابط، وبعد الشراء يضغط ✓.",
+  cartWait:"بانتظار الشراء",cartBought:"منشتري",cartLink:"رابط السلة",cartOpen:"افتح",cartCopy:"نسخ",cartDone:"انشترى",cartUndo:"رجّعه للانتظار",
+  cartShowBought:"المشتراة",cartHideBought:"المنتظرة",cartNoLink:"ما لكيت رابط — الصق الرابط",cartNeedUser:"لازم اسم الانستغرام",cartDup:"هذا الرابط محفوظ من قبل",cartBy:"من قبل",cartEmpty:"ما في روابط",
   st:{received:"تم الاستلام",purchased:"تم الشراء",at_dubai:"بدبي",in_transit:"بالطريق",
    at_erbil:"بأربيل",out_for_delivery:"قيد التوصيل",delivered:"تم التسليم",cancelled:"ملغي"}}
 };
@@ -705,6 +733,8 @@ let hasCollect = false;
 let hasShip = false;
 // true once the expenses table exists (costs & profit section)
 let hasCosts = false;
+// true once the cart_links table exists (cart_links.sql)
+let hasCarts = false;
 
 const $ = i => document.getElementById(i);
 
@@ -740,7 +770,7 @@ function say(box, text, kind, ms){
   if (text && hold) setTimeout(() => { if ($(box)) $(box).innerHTML = ""; }, hold);
 }
 function view(n){
-  ["home","new","paste","dash","scan","detail","batch","shko","cost","lbl","cust","close","open"].forEach(v => $("v-" + v).classList.toggle("hide", v !== n));
+  ["home","new","paste","dash","scan","detail","batch","shko","cost","lbl","cust","close","open","carts"].forEach(v => $("v-" + v).classList.toggle("hide", v !== n));
   window.scrollTo(0,0);
 }
 function paintLang(){
@@ -837,6 +867,8 @@ async function loadHome(){
   $("nav-shko").classList.toggle("hide", me.role !== "admin" || !hasShip);
   $("nav-cost").classList.toggle("hide", me.role !== "admin" || !hasCosts);
   $("bag-box").classList.toggle("hide", me.role !== "admin");
+  // every staff member sees the cart queue — the buyer works from it
+  $("nav-carts").classList.toggle("hide", !hasCarts);
   if (me.role === "admin"){
     $("h-billed").textContent = iqd(sum("total_iqd"));
     $("h-paid").textContent   = iqd(sum("deposit_iqd"));
@@ -1368,6 +1400,7 @@ document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", 
   if (g === "cost") initCost();
   if (g === "lbl") initLbl();
   if (g === "open") initOpen();
+  if (g === "carts") initCarts();
   view(g);
 }));
 $("q-go").addEventListener("click", search);
@@ -4186,6 +4219,98 @@ function paintOnline(){
          box-shadow:0 0 6px rgba(29,158,117,.8)"></span>${u.name}${u.role === "admin" ? " ★" : ""}</span>`).join("");
 }
 
+// ---------- Cart links: Instagram DM → purchase queue ----------
+// A cart link arrives before there is an order or a total, so it cannot hang
+// off orders; it gets its own table. The buyer works this list instead of a
+// WhatsApp chat: open the link, buy, tick. Ticked rows stay for the record.
+let cartRows = [], cartShowBought = false;
+const escC = v => String(v == null ? "" : v).replace(/[&<>"']/g,
+  c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const CART_URL = /https?:\/\/[^\s<>"'،]+/gi;
+
+async function initCarts(){
+  await freshSession();
+  const { data, error } = await db.from("cart_links")
+    .select("id,username,url,status,added_by,bought_by,bought_at,created_at")
+    .order("created_at", { ascending: false }).limit(500);
+  if (error) return say("ca-msg", error.message, "err");
+  cartRows = data || [];
+  renderCarts();
+}
+
+const cartHost = u => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch { return ""; } };
+const cartWhen = s => new Date(s).toLocaleString("en-GB", { day:"numeric", month:"short", hour:"2-digit", minute:"2-digit" });
+
+function renderCarts(){
+  const q = ($("ca-q").value || "").trim().toLowerCase().replace(/^@/, "");
+  $("ca-n").textContent = cartRows.filter(r => r.status === "queued").length;
+  $("ca-b").textContent = cartRows.filter(r => r.status === "bought").length;
+  $("ca-toggle").textContent = cartShowBought ? t().cartHideBought : t().cartShowBought;
+  const want = cartShowBought ? "bought" : "queued";
+  const rows = cartRows.filter(r => r.status === want &&
+    (!q || (r.username || "").toLowerCase().includes(q) || r.url.toLowerCase().includes(q)));
+  const btn = `width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:transparent;
+    color:var(--white);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    text-decoration:none;flex:0 0 auto`;
+  $("ca-list").innerHTML = rows.map(r => `<div class="row" style="cursor:default">
+    <div class="l">
+      <div class="u" dir="ltr">@${escC(r.username)}</div>
+      <div class="s num" dir="ltr">${cartWhen(r.created_at)} · ${escC(cartHost(r.url))}${
+        r.status === "bought" && r.bought_by ? ` · ✓ ${escC(r.bought_by)} ${cartWhen(r.bought_at)}` : ""}</div>
+    </div>
+    <a href="${escC(r.url)}" target="_blank" rel="noopener" title="${t().cartOpen}" style="${btn}">↗</a>
+    <button class="ca-copy" data-id="${r.id}" title="${t().cartCopy}" style="${btn}">⧉</button>
+    <button class="ca-tick" data-id="${r.id}" title="${r.status === "bought" ? t().cartUndo : t().cartDone}"
+      style="${btn};${r.status === "bought"
+        ? "color:var(--mute)"
+        : "border-color:var(--teal);background:rgba(29,158,117,.12);color:var(--teal)"}">${
+      r.status === "bought" ? "↩" : "✓"}</button>
+  </div>`).join("") || `<div class="empty">${t().cartEmpty}</div>`;
+
+  const byId = id => cartRows.find(x => String(x.id) === id);
+  [...$("ca-list").querySelectorAll(".ca-copy")].forEach(b => b.addEventListener("click", async () => {
+    const r = byId(b.dataset.id); if (!r) return;
+    try { await navigator.clipboard.writeText(r.url); say("ca-msg", t().copied, "ok", 1500); }
+    catch { say("ca-msg", r.url, "ok", 8000); }
+  }));
+  [...$("ca-list").querySelectorAll(".ca-tick")].forEach(b => b.addEventListener("click", async () => {
+    const r = byId(b.dataset.id); if (!r) return;
+    const upd = r.status === "bought"
+      ? { status:"queued", bought_by:null, bought_at:null }
+      : { status:"bought", bought_by:me.full_name, bought_at:new Date().toISOString() };
+    b.disabled = true;
+    await freshSession();
+    const { error } = await db.from("cart_links").update(upd).eq("id", r.id);
+    if (error){ b.disabled = false; return say("ca-msg", error.message, "err"); }
+    Object.assign(r, upd);
+    renderCarts();
+  }));
+}
+
+$("ca-q").addEventListener("input", renderCarts);
+$("ca-toggle").addEventListener("click", () => { cartShowBought = !cartShowBought; renderCarts(); });
+$("ca-add").addEventListener("click", async () => {
+  const raw = $("ca-box").value;
+  const urls = [...new Set(raw.match(CART_URL) || [])];
+  // username: the field, or whatever non-link word was pasted along with the link
+  let user = $("ca-user").value.trim().replace(/^@/, "");
+  if (!user) user = raw.replace(CART_URL, " ").replace(/[^A-Za-z0-9._]+/g, " ").trim().split(/\s+/)[0] || "";
+  if (!urls.length) return say("ca-msg", t().cartNoLink, "err");
+  if (!user) return say("ca-msg", t().cartNeedUser, "err");
+  user = user.toLowerCase();
+  const dup = cartRows.find(r => r.status === "queued" && urls.includes(r.url));
+  if (dup) return say("ca-msg", `${t().cartDup} — @${escC(dup.username)}`, "err");
+  const b = $("ca-add"); b.disabled = true;
+  await freshSession();
+  const { error } = await db.from("cart_links")
+    .insert(urls.map(u => ({ username: user, url: u, added_by: me.full_name })));
+  b.disabled = false;
+  if (error) return say("ca-msg", error.message, "err");
+  $("ca-box").value = ""; $("ca-user").value = "";
+  say("ca-msg", `✓ @${escC(user)} — ${urls.length}`, "ok");
+  initCarts();
+});
+
 db.auth.onAuthStateChange(async (_e, session) => {
   if (!session){
     started = false;
@@ -4212,6 +4337,8 @@ db.auth.onAuthStateChange(async (_e, session) => {
   hasShip = !se2;
   const { error: ce2 } = await db.from("expenses").select("id").limit(1);
   hasCosts = !ce2;
+  const { error: ca } = await db.from("cart_links").select("id").limit(1);
+  hasCarts = !ca;
   $("me").textContent = s.full_name;
   $("login").classList.add("hide");
   $("app").classList.remove("hide");
