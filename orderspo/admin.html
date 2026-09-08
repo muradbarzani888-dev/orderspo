@@ -141,7 +141,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v109</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v110</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -4224,18 +4224,44 @@ function paintOnline(){
 // off orders; it gets its own table. The buyer works this list instead of a
 // WhatsApp chat: open the link, buy, tick. Ticked rows stay for the record.
 let cartRows = [], cartShowBought = false;
+// true once cart_links.preview_url exists (second block of cart_links.sql)
+let hasCartPreview = false;
 const escC = v => String(v == null ? "" : v).replace(/[&<>"']/g,
   c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const CART_URL = /https?:\/\/[^\s<>"'،]+/gi;
 
 async function initCarts(){
   await freshSession();
-  const { data, error } = await db.from("cart_links")
-    .select("id,username,url,status,added_by,bought_by,bought_at,created_at")
-    .order("created_at", { ascending: false }).limit(500);
-  if (error) return say("ca-msg", error.message, "err");
-  cartRows = data || [];
+  const cols = "id,username,url,status,added_by,bought_by,bought_at,created_at";
+  const load = c => db.from("cart_links").select(c).order("created_at", { ascending: false }).limit(500);
+  let r = await load(cols + ",preview_url");
+  hasCartPreview = !r.error;
+  if (r.error && /preview_url/i.test(r.error.message)) r = await load(cols);
+  if (r.error) return say("ca-msg", r.error.message, "err");
+  cartRows = r.data || [];
   renderCarts();
+  fillCartPreviews();
+}
+
+// The share link only opens inside the SHEIN app, but its page carries a
+// public collage of the cart with the item count stamped on it. Our Vercel
+// function (api/cart_preview.py) reads that; we keep the image URL per row.
+const cartPrevTried = new Set();
+async function fillCartPreviews(){
+  if (!hasCartPreview) return;
+  const todo = cartRows.filter(r => !r.preview_url && r.status === "queued" && !cartPrevTried.has(r.id)).slice(0, 8);
+  for (const r of todo){
+    cartPrevTried.add(r.id);
+    try {
+      const res = await fetch("/api/cart_preview?u=" + encodeURIComponent(r.url));
+      if (!res.ok) continue;
+      const j = await res.json();
+      if (!j.image || !(j.cart_share || j.group_id)) continue;   // bounced to the homepage: no cart here
+      await freshSession();
+      const { error } = await db.from("cart_links").update({ preview_url: j.image }).eq("id", r.id);
+      if (!error){ r.preview_url = j.image; renderCarts(); }
+    } catch (_) { /* offline or function down: the row simply stays without a picture */ }
+  }
 }
 
 const cartHost = u => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch { return ""; } };
@@ -4253,6 +4279,9 @@ function renderCarts(){
     color:var(--white);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;
     text-decoration:none;flex:0 0 auto`;
   $("ca-list").innerHTML = rows.map(r => `<div class="row" style="cursor:default">
+    ${r.preview_url ? `<a href="${escC(r.preview_url)}" target="_blank" rel="noopener" style="flex:0 0 auto">
+      <img src="${escC(r.preview_url)}" referrerpolicy="no-referrer" loading="lazy" alt=""
+        style="width:58px;height:86px;object-fit:cover;object-position:50% 45%;border-radius:9px;display:block;background:var(--line)"></a>` : ""}
     <div class="l">
       <div class="u" dir="ltr">@${escC(r.username)}</div>
       <div class="s num" dir="ltr">${cartWhen(r.created_at)} · ${escC(cartHost(r.url))}${

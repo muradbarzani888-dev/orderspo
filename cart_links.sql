@@ -26,3 +26,8 @@ create policy "staff manage cart links" on public.cart_links
   for all to authenticated
   using      (exists (select 1 from public.staff s where s.id = auth.uid()))
   with check (exists (select 1 from public.staff s where s.id = auth.uid()));
+
+-- ---------------------------------------------------------------------------
+-- v110: cart preview. The share link's page carries a public collage image of
+-- the cart (item count stamped on it); admin stores that URL per row.
+alter table public.cart_links add column if not exists preview_url text;
