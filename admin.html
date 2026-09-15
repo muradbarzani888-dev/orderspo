@@ -141,7 +141,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v110</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v111</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -345,6 +345,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
       <button class="back" data-go="home" data-t="back"></button>
       <h2 data-t="shkoTitle"></h2>
       <div id="sk-msg"></div>
+      <div id="sk-couriers" style="display:flex;gap:8px;margin-bottom:14px"></div>
       <div class="tiles">
         <div class="tile wide"><div class="k" data-t="shkoRemaining"></div><div class="v num" id="sk-remaining">—</div><div class="sub" id="sk-remaining-sub"></div></div>
         <div class="tile wide"><div class="k" data-t="shkoAllRecv"></div><div class="v num" id="sk-all">—</div></div>
@@ -384,7 +385,10 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
         <h2 style="margin:0;font-size:15px" data-t="shkoOpenList"></h2>
         <span id="sk-open-n" class="num" style="color:var(--teal);font-size:13px;font-weight:600"></span>
-        <button id="sk-clear-open" class="hide" style="margin-inline-start:auto;padding:7px 12px;border-radius:10px;
+        <button id="sk-export" class="hide" style="margin-inline-start:auto;padding:7px 12px;border-radius:10px;
+          border:1px solid var(--teal);background:transparent;color:var(--teal);font-size:12px"
+          data-t="skExport"></button>
+        <button id="sk-clear-open" class="hide" style="padding:7px 12px;border-radius:10px;
           border:1px solid rgba(226,75,74,.4);background:transparent;color:#F09595;font-size:12px"
           data-t="shkoClearAll"></button>
       </div>
@@ -646,7 +650,7 @@ const T = {
   moveBatch:"گواستنەوەی کۆمەڵ",searchLbl:"گەڕان بە کۆد، ناو یان ژمارە",search:"گەڕان",back:"گەڕانەوە",
   username:"ناوی ئینستاگرام",phone:"ژمارەی مۆبایل",address:"ناونیشان",total:"کۆی گشتی",
   deposit:"پارەی پێشەکی",due:"بڕی ماوە",items:"ژمارەی بەرهەم",save:"تۆمارکردن",
-  setStatus:"دۆخی نوێ",update:"نوێکردنەوە",collected:"پارەی کۆکراوە",collectedAsk:"چەند پارە کۆکرایەوە؟",shkoTitle:"شحنەکانی SHKO",shkoRemaining:"پارە لای SHKO (ماوە)",shkoThisMonth:"وەرگیراوی ئەم مانگە",shkoAllRecv:"کۆی وەرگیراو",shkoAddOfd:"زیادکردنی هەموو «لە گەیاندندایە»",shkoAdd:"زیادکردن",shkoReceived:"وەرگیراوەکان",shkoEmpty:"هیچ نەماوە — هەمووی وەرگیراوە ✓",shkoNone:"هیچ داواکارییەک نییە",shkoDel:"سڕینەوە",shkoClearAll:"سڕینەوەی هەمووی",shkoRecvN:"وەرگیراوە",shkoOpenList:"لای SHKO",shkoShipN:"شحنە",shkoScanHelp:"وێنەی لەیبڵەکان هەڵبژێرە — سیستەم کۆدی کڕیار دەخوێنێتەوە، بڕی ماوە و ناو لە داواکارییەکەوە دێن",shkoApply:"تۆمارکردنی شحنەکان",shkoImgDel:"سڕینەوەی وێنە",lblTitle:"چاپکردنی لەیبڵ",lblHelp:"کۆد یان مەودا بنووسە (1-50 398) یان هەموو دۆخێک زیاد بکە، دواتر چاپکردن — هەر لەیبڵێک 100×100mm. ژمارەی بارکۆد = مانگ + کۆدی کڕیار.",lblAddStatus:"زیادکردنی هەموو",lblPrint:"چاپکردن",lblName:"ناو",lblPhone:"مۆبایلی کڕیار",lblCity:"شار",lblAddr:"ناونیشان",lblDue:"بڕی ماوە",alTitle:"داواکاری گیرماوەکان",alDays:"ڕۆژ",alFix:"گۆڕینی دۆخ",alBagLate:"جانتای دواکەوتوو",openTitle:"بۆردی داواکارییە کراوەکان",opHelp:"هەموو داواکارییەک کە هێشتا نەگەیەندراوە، بەپێی ماوەی مانەوەی لە دۆخەکەیدا: سەوز = باشە، زەرد = نزیک لە سنوور، سوور = زۆر دواکەوتووە. لێی بدە بۆ گۆڕینی دۆخ.",opRed:"زۆر دواکەوتوو",opYellow:"ئاگاداربە",opGreen:"باشە",opLimit:"سنوور",opNone:"هیچ داواکارییەکی کراوە نییە ✓",opSelAll:"هەڵبژاردنی هەمووی",opSelected:"هەڵبژێردراو",opSearchHint:"کۆدەکان بلکێنە بۆ گەڕانی کۆمەڵ — یان ناوی کڕیار",opSelShown:"هەڵبژاردنی هەموو ئەوانەی دەرکەوتوون",opNotOpen:"کراوە نییە لەم مانگەدا",
+  setStatus:"دۆخی نوێ",update:"نوێکردنەوە",collected:"پارەی کۆکراوە",collectedAsk:"چەند پارە کۆکرایەوە؟",shkoTitle:"شحنەکانی SHKO",shkoRemaining:"پارە لای SHKO (ماوە)",shkoThisMonth:"وەرگیراوی ئەم مانگە",shkoAllRecv:"کۆی وەرگیراو",shkoAddOfd:"زیادکردنی هەموو «لە گەیاندندایە»",shkoAdd:"زیادکردن",shkoReceived:"وەرگیراوەکان",shkoEmpty:"هیچ نەماوە — هەمووی وەرگیراوە ✓",shkoNone:"هیچ داواکارییەک نییە",shkoDel:"سڕینەوە",shkoClearAll:"سڕینەوەی هەمووی",shkoRecvN:"وەرگیراوە",shkoOpenList:"لای SHKO",shkoShipN:"شحنە",shkoScanHelp:"وێنەی لەیبڵەکان هەڵبژێرە — سیستەم کۆدی کڕیار دەخوێنێتەوە، بڕی ماوە و ناو لە داواکارییەکەوە دێن",shkoApply:"تۆمارکردنی شحنەکان",shkoImgDel:"سڕینەوەی وێنە",skExport:"فایلی کۆریەر (Excel)",lblTitle:"چاپکردنی لەیبڵ",lblHelp:"کۆد یان مەودا بنووسە (1-50 398) یان هەموو دۆخێک زیاد بکە، دواتر چاپکردن — هەر لەیبڵێک 100×100mm. ژمارەی بارکۆد = مانگ + کۆدی کڕیار.",lblAddStatus:"زیادکردنی هەموو",lblPrint:"چاپکردن",lblName:"ناو",lblPhone:"مۆبایلی کڕیار",lblCity:"شار",lblAddr:"ناونیشان",lblDue:"بڕی ماوە",alTitle:"داواکاری گیرماوەکان",alDays:"ڕۆژ",alFix:"گۆڕینی دۆخ",alBagLate:"جانتای دواکەوتوو",openTitle:"بۆردی داواکارییە کراوەکان",opHelp:"هەموو داواکارییەک کە هێشتا نەگەیەندراوە، بەپێی ماوەی مانەوەی لە دۆخەکەیدا: سەوز = باشە، زەرد = نزیک لە سنوور، سوور = زۆر دواکەوتووە. لێی بدە بۆ گۆڕینی دۆخ.",opRed:"زۆر دواکەوتوو",opYellow:"ئاگاداربە",opGreen:"باشە",opLimit:"سنوور",opNone:"هیچ داواکارییەکی کراوە نییە ✓",opSelAll:"هەڵبژاردنی هەمووی",opSelected:"هەڵبژێردراو",opSearchHint:"کۆدەکان بلکێنە بۆ گەڕانی کۆمەڵ — یان ناوی کڕیار",opSelShown:"هەڵبژاردنی هەموو ئەوانەی دەرکەوتوون",opNotOpen:"کراوە نییە لەم مانگەدا",
   custTitle:"کڕیارەکان",custVips:"کڕیاری VIP",custRepeat:"کڕیاری دووبارە",custCopy:"کۆپی لیستی VIP بۆ Close Friends",
   custSpend:"کۆی کڕین",custDebt:"قەرز",custOpen:"لە ڕێگادایە",custOrdersN:"داواکاری",custDeliv:"گەیەندراو",
   custCanc:"هەڵوەشاوە",custBack:"گەڕانەوە بۆ لیست",copied:"کۆپی کرا ✓",custShare:"لە داهات",
@@ -699,7 +703,7 @@ const T = {
   moveBatch:"تحديث مجموعة",searchLbl:"دور بالرمز أو الاسم أو الرقم",search:"دور",back:"رجوع",
   username:"اسم الانستغرام",phone:"رقم الموبايل",address:"العنوان",total:"المجموع",
   deposit:"المدفوع",due:"المتبقي",items:"عدد القطع",save:"حفظ",
-  setStatus:"الحالة الجديدة",update:"تحديث",collected:"المبلغ المستلم",collectedAsk:"شكد انستلم؟",shkoTitle:"شحنات SHKO",shkoRemaining:"الفلوس عند SHKO (باقية)",shkoThisMonth:"مستلم هذا الشهر",shkoAllRecv:"مجموع المستلم",shkoAddOfd:"إضافة كل «قيد التوصيل»",shkoAdd:"إضافة",shkoReceived:"المستلمة",shkoEmpty:"ما باقي شي — كله مستلم ✓",shkoNone:"ما في طلبات",shkoDel:"حذف",shkoClearAll:"حذف الكل",shkoRecvN:"مستلم",shkoOpenList:"عند SHKO",shkoShipN:"شحنة",shkoScanHelp:"اختار صور الليبلات — النظام يقرا رمز الزبون، والمبلغ الباقي والاسم ييجون من الطلب",shkoApply:"حفظ الشحنات",shkoImgDel:"حذف الصورة",lblTitle:"طباعة الليبلات",lblHelp:"اكتب الرموز أو مدى (1-50 398) أو ضيف حالة كاملة ثم اطبع — كل ليبل 100×100mm. رقم الباركود = الشهر + رمز الزبون.",lblAddStatus:"إضافة الكل",lblPrint:"طباعة",lblName:"الاسم",lblPhone:"موبايل الزبون",lblCity:"المدينة",lblAddr:"العنوان",lblDue:"المبلغ المتبقي",alTitle:"طلبات عالقة",alDays:"يوم",alFix:"تغيير الحالة",alBagLate:"كيس متأخر",openTitle:"لوحة الطلبات المفتوحة",opHelp:"كل طلب بعده ما تسلّم، حسب مدة بقائه بحالته: أخضر = تمام، أصفر = قرب الحد، أحمر = متأخر جداً. اضغط عليه لتغيير الحالة.",opRed:"متأخر جداً",opYellow:"انتبه",opGreen:"تمام",opLimit:"الحد",opNone:"ما في طلبات مفتوحة ✓",opSelAll:"اختيار الكل",opSelected:"محدد",opSearchHint:"الصق الرموز للبحث الجماعي — أو اسم الزبون",opSelShown:"اختيار كل الظاهر",opNotOpen:"مو مفتوح بهذا الشهر",
+  setStatus:"الحالة الجديدة",update:"تحديث",collected:"المبلغ المستلم",collectedAsk:"شكد انستلم؟",shkoTitle:"شحنات SHKO",shkoRemaining:"الفلوس عند SHKO (باقية)",shkoThisMonth:"مستلم هذا الشهر",shkoAllRecv:"مجموع المستلم",shkoAddOfd:"إضافة كل «قيد التوصيل»",shkoAdd:"إضافة",shkoReceived:"المستلمة",shkoEmpty:"ما باقي شي — كله مستلم ✓",shkoNone:"ما في طلبات",shkoDel:"حذف",shkoClearAll:"حذف الكل",shkoRecvN:"مستلم",shkoOpenList:"عند SHKO",shkoShipN:"شحنة",shkoScanHelp:"اختار صور الليبلات — النظام يقرا رمز الزبون، والمبلغ الباقي والاسم ييجون من الطلب",shkoApply:"حفظ الشحنات",shkoImgDel:"حذف الصورة",skExport:"ملف الكوريير (Excel)",lblTitle:"طباعة الليبلات",lblHelp:"اكتب الرموز أو مدى (1-50 398) أو ضيف حالة كاملة ثم اطبع — كل ليبل 100×100mm. رقم الباركود = الشهر + رمز الزبون.",lblAddStatus:"إضافة الكل",lblPrint:"طباعة",lblName:"الاسم",lblPhone:"موبايل الزبون",lblCity:"المدينة",lblAddr:"العنوان",lblDue:"المبلغ المتبقي",alTitle:"طلبات عالقة",alDays:"يوم",alFix:"تغيير الحالة",alBagLate:"كيس متأخر",openTitle:"لوحة الطلبات المفتوحة",opHelp:"كل طلب بعده ما تسلّم، حسب مدة بقائه بحالته: أخضر = تمام، أصفر = قرب الحد، أحمر = متأخر جداً. اضغط عليه لتغيير الحالة.",opRed:"متأخر جداً",opYellow:"انتبه",opGreen:"تمام",opLimit:"الحد",opNone:"ما في طلبات مفتوحة ✓",opSelAll:"اختيار الكل",opSelected:"محدد",opSearchHint:"الصق الرموز للبحث الجماعي — أو اسم الزبون",opSelShown:"اختيار كل الظاهر",opNotOpen:"مو مفتوح بهذا الشهر",
   custTitle:"الزبائن",custVips:"زبون VIP",custRepeat:"زبون متكرر",custCopy:"انسخ قائمة VIP لـ Close Friends",
   custSpend:"مجموع الشراء",custDebt:"دين",custOpen:"بالطريق",custOrdersN:"طلب",custDeliv:"مسلَّم",
   custCanc:"ملغى",custBack:"رجوع للقائمة",copied:"تم النسخ ✓",custShare:"من الدخل",
@@ -1809,7 +1813,10 @@ const GOV_MAP = {
   "واسط":"واسط","ديالى":"ديالى","ذي قار":"ذي قار","الناصرية":"ذي قار","ناصرية":"ذي قار",
   "المثنى":"المثنى","السماوة":"المثنى","القادسية":"القادسية","الديوانية":"القادسية",
   "ميسان":"ميسان","العمارة":"ميسان","halabja":"حلبجة","حلبجة":"حلبجة","كفري":"السليمانية",
-  "ranya":"السليمانية","soran":"أربيل","koya":"أربيل","shaqllawa":"أربيل","akre":"دهوك"
+  "ranya":"السليمانية","soran":"أربيل","koya":"أربيل","shaqllawa":"أربيل","akre":"دهوك",
+  "karkuk":"كركوك","kerkuk":"كركوك","qarahanjir":"كركوك","chamchamal":"السليمانية","qalladze":"السليمانية",
+  "qaladze":"السليمانية","qeladze":"السليمانية","قەڵادزێ":"السليمانية","حله":"بابل","الحلة":"بابل","hilla":"بابل",
+  "ناصريه":"ذي قار","nasiriyah":"ذي قار","رمادي":"الأنبار","ramadi":"الأنبار","العماره":"ميسان","هەولير":"أربيل"
 };
 function govOf(addr){
   const a = String(addr || "").toLowerCase();
@@ -2610,6 +2617,31 @@ $("bg-go").addEventListener("click", async () => {
 
 // ---------- SHKO shipments: money that is out with the courier ----------
 let skRows = [], skAttachId = null, skInit = false;
+// Each shipment belongs to one courier, so "money out with SHKO" and "money out
+// with Nihad" are separate ledgers that can never mix. Rows without a courier
+// (before the column existed) are SHKO's.
+const COURIERS = [{ id: "shko", name: "SHKO Post" }, { id: "nihad", name: "Nihad" }];
+let skCourier = "shko", skHasCourier = true;
+const rowCourier = r => r.courier || "shko";
+const skMine = () => skRows.filter(r => rowCourier(r) === skCourier);
+function skTag(row){ return skHasCourier ? { ...row, courier: skCourier } : row; }
+
+function renderCourierTabs(){
+  const sum = a => a.reduce((x, r) => x + Number(r.amount_iqd || 0), 0);
+  $("sk-couriers").innerHTML = COURIERS.map(c => {
+    const open = skRows.filter(r => rowCourier(r) === c.id && !r.received);
+    const on = c.id === skCourier;
+    return `<button data-courier="${c.id}" style="flex:1;padding:10px 8px;border-radius:12px;font-family:inherit;
+        border:1px solid ${on ? "var(--teal)" : "var(--line)"};background:${on ? "rgba(42,173,165,.12)" : "var(--deep)"};
+        color:${on ? "var(--white)" : "var(--mute)"}">
+        <div style="font-weight:600;font-size:14px">${c.name}</div>
+        <div class="num" style="font-size:12px;color:${on ? "var(--teal)" : "var(--faint)"};margin-top:3px">${iqd(sum(open))} · ${open.length}</div>
+      </button>`;
+  }).join("");
+  $("sk-couriers").querySelectorAll("[data-courier]").forEach(b => b.onclick = () => {
+    skCourier = b.dataset.courier; renderShko();
+  });
+}
 
 async function initShko(){
   if (!skInit){
@@ -2634,6 +2666,11 @@ async function initShko(){
     $("sk-clear").addEventListener("click", clearShkoRecv);
     $("sk-clear-open").addEventListener("click", clearShkoOpen);
     $("sk-q").addEventListener("input", renderShko);
+    $("sk-export").addEventListener("click", exportCourierXlsx);
+    // the courier column is a later migration: without it everything is SHKO's
+    const { error: ce } = await db.from("shipments").select("courier").limit(1);
+    skHasCourier = !ce;
+    if (ce) say("sk-msg", "DB: shipments.courier missing — run the courier migration", "err", 0);
   }
   await loadShko();
 }
@@ -2676,8 +2713,10 @@ function shipRow(r, done){
 }
 
 function renderShko(){
-  const allOpen = skRows.filter(r => !r.received);
-  const allRecv = skRows.filter(r => r.received);
+  renderCourierTabs();
+  const mine = skMine();
+  const allOpen = mine.filter(r => !r.received);
+  const allRecv = mine.filter(r => r.received);
   const q = toEn($("sk-q").value || "").trim().toLowerCase();
   // amount lookup kicks in from 4 digits so short queries stay code searches
   const qd = q.replace(/[,،٫٬.\s]/g, "");
@@ -2704,6 +2743,7 @@ function renderShko(){
        <span class="num" dir="ltr">${k}</span><span class="num" style="color:var(--teal)">${iqd(m[k])}</span></div>`).join("");
   $("sk-open-n").textContent = `${open.length} ${t().shkoShipN}`;
   $("sk-clear-open").classList.toggle("hide", !open.length);
+  $("sk-export").classList.toggle("hide", !allOpen.length);
   $("sk-recv-n").textContent = recv.length ? `${recv.length} ${t().shkoRecvN}` : `0 ${t().shkoRecvN}`;
   $("sk-clear").classList.toggle("hide", !recv.length);
   $("sk-recv").innerHTML = recv.slice(0, 80).map(r => shipRow(r, true)).join("");
@@ -2776,8 +2816,48 @@ async function clearShkoBulk(rows, btn, word){
   say("sk-msg", t().saved, "ok");
   loadShko();
 }
-const clearShkoRecv = () => clearShkoBulk(skRows.filter(r => r.received), $("sk-clear"), t().shkoRecvN);
-const clearShkoOpen = () => clearShkoBulk(skRows.filter(r => !r.received), $("sk-clear-open"), t().shkoShipN);
+const clearShkoRecv = () => clearShkoBulk(skMine().filter(r => r.received), $("sk-clear"), t().shkoRecvN);
+const clearShkoOpen = () => clearShkoBulk(skMine().filter(r => !r.received), $("sk-clear-open"), t().shkoShipN);
+
+// The courier's bulk-upload workbook, built from the open shipments of the
+// current courier tab and month: our waybill as the reference, COD = balance,
+// pieces = bags, city from the address. Same columns as their template.
+const GOV_EN = { "أربيل": "Erbil", "بغداد": "Baghdad", "البصرة": "Basra", "نينوى": "Mosul", "كركوك": "Kirkuk",
+  "السليمانية": "Sulaymaniyah", "دهوك": "Duhok", "صلاح الدين": "Salah al-Din", "الأنبار": "Anbar",
+  "النجف": "Najaf", "كربلاء": "Karbala", "بابل": "Babil", "واسط": "Wasit", "ديالى": "Diyala",
+  "ذي قار": "Dhi Qar", "المثنى": "Muthanna", "القادسية": "Diwaniyah", "ميسان": "Maysan", "حلبجة": "Halabja" };
+async function exportCourierXlsx(){
+  const cyc = $("sk-cycle").value;
+  const rows = skMine().filter(r => !r.received && r.cycle_code === cyc);
+  if (!rows.length) return say("sk-msg", t().shkoNone, "err");
+  const b = $("sk-export"); b.disabled = true;
+  try {
+    if (!window.XLSX) await lbScript("https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js");
+    const { data: os, error } = await db.from("orders")
+      .select("id,seq,balance_iqd,customers(instagram_username,phone,address),bags(id)")
+      .in("id", rows.map(r => r.order_id));
+    if (error) throw error;
+    const clean = s => String(s || "").replace(/[‎‏‪-‮]/g, "").replace(/\s+/g, " ").trim().replace(/^["“”]+|["“”]+$/g, "");
+    const size = n => n <= 1 ? "Small/Standard" : n <= 3 ? "Medium" : n <= 6 ? "Large" : "Extra Large";
+    const head = ["Ext.Ref ID", "Payment Method", "COD Amount", "Delivery Payer", "Item Name", "Piece Count",
+      "Package Size", "Consignee Name", "Consignee Phone", "City", "Consignee Address", "Latitude", "Longitude"];
+    const body = (os || []).sort((a, c) => a.seq - c.seq).map(o => {
+      const bags = Math.max(1, (o.bags || []).length), addr = clean(o.customers?.address);
+      const phone = String(o.customers?.phone || "").replace(/\D/g, "").replace(/^0+/, "");
+      return [`${cyc}${String(o.seq).padStart(4, "0")}`, "cod", Number(o.balance_iqd || 0), "sender", "SHEIN order",
+        bags, size(bags), clean(o.customers?.instagram_username), phone ? `+964${phone}` : "",
+        GOV_EN[govOf(addr)] || "", addr, null, null];
+    });
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([head, ...body]), "Deliveries");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["cod", "sender", "Small/Standard"],
+      ["wallet", "receiver", "Large"], [null, null, "Extra Large"], [null, null, "Medium"]]), "DataLists");
+    XLSX.writeFile(wb, `deliveries_${skCourier}_${cyc}.xlsx`);
+    const noCity = body.filter(r => !r[9]).map(r => r[0].slice(-4).replace(/^0+/, ""));
+    say("sk-msg", `✓ ${body.length}` + (noCity.length ? ` · ${t().unknownGov}: ${noCity.join(" ")}` : ""), noCity.length ? "err" : "ok");
+  } catch (e){ say("sk-msg", e.message, "err"); }
+  b.disabled = false;
+}
 
 async function skUpload(e){
   const f = e.target.files[0]; e.target.value = "";
@@ -4125,8 +4205,8 @@ async function applyShkoScan(){
 
   const rows = sk2Rows.map(r => {
     const o = sk2Orders[r.seq];
-    return { order_id: o.id, cycle_code: cyc, seq: r.seq,
-      username: o.customers?.instagram_username || null, amount_iqd: o.balance_iqd || 0 };
+    return skTag({ order_id: o.id, cycle_code: cyc, seq: r.seq,
+      username: o.customers?.instagram_username || null, amount_iqd: o.balance_iqd || 0 });
   });
   const { error } = await db.from("shipments").upsert(rows, { onConflict: "order_id", ignoreDuplicates: true });
   if (error){ b.disabled = false; b.textContent = t().shkoApply; return say("sk-msg", error.message, "err"); }
@@ -4163,7 +4243,7 @@ async function addShko(seqs){
     .eq("cycle_code", cyc).in("seq", seqs);
   if (error) return say("sk-msg", error.message, "err");
   const found = new Set((os || []).map(o => Number(o.seq)));
-  const rows = (os || []).map(o => ({ order_id: o.id, cycle_code: cyc, seq: o.seq,
+  const rows = (os || []).map(o => skTag({ order_id: o.id, cycle_code: cyc, seq: o.seq,
     username: o.customers?.instagram_username || null, amount_iqd: o.balance_iqd || 0 }));
   if (rows.length){
     const { error: ie } = await db.from("shipments")
@@ -4187,7 +4267,7 @@ async function addAllOfd(){
     .eq("cycle_code", cyc).eq("status", "out_for_delivery");
   if (error) return say("sk-msg", error.message, "err");
   if (!(os || []).length) return say("sk-msg", t().shkoNone, "err");
-  const rows = os.map(o => ({ order_id: o.id, cycle_code: cyc, seq: o.seq,
+  const rows = os.map(o => skTag({ order_id: o.id, cycle_code: cyc, seq: o.seq,
     username: o.customers?.instagram_username || null, amount_iqd: o.balance_iqd || 0 }));
   const { error: ie } = await db.from("shipments")
     .upsert(rows, { onConflict: "order_id", ignoreDuplicates: true });
