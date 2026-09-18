@@ -161,7 +161,7 @@ button.go:disabled{opacity:.5;cursor:default}
     </div>
     <button class="go" id="submit" data-t="cta"></button>
     <p class="hint" data-t="hint"></p>
-    <p style="text-align:center;color:#3E545B;font-size:10px;margin-top:22px;font-family:Archivo,sans-serif">v17</p>
+    <p style="text-align:center;color:#3E545B;font-size:10px;margin-top:22px;font-family:Archivo,sans-serif">v18</p>
   </section>
 
   <section id="result-view" class="hidden">
@@ -274,7 +274,7 @@ const T = {
     stageHint:{received:"بە ئاسایی ٥–٧ ڕۆژ دەخایەنێت تا دەگاتە دوبەی",
       at_dubai:"زۆرترین ماوەی مانەوە لە دوبەی ٧ ڕۆژە",
       in_transit:"بە ئاسایی ٧–١٤ ڕۆژ دەخایەنێت تا دەگاتە هەولێر",
-      at_erbil:"چەند ڕۆژێک بۆ ئامادەکردن و ناردنی گەیاندن",
+      at_erbil:"لە ماوەی ١–٣ ڕۆژدا دەگاتە دەستت",
       out_for_delivery:"لە ماوەی ١–٣ ڕۆژدا دەگاتە دەستت"},
     lateQ:"داواکاریەکەت دواکەوتووە؟",lateBtn:"پەیوەندیمان پێوە بکە — واتسئاپ",
     lateMsg:"سڵاو، داواکاریەکەم دواکەوتووە. کۆدەکەم: ",
@@ -298,6 +298,7 @@ const T = {
       out_for_delivery:"لە ڕێگای گەیاندندایە",
       delivered:"گەیەندرا"
     },
+    erbilStop:"گەیشتە هەولێر — لە گەیاندندایە",
     now:"ئێستا"
   },
   ar: {
@@ -314,7 +315,7 @@ const T = {
     stageHint:{received:"عادةً ياخذ ٥–٧ أيام حتى يوصل دبي",
       at_dubai:"أقصى مدة بقاء بدبي ٧ أيام",
       in_transit:"عادةً ياخذ ٧–١٤ يوم حتى يوصل أربيل",
-      at_erbil:"كم يوم للتجهيز والإرسال للتوصيل",
+      at_erbil:"يوصلك خلال ١–٣ أيام",
       out_for_delivery:"يوصلك خلال ١–٣ أيام"},
     lateQ:"طلبك متأخر؟",lateBtn:"راسلنا — واتساب",
     lateMsg:"مرحباً، طلبي متأخر. الرمز: ",
@@ -338,6 +339,7 @@ const T = {
       out_for_delivery:"قيد التوصيل",
       delivered:"تم التسليم"
     },
+    erbilStop:"وصل أربيل — قيد التوصيل",
     now:"الآن"
   }
 };
@@ -452,15 +454,16 @@ function render(o){
   cx.style.display = dead ? "" : "none";
   $("r-timeline").style.display = dead ? "none" : "";
 
-  // Six stops: Dubai and the road to Erbil are separate chapters now;
-  // the stop before them, and the last stop covers the delivery hand-off.
+  // Five stops: Dubai and the road to Erbil are separate chapters; arriving in
+  // Erbil and going out with the courier are ONE stop, because parcels leave
+  // the same day or the next — two stops only made customers ask why it was
+  // "stuck in Erbil".
   const TL = [
-    { covers: ["received", "purchased"],  label: t.st.received },
-    { covers: ["at_dubai"],               label: t.st.at_dubai },
-    { covers: ["in_transit"],             label: t.st.in_transit },
-    { covers: ["at_erbil"],               label: t.st.at_erbil },
-    { covers: ["out_for_delivery"],       label: t.st.out_for_delivery },
-    { covers: ["delivered"],              label: t.st.delivered }
+    { covers: ["received", "purchased"],        label: t.st.received },
+    { covers: ["at_dubai"],                     label: t.st.at_dubai },
+    { covers: ["in_transit"],                   label: t.st.in_transit },
+    { covers: ["at_erbil", "out_for_delivery"], label: t.erbilStop },
+    { covers: ["delivered"],                    label: t.st.delivered }
   ];
   const reached = TL.findIndex(x => x.covers.includes(o.status));
   const tl = $("r-timeline");
