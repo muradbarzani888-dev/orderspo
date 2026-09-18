@@ -141,7 +141,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v112</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v113</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -522,6 +522,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
       <p style="color:var(--mute);font-size:12.5px;line-height:1.9;margin-bottom:14px" data-t="opHelp"></p>
       <div id="h-alerts" style="margin-bottom:6px"></div>
       <div class="f"><label data-t="month"></label><select id="op-cycle"></select></div>
+      <div id="op-due"></div>
       <div id="op-sum" style="display:flex;gap:8px;margin-bottom:14px"></div>
       <div class="f" style="margin-bottom:8px"><label data-t="opSearchHint"></label>
         <input id="op-q" dir="ltr" placeholder="312   345 357 361 …"></div>
@@ -630,7 +631,7 @@ const FLOW = ["received","purchased","at_dubai","in_transit","at_erbil","out_for
 // per-stage patience in days: SHEIN->Dubai runs 5-7 days, so at 7 the order
 // should already be in Dubai; Dubai->Erbil 7-14d -> flag at 20; after that it's
 // in our hands (labels + SHKO), so a week is already too long.
-const STAGE_LIMITS = { received: 7, purchased: 7, at_dubai: 7, in_transit: 20,
+const STAGE_LIMITS = { received: 7, purchased: 7, at_dubai: 5, in_transit: 20,
                        at_erbil: 7, out_for_delivery: 7 };
 const T = {
  ku:{cycle:"مانگ",orders:"داواکاری",cod:"پارەی ماوە بۆ کۆکردنەوە",codPending:"ماوە بۆ کۆکردنەوە (بێ گەیەندراوەکان)",billed:"کۆی گشتی مانگ",paidUp:"پێشەکی وەرگیراو",
@@ -661,7 +662,7 @@ const T = {
   moveBatch:"گواستنەوەی کۆمەڵ",searchLbl:"گەڕان بە کۆد، ناو یان ژمارە",search:"گەڕان",back:"گەڕانەوە",
   username:"ناوی ئینستاگرام",phone:"ژمارەی مۆبایل",address:"ناونیشان",total:"کۆی گشتی",
   deposit:"پارەی پێشەکی",due:"بڕی ماوە",items:"ژمارەی بەرهەم",save:"تۆمارکردن",
-  setStatus:"دۆخی نوێ",update:"نوێکردنەوە",collected:"پارەی کۆکراوە",collectedAsk:"چەند پارە کۆکرایەوە؟",shkoTitle:"شحنەکانی SHKO",shkoRemaining:"پارە لای SHKO (ماوە)",shkoThisMonth:"وەرگیراوی ئەم مانگە",shkoAllRecv:"کۆی وەرگیراو",shkoAddOfd:"زیادکردنی هەموو «لە گەیاندندایە»",shkoAdd:"زیادکردن",shkoReceived:"وەرگیراوەکان",shkoEmpty:"هیچ نەماوە — هەمووی وەرگیراوە ✓",shkoNone:"هیچ داواکارییەک نییە",shkoDel:"سڕینەوە",shkoClearAll:"سڕینەوەی هەمووی",shkoRecvN:"وەرگیراوە",shkoOpenList:"لای SHKO",shkoShipN:"شحنە",shkoScanHelp:"وێنەی لەیبڵەکان هەڵبژێرە — سیستەم کۆدی کڕیار دەخوێنێتەوە، بڕی ماوە و ناو لە داواکارییەکەوە دێن",shkoApply:"تۆمارکردنی شحنەکان",shkoImgDel:"سڕینەوەی وێنە",skExport:"فایلی کۆریەر (Excel)",lblTitle:"چاپکردنی لەیبڵ",lblHelp:"کۆد یان مەودا بنووسە (1-50 398) یان هەموو دۆخێک زیاد بکە، دواتر چاپکردن — هەر لەیبڵێک 100×100mm. ژمارەی بارکۆد = مانگ + کۆدی کڕیار.",lblAddStatus:"زیادکردنی هەموو",lblPrint:"چاپکردن",lblName:"ناو",lblPhone:"مۆبایلی کڕیار",lblCity:"شار",lblAddr:"ناونیشان",lblDue:"بڕی ماوە",alTitle:"داواکاری گیرماوەکان",alDays:"ڕۆژ",alFix:"گۆڕینی دۆخ",alBagLate:"جانتای دواکەوتوو",openTitle:"بۆردی داواکارییە کراوەکان",opHelp:"هەموو داواکارییەک کە هێشتا نەگەیەندراوە، بەپێی ماوەی مانەوەی لە دۆخەکەیدا: سەوز = باشە، زەرد = نزیک لە سنوور، سوور = زۆر دواکەوتووە. لێی بدە بۆ گۆڕینی دۆخ.",opRed:"زۆر دواکەوتوو",opYellow:"ئاگاداربە",opGreen:"باشە",opLimit:"سنوور",opNone:"هیچ داواکارییەکی کراوە نییە ✓",sheinTitle:"بەدواداچوونی شەین (ئیمەیڵ)",sheinHelp:"هەر ئیمەیڵێکی شەین کە دەگات: کڕین، ناردن، گەیشتن بە ئاژانس. سیستەم خۆی جانتاکە دروست دەکات و دۆخەکەی دەگۆڕێت. ئەوانەی نەناسراون لێرە دەمێننەوە بۆ پشکنینی خۆت.",sheinNoTable:"خشتەی shein_events هێشتا دروست نەکراوە — SQL ـەکە لە Supabase جێبەجێ بکە",seToday:"ئەمڕۆ جێبەجێکرا",seUnmatched:"نەناسراو",seLast:"دوایین ئیمەیڵ",seType:{confirmed:"کڕدرا",shipped:"لە شەین دەرچوو",out_for_delivery:"لە ڕێگای ئاژانسە",delivered:"گەیشتە ئاژانس (دوبەی)",other:"ئیمەیڵی تر"},opSelAll:"هەڵبژاردنی هەمووی",opSelected:"هەڵبژێردراو",opSearchHint:"کۆدەکان بلکێنە بۆ گەڕانی کۆمەڵ — یان ناوی کڕیار",opSelShown:"هەڵبژاردنی هەموو ئەوانەی دەرکەوتوون",opNotOpen:"کراوە نییە لەم مانگەدا",
+  setStatus:"دۆخی نوێ",update:"نوێکردنەوە",collected:"پارەی کۆکراوە",collectedAsk:"چەند پارە کۆکرایەوە؟",shkoTitle:"شحنەکانی SHKO",shkoRemaining:"پارە لای SHKO (ماوە)",shkoThisMonth:"وەرگیراوی ئەم مانگە",shkoAllRecv:"کۆی وەرگیراو",shkoAddOfd:"زیادکردنی هەموو «لە گەیاندندایە»",shkoAdd:"زیادکردن",shkoReceived:"وەرگیراوەکان",shkoEmpty:"هیچ نەماوە — هەمووی وەرگیراوە ✓",shkoNone:"هیچ داواکارییەک نییە",shkoDel:"سڕینەوە",shkoClearAll:"سڕینەوەی هەمووی",shkoRecvN:"وەرگیراوە",shkoOpenList:"لای SHKO",shkoShipN:"شحنە",shkoScanHelp:"وێنەی لەیبڵەکان هەڵبژێرە — سیستەم کۆدی کڕیار دەخوێنێتەوە، بڕی ماوە و ناو لە داواکارییەکەوە دێن",shkoApply:"تۆمارکردنی شحنەکان",shkoImgDel:"سڕینەوەی وێنە",skExport:"فایلی کۆریەر (Excel)",lblTitle:"چاپکردنی لەیبڵ",lblHelp:"کۆد یان مەودا بنووسە (1-50 398) یان هەموو دۆخێک زیاد بکە، دواتر چاپکردن — هەر لەیبڵێک 100×100mm. ژمارەی بارکۆد = مانگ + کۆدی کڕیار.",lblAddStatus:"زیادکردنی هەموو",lblPrint:"چاپکردن",lblName:"ناو",lblPhone:"مۆبایلی کڕیار",lblCity:"شار",lblAddr:"ناونیشان",lblDue:"بڕی ماوە",alTitle:"داواکاری گیرماوەکان",alDays:"ڕۆژ",alFix:"گۆڕینی دۆخ",alBagLate:"جانتای دواکەوتوو",openTitle:"بۆردی داواکارییە کراوەکان",opHelp:"هەموو داواکارییەک کە هێشتا نەگەیەندراوە، بەپێی ماوەی مانەوەی لە دۆخەکەیدا: سەوز = باشە، زەرد = نزیک لە سنوور، سوور = زۆر دواکەوتووە. لێی بدە بۆ گۆڕینی دۆخ.",opRed:"زۆر دواکەوتوو",opYellow:"ئاگاداربە",opGreen:"باشە",opLimit:"سنوور",opNone:"هیچ داواکارییەکی کراوە نییە ✓",sheinTitle:"بەدواداچوونی شەین (ئیمەیڵ)",sheinHelp:"هەر ئیمەیڵێکی شەین کە دەگات: کڕین، ناردن، گەیشتن بە ئاژانس. سیستەم خۆی جانتاکە دروست دەکات و دۆخەکەی دەگۆڕێت. ئەوانەی نەناسراون لێرە دەمێننەوە بۆ پشکنینی خۆت.",sheinNoTable:"خشتەی shein_events هێشتا دروست نەکراوە — SQL ـەکە لە Supabase جێبەجێ بکە",seToday:"ئەمڕۆ جێبەجێکرا",seUnmatched:"نەناسراو",seLast:"دوایین ئیمەیڵ",seType:{confirmed:"کڕدرا",shipped:"لە شەین دەرچوو",out_for_delivery:"لە ڕێگای ئاژانسە",delivered:"گەیشتە ئاژانس (دوبەی)",other:"ئیمەیڵی تر"},opDubaiDue:"داواکاری ٥ ڕۆژ یان زیاترە لە دوبەین — کاتی ناردنیانە بۆ هەولێر",opDubaiGo:"هەڵبژاردنیان ← «لە ڕێگادایە»",opSelAll:"هەڵبژاردنی هەمووی",opSelected:"هەڵبژێردراو",opSearchHint:"کۆدەکان بلکێنە بۆ گەڕانی کۆمەڵ — یان ناوی کڕیار",opSelShown:"هەڵبژاردنی هەموو ئەوانەی دەرکەوتوون",opNotOpen:"کراوە نییە لەم مانگەدا",
   custTitle:"کڕیارەکان",custVips:"کڕیاری VIP",custRepeat:"کڕیاری دووبارە",custCopy:"کۆپی لیستی VIP بۆ Close Friends",
   custSpend:"کۆی کڕین",custDebt:"قەرز",custOpen:"لە ڕێگادایە",custOrdersN:"داواکاری",custDeliv:"گەیەندراو",
   custCanc:"هەڵوەشاوە",custBack:"گەڕانەوە بۆ لیست",copied:"کۆپی کرا ✓",custShare:"لە داهات",
@@ -714,7 +715,7 @@ const T = {
   moveBatch:"تحديث مجموعة",searchLbl:"دور بالرمز أو الاسم أو الرقم",search:"دور",back:"رجوع",
   username:"اسم الانستغرام",phone:"رقم الموبايل",address:"العنوان",total:"المجموع",
   deposit:"المدفوع",due:"المتبقي",items:"عدد القطع",save:"حفظ",
-  setStatus:"الحالة الجديدة",update:"تحديث",collected:"المبلغ المستلم",collectedAsk:"شكد انستلم؟",shkoTitle:"شحنات SHKO",shkoRemaining:"الفلوس عند SHKO (باقية)",shkoThisMonth:"مستلم هذا الشهر",shkoAllRecv:"مجموع المستلم",shkoAddOfd:"إضافة كل «قيد التوصيل»",shkoAdd:"إضافة",shkoReceived:"المستلمة",shkoEmpty:"ما باقي شي — كله مستلم ✓",shkoNone:"ما في طلبات",shkoDel:"حذف",shkoClearAll:"حذف الكل",shkoRecvN:"مستلم",shkoOpenList:"عند SHKO",shkoShipN:"شحنة",shkoScanHelp:"اختار صور الليبلات — النظام يقرا رمز الزبون، والمبلغ الباقي والاسم ييجون من الطلب",shkoApply:"حفظ الشحنات",shkoImgDel:"حذف الصورة",skExport:"ملف الكوريير (Excel)",lblTitle:"طباعة الليبلات",lblHelp:"اكتب الرموز أو مدى (1-50 398) أو ضيف حالة كاملة ثم اطبع — كل ليبل 100×100mm. رقم الباركود = الشهر + رمز الزبون.",lblAddStatus:"إضافة الكل",lblPrint:"طباعة",lblName:"الاسم",lblPhone:"موبايل الزبون",lblCity:"المدينة",lblAddr:"العنوان",lblDue:"المبلغ المتبقي",alTitle:"طلبات عالقة",alDays:"يوم",alFix:"تغيير الحالة",alBagLate:"كيس متأخر",openTitle:"لوحة الطلبات المفتوحة",opHelp:"كل طلب بعده ما تسلّم، حسب مدة بقائه بحالته: أخضر = تمام، أصفر = قرب الحد، أحمر = متأخر جداً. اضغط عليه لتغيير الحالة.",opRed:"متأخر جداً",opYellow:"انتبه",opGreen:"تمام",opLimit:"الحد",opNone:"ما في طلبات مفتوحة ✓",sheinTitle:"تتبع شي إن (الإيميل)",sheinHelp:"كل إيميل يوصل من شي إن: شراء، شحن، وصول للوكيل. النظام ينشئ الكيس ويغير حالته تلقائياً. اللي ما انعرف يبقى هنا حتى تراجعه بنفسك.",sheinNoTable:"جدول shein_events بعده ما انعمل — شغّل الـ SQL في Supabase",seToday:"تم اليوم",seUnmatched:"غير مطابق",seLast:"آخر إيميل",seType:{confirmed:"انشرى",shipped:"طلع من شي إن",out_for_delivery:"بالطريق للوكيل",delivered:"وصل للوكيل (دبي)",other:"إيميل آخر"},opSelAll:"اختيار الكل",opSelected:"محدد",opSearchHint:"الصق الرموز للبحث الجماعي — أو اسم الزبون",opSelShown:"اختيار كل الظاهر",opNotOpen:"مو مفتوح بهذا الشهر",
+  setStatus:"الحالة الجديدة",update:"تحديث",collected:"المبلغ المستلم",collectedAsk:"شكد انستلم؟",shkoTitle:"شحنات SHKO",shkoRemaining:"الفلوس عند SHKO (باقية)",shkoThisMonth:"مستلم هذا الشهر",shkoAllRecv:"مجموع المستلم",shkoAddOfd:"إضافة كل «قيد التوصيل»",shkoAdd:"إضافة",shkoReceived:"المستلمة",shkoEmpty:"ما باقي شي — كله مستلم ✓",shkoNone:"ما في طلبات",shkoDel:"حذف",shkoClearAll:"حذف الكل",shkoRecvN:"مستلم",shkoOpenList:"عند SHKO",shkoShipN:"شحنة",shkoScanHelp:"اختار صور الليبلات — النظام يقرا رمز الزبون، والمبلغ الباقي والاسم ييجون من الطلب",shkoApply:"حفظ الشحنات",shkoImgDel:"حذف الصورة",skExport:"ملف الكوريير (Excel)",lblTitle:"طباعة الليبلات",lblHelp:"اكتب الرموز أو مدى (1-50 398) أو ضيف حالة كاملة ثم اطبع — كل ليبل 100×100mm. رقم الباركود = الشهر + رمز الزبون.",lblAddStatus:"إضافة الكل",lblPrint:"طباعة",lblName:"الاسم",lblPhone:"موبايل الزبون",lblCity:"المدينة",lblAddr:"العنوان",lblDue:"المبلغ المتبقي",alTitle:"طلبات عالقة",alDays:"يوم",alFix:"تغيير الحالة",alBagLate:"كيس متأخر",openTitle:"لوحة الطلبات المفتوحة",opHelp:"كل طلب بعده ما تسلّم، حسب مدة بقائه بحالته: أخضر = تمام، أصفر = قرب الحد، أحمر = متأخر جداً. اضغط عليه لتغيير الحالة.",opRed:"متأخر جداً",opYellow:"انتبه",opGreen:"تمام",opLimit:"الحد",opNone:"ما في طلبات مفتوحة ✓",sheinTitle:"تتبع شي إن (الإيميل)",sheinHelp:"كل إيميل يوصل من شي إن: شراء، شحن، وصول للوكيل. النظام ينشئ الكيس ويغير حالته تلقائياً. اللي ما انعرف يبقى هنا حتى تراجعه بنفسك.",sheinNoTable:"جدول shein_events بعده ما انعمل — شغّل الـ SQL في Supabase",seToday:"تم اليوم",seUnmatched:"غير مطابق",seLast:"آخر إيميل",seType:{confirmed:"انشرى",shipped:"طلع من شي إن",out_for_delivery:"بالطريق للوكيل",delivered:"وصل للوكيل (دبي)",other:"إيميل آخر"},opDubaiDue:"طلب صار له ٥ أيام أو أكثر بدبي — وقت إرساله لأربيل",opDubaiGo:"اخترهم ← «بالطريق»",opSelAll:"اختيار الكل",opSelected:"محدد",opSearchHint:"الصق الرموز للبحث الجماعي — أو اسم الزبون",opSelShown:"اختيار كل الظاهر",opNotOpen:"مو مفتوح بهذا الشهر",
   custTitle:"الزبائن",custVips:"زبون VIP",custRepeat:"زبون متكرر",custCopy:"انسخ قائمة VIP لـ Close Friends",
   custSpend:"مجموع الشراء",custDebt:"دين",custOpen:"بالطريق",custOrdersN:"طلب",custDeliv:"مسلَّم",
   custCanc:"ملغى",custBack:"رجوع للقائمة",copied:"تم النسخ ✓",custShare:"من الدخل",
@@ -865,7 +866,25 @@ async function loadAlerts(){
       <div style="color:#EF9F27;font-weight:700;font-size:13.5px;padding:12px 0 8px">⚠ ${t().alTitle}</div>${h}</div>` : "";
 }
 
+// Red count on the home button: orders sitting in Dubai 5+ days, any month.
+async function paintDueBadge(){
+  const btn = document.querySelector('[data-go="open"]');
+  if (!btn) return;
+  btn.querySelector(".due")?.remove();
+  const cut = new Date(Date.now() - STAGE_LIMITS.at_dubai * 864e5).toISOString();
+  const { count } = await db.from("stuck_orders").select("id", { count: "exact", head: true })
+    .eq("status", "at_dubai").lte("since", cut);
+  if (!count) return;
+  const b = document.createElement("span");
+  b.className = "due num";
+  b.textContent = count;
+  b.style.cssText = "display:inline-block;margin-inline-start:8px;min-width:20px;padding:1px 7px;border-radius:10px;" +
+    "background:#E24B4A;color:#fff;font-size:11.5px;font-weight:700;vertical-align:1px";
+  btn.appendChild(b);
+}
+
 async function loadHome(){
+  paintDueBadge();
   const { data: c } = await db.from("cycles").select("code,label").eq("is_open", true).maybeSingle();
   if (c) cycle = c.code;
   $("h-cycle").textContent = cycle || "—";
@@ -3366,6 +3385,22 @@ function renderOpen(){
   $("op-sum").querySelectorAll("[data-tone]").forEach(el => el.onclick = () => {
     opFilter = opFilter === el.dataset.tone ? null : el.dataset.tone; renderOpen();
   });
+  // Dubai reminder: emails put orders INTO Dubai by themselves, but sending
+  // them on to Erbil is a human decision — nudge at 5 days, one tap to act.
+  const due = opRows.filter(o => o.status === "at_dubai" && (o.days ?? 0) >= STAGE_LIMITS.at_dubai);
+  $("op-due").innerHTML = due.length ? `<div style="background:rgba(226,75,74,.10);border:1px solid rgba(226,75,74,.4);
+      border-radius:14px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <span style="color:#F09595;font-size:13px;font-weight:600;flex:1;min-width:180px">
+        <span class="num">${due.length}</span> ${t().opDubaiDue}</span>
+      <button id="op-due-go" style="flex:0 0 auto;padding:8px 12px;border-radius:10px;border:1px solid #F09595;
+        background:transparent;color:#F09595;font-size:12px;font-family:inherit">${t().opDubaiGo}</button></div>` : "";
+  const dueGo = $("op-due-go");
+  if (dueGo) dueGo.onclick = () => {
+    opSel.clear(); due.forEach(o => opSel.add(o.id));
+    $("op-q").value = ""; opFilter = null;
+    $("op-bar-st").value = "in_transit";
+    renderOpen();
+  };
   // pasted-batch summary: how many of the codes are here, which ones are not
   $("op-found").innerHTML = toEn($("op-q").value).trim()
     ? `<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:12px">
