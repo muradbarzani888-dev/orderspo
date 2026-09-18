@@ -141,7 +141,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v111</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v112</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -168,6 +168,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
         <button data-go="shko" data-t="shkoTitle" id="nav-shko" class="hide"></button>
         <button data-go="cost" data-t="costTitle" id="nav-cost" class="hide"></button>
         <button data-go="open" data-t="openTitle"></button>
+        <button data-go="shein" data-t="sheinTitle" id="nav-shein" class="hide"></button>
         <button data-go="carts" data-t="cartTitle" id="nav-carts" class="hide"></button>
         <button data-go="lbl" data-t="lblTitle"></button>
         <button data-go="batch" data-t="moveBatch"></button>
@@ -504,6 +505,16 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
       <div id="cl-check"></div>
     </div>
 
+    <div id="v-shein" class="hide">
+      <button class="back" data-go="home" data-t="back"></button>
+      <h2 data-t="sheinTitle"></h2>
+      <div id="se-msg"></div>
+      <p style="color:var(--mute);font-size:12.5px;line-height:1.9;margin-bottom:14px" data-t="sheinHelp"></p>
+      <div id="se-sum" style="display:flex;gap:8px;margin-bottom:14px"></div>
+      <div class="f"><input id="se-q" dir="ltr" placeholder="GGGG7 / 349 / GSH1RH42…"></div>
+      <div id="se-list"></div>
+    </div>
+
     <div id="v-open" class="hide">
       <button class="back" data-go="home" data-t="back"></button>
       <h2 data-t="openTitle"></h2>
@@ -650,7 +661,7 @@ const T = {
   moveBatch:"گواستنەوەی کۆمەڵ",searchLbl:"گەڕان بە کۆد، ناو یان ژمارە",search:"گەڕان",back:"گەڕانەوە",
   username:"ناوی ئینستاگرام",phone:"ژمارەی مۆبایل",address:"ناونیشان",total:"کۆی گشتی",
   deposit:"پارەی پێشەکی",due:"بڕی ماوە",items:"ژمارەی بەرهەم",save:"تۆمارکردن",
-  setStatus:"دۆخی نوێ",update:"نوێکردنەوە",collected:"پارەی کۆکراوە",collectedAsk:"چەند پارە کۆکرایەوە؟",shkoTitle:"شحنەکانی SHKO",shkoRemaining:"پارە لای SHKO (ماوە)",shkoThisMonth:"وەرگیراوی ئەم مانگە",shkoAllRecv:"کۆی وەرگیراو",shkoAddOfd:"زیادکردنی هەموو «لە گەیاندندایە»",shkoAdd:"زیادکردن",shkoReceived:"وەرگیراوەکان",shkoEmpty:"هیچ نەماوە — هەمووی وەرگیراوە ✓",shkoNone:"هیچ داواکارییەک نییە",shkoDel:"سڕینەوە",shkoClearAll:"سڕینەوەی هەمووی",shkoRecvN:"وەرگیراوە",shkoOpenList:"لای SHKO",shkoShipN:"شحنە",shkoScanHelp:"وێنەی لەیبڵەکان هەڵبژێرە — سیستەم کۆدی کڕیار دەخوێنێتەوە، بڕی ماوە و ناو لە داواکارییەکەوە دێن",shkoApply:"تۆمارکردنی شحنەکان",shkoImgDel:"سڕینەوەی وێنە",skExport:"فایلی کۆریەر (Excel)",lblTitle:"چاپکردنی لەیبڵ",lblHelp:"کۆد یان مەودا بنووسە (1-50 398) یان هەموو دۆخێک زیاد بکە، دواتر چاپکردن — هەر لەیبڵێک 100×100mm. ژمارەی بارکۆد = مانگ + کۆدی کڕیار.",lblAddStatus:"زیادکردنی هەموو",lblPrint:"چاپکردن",lblName:"ناو",lblPhone:"مۆبایلی کڕیار",lblCity:"شار",lblAddr:"ناونیشان",lblDue:"بڕی ماوە",alTitle:"داواکاری گیرماوەکان",alDays:"ڕۆژ",alFix:"گۆڕینی دۆخ",alBagLate:"جانتای دواکەوتوو",openTitle:"بۆردی داواکارییە کراوەکان",opHelp:"هەموو داواکارییەک کە هێشتا نەگەیەندراوە، بەپێی ماوەی مانەوەی لە دۆخەکەیدا: سەوز = باشە، زەرد = نزیک لە سنوور، سوور = زۆر دواکەوتووە. لێی بدە بۆ گۆڕینی دۆخ.",opRed:"زۆر دواکەوتوو",opYellow:"ئاگاداربە",opGreen:"باشە",opLimit:"سنوور",opNone:"هیچ داواکارییەکی کراوە نییە ✓",opSelAll:"هەڵبژاردنی هەمووی",opSelected:"هەڵبژێردراو",opSearchHint:"کۆدەکان بلکێنە بۆ گەڕانی کۆمەڵ — یان ناوی کڕیار",opSelShown:"هەڵبژاردنی هەموو ئەوانەی دەرکەوتوون",opNotOpen:"کراوە نییە لەم مانگەدا",
+  setStatus:"دۆخی نوێ",update:"نوێکردنەوە",collected:"پارەی کۆکراوە",collectedAsk:"چەند پارە کۆکرایەوە؟",shkoTitle:"شحنەکانی SHKO",shkoRemaining:"پارە لای SHKO (ماوە)",shkoThisMonth:"وەرگیراوی ئەم مانگە",shkoAllRecv:"کۆی وەرگیراو",shkoAddOfd:"زیادکردنی هەموو «لە گەیاندندایە»",shkoAdd:"زیادکردن",shkoReceived:"وەرگیراوەکان",shkoEmpty:"هیچ نەماوە — هەمووی وەرگیراوە ✓",shkoNone:"هیچ داواکارییەک نییە",shkoDel:"سڕینەوە",shkoClearAll:"سڕینەوەی هەمووی",shkoRecvN:"وەرگیراوە",shkoOpenList:"لای SHKO",shkoShipN:"شحنە",shkoScanHelp:"وێنەی لەیبڵەکان هەڵبژێرە — سیستەم کۆدی کڕیار دەخوێنێتەوە، بڕی ماوە و ناو لە داواکارییەکەوە دێن",shkoApply:"تۆمارکردنی شحنەکان",shkoImgDel:"سڕینەوەی وێنە",skExport:"فایلی کۆریەر (Excel)",lblTitle:"چاپکردنی لەیبڵ",lblHelp:"کۆد یان مەودا بنووسە (1-50 398) یان هەموو دۆخێک زیاد بکە، دواتر چاپکردن — هەر لەیبڵێک 100×100mm. ژمارەی بارکۆد = مانگ + کۆدی کڕیار.",lblAddStatus:"زیادکردنی هەموو",lblPrint:"چاپکردن",lblName:"ناو",lblPhone:"مۆبایلی کڕیار",lblCity:"شار",lblAddr:"ناونیشان",lblDue:"بڕی ماوە",alTitle:"داواکاری گیرماوەکان",alDays:"ڕۆژ",alFix:"گۆڕینی دۆخ",alBagLate:"جانتای دواکەوتوو",openTitle:"بۆردی داواکارییە کراوەکان",opHelp:"هەموو داواکارییەک کە هێشتا نەگەیەندراوە، بەپێی ماوەی مانەوەی لە دۆخەکەیدا: سەوز = باشە، زەرد = نزیک لە سنوور، سوور = زۆر دواکەوتووە. لێی بدە بۆ گۆڕینی دۆخ.",opRed:"زۆر دواکەوتوو",opYellow:"ئاگاداربە",opGreen:"باشە",opLimit:"سنوور",opNone:"هیچ داواکارییەکی کراوە نییە ✓",sheinTitle:"بەدواداچوونی شەین (ئیمەیڵ)",sheinHelp:"هەر ئیمەیڵێکی شەین کە دەگات: کڕین، ناردن، گەیشتن بە ئاژانس. سیستەم خۆی جانتاکە دروست دەکات و دۆخەکەی دەگۆڕێت. ئەوانەی نەناسراون لێرە دەمێننەوە بۆ پشکنینی خۆت.",sheinNoTable:"خشتەی shein_events هێشتا دروست نەکراوە — SQL ـەکە لە Supabase جێبەجێ بکە",seToday:"ئەمڕۆ جێبەجێکرا",seUnmatched:"نەناسراو",seLast:"دوایین ئیمەیڵ",seType:{confirmed:"کڕدرا",shipped:"لە شەین دەرچوو",out_for_delivery:"لە ڕێگای ئاژانسە",delivered:"گەیشتە ئاژانس (دوبەی)",other:"ئیمەیڵی تر"},opSelAll:"هەڵبژاردنی هەمووی",opSelected:"هەڵبژێردراو",opSearchHint:"کۆدەکان بلکێنە بۆ گەڕانی کۆمەڵ — یان ناوی کڕیار",opSelShown:"هەڵبژاردنی هەموو ئەوانەی دەرکەوتوون",opNotOpen:"کراوە نییە لەم مانگەدا",
   custTitle:"کڕیارەکان",custVips:"کڕیاری VIP",custRepeat:"کڕیاری دووبارە",custCopy:"کۆپی لیستی VIP بۆ Close Friends",
   custSpend:"کۆی کڕین",custDebt:"قەرز",custOpen:"لە ڕێگادایە",custOrdersN:"داواکاری",custDeliv:"گەیەندراو",
   custCanc:"هەڵوەشاوە",custBack:"گەڕانەوە بۆ لیست",copied:"کۆپی کرا ✓",custShare:"لە داهات",
@@ -703,7 +714,7 @@ const T = {
   moveBatch:"تحديث مجموعة",searchLbl:"دور بالرمز أو الاسم أو الرقم",search:"دور",back:"رجوع",
   username:"اسم الانستغرام",phone:"رقم الموبايل",address:"العنوان",total:"المجموع",
   deposit:"المدفوع",due:"المتبقي",items:"عدد القطع",save:"حفظ",
-  setStatus:"الحالة الجديدة",update:"تحديث",collected:"المبلغ المستلم",collectedAsk:"شكد انستلم؟",shkoTitle:"شحنات SHKO",shkoRemaining:"الفلوس عند SHKO (باقية)",shkoThisMonth:"مستلم هذا الشهر",shkoAllRecv:"مجموع المستلم",shkoAddOfd:"إضافة كل «قيد التوصيل»",shkoAdd:"إضافة",shkoReceived:"المستلمة",shkoEmpty:"ما باقي شي — كله مستلم ✓",shkoNone:"ما في طلبات",shkoDel:"حذف",shkoClearAll:"حذف الكل",shkoRecvN:"مستلم",shkoOpenList:"عند SHKO",shkoShipN:"شحنة",shkoScanHelp:"اختار صور الليبلات — النظام يقرا رمز الزبون، والمبلغ الباقي والاسم ييجون من الطلب",shkoApply:"حفظ الشحنات",shkoImgDel:"حذف الصورة",skExport:"ملف الكوريير (Excel)",lblTitle:"طباعة الليبلات",lblHelp:"اكتب الرموز أو مدى (1-50 398) أو ضيف حالة كاملة ثم اطبع — كل ليبل 100×100mm. رقم الباركود = الشهر + رمز الزبون.",lblAddStatus:"إضافة الكل",lblPrint:"طباعة",lblName:"الاسم",lblPhone:"موبايل الزبون",lblCity:"المدينة",lblAddr:"العنوان",lblDue:"المبلغ المتبقي",alTitle:"طلبات عالقة",alDays:"يوم",alFix:"تغيير الحالة",alBagLate:"كيس متأخر",openTitle:"لوحة الطلبات المفتوحة",opHelp:"كل طلب بعده ما تسلّم، حسب مدة بقائه بحالته: أخضر = تمام، أصفر = قرب الحد، أحمر = متأخر جداً. اضغط عليه لتغيير الحالة.",opRed:"متأخر جداً",opYellow:"انتبه",opGreen:"تمام",opLimit:"الحد",opNone:"ما في طلبات مفتوحة ✓",opSelAll:"اختيار الكل",opSelected:"محدد",opSearchHint:"الصق الرموز للبحث الجماعي — أو اسم الزبون",opSelShown:"اختيار كل الظاهر",opNotOpen:"مو مفتوح بهذا الشهر",
+  setStatus:"الحالة الجديدة",update:"تحديث",collected:"المبلغ المستلم",collectedAsk:"شكد انستلم؟",shkoTitle:"شحنات SHKO",shkoRemaining:"الفلوس عند SHKO (باقية)",shkoThisMonth:"مستلم هذا الشهر",shkoAllRecv:"مجموع المستلم",shkoAddOfd:"إضافة كل «قيد التوصيل»",shkoAdd:"إضافة",shkoReceived:"المستلمة",shkoEmpty:"ما باقي شي — كله مستلم ✓",shkoNone:"ما في طلبات",shkoDel:"حذف",shkoClearAll:"حذف الكل",shkoRecvN:"مستلم",shkoOpenList:"عند SHKO",shkoShipN:"شحنة",shkoScanHelp:"اختار صور الليبلات — النظام يقرا رمز الزبون، والمبلغ الباقي والاسم ييجون من الطلب",shkoApply:"حفظ الشحنات",shkoImgDel:"حذف الصورة",skExport:"ملف الكوريير (Excel)",lblTitle:"طباعة الليبلات",lblHelp:"اكتب الرموز أو مدى (1-50 398) أو ضيف حالة كاملة ثم اطبع — كل ليبل 100×100mm. رقم الباركود = الشهر + رمز الزبون.",lblAddStatus:"إضافة الكل",lblPrint:"طباعة",lblName:"الاسم",lblPhone:"موبايل الزبون",lblCity:"المدينة",lblAddr:"العنوان",lblDue:"المبلغ المتبقي",alTitle:"طلبات عالقة",alDays:"يوم",alFix:"تغيير الحالة",alBagLate:"كيس متأخر",openTitle:"لوحة الطلبات المفتوحة",opHelp:"كل طلب بعده ما تسلّم، حسب مدة بقائه بحالته: أخضر = تمام، أصفر = قرب الحد، أحمر = متأخر جداً. اضغط عليه لتغيير الحالة.",opRed:"متأخر جداً",opYellow:"انتبه",opGreen:"تمام",opLimit:"الحد",opNone:"ما في طلبات مفتوحة ✓",sheinTitle:"تتبع شي إن (الإيميل)",sheinHelp:"كل إيميل يوصل من شي إن: شراء، شحن، وصول للوكيل. النظام ينشئ الكيس ويغير حالته تلقائياً. اللي ما انعرف يبقى هنا حتى تراجعه بنفسك.",sheinNoTable:"جدول shein_events بعده ما انعمل — شغّل الـ SQL في Supabase",seToday:"تم اليوم",seUnmatched:"غير مطابق",seLast:"آخر إيميل",seType:{confirmed:"انشرى",shipped:"طلع من شي إن",out_for_delivery:"بالطريق للوكيل",delivered:"وصل للوكيل (دبي)",other:"إيميل آخر"},opSelAll:"اختيار الكل",opSelected:"محدد",opSearchHint:"الصق الرموز للبحث الجماعي — أو اسم الزبون",opSelShown:"اختيار كل الظاهر",opNotOpen:"مو مفتوح بهذا الشهر",
   custTitle:"الزبائن",custVips:"زبون VIP",custRepeat:"زبون متكرر",custCopy:"انسخ قائمة VIP لـ Close Friends",
   custSpend:"مجموع الشراء",custDebt:"دين",custOpen:"بالطريق",custOrdersN:"طلب",custDeliv:"مسلَّم",
   custCanc:"ملغى",custBack:"رجوع للقائمة",copied:"تم النسخ ✓",custShare:"من الدخل",
@@ -774,7 +785,7 @@ function say(box, text, kind, ms){
   if (text && hold) setTimeout(() => { if ($(box)) $(box).innerHTML = ""; }, hold);
 }
 function view(n){
-  ["home","new","paste","dash","scan","detail","batch","shko","cost","lbl","cust","close","open","carts"].forEach(v => $("v-" + v).classList.toggle("hide", v !== n));
+  ["home","new","paste","dash","scan","detail","batch","shko","cost","lbl","cust","close","open","carts","shein"].forEach(v => $("v-" + v).classList.toggle("hide", v !== n));
   window.scrollTo(0,0);
 }
 function paintLang(){
@@ -868,6 +879,7 @@ async function loadHome(){
   $("nav-cust").classList.toggle("hide", me.role !== "admin");
   $("nav-close").classList.toggle("hide", me.role !== "admin");
   $("nav-scan").classList.toggle("hide", me.role !== "admin");
+  $("nav-shein").classList.toggle("hide", me.role !== "admin");
   $("nav-shko").classList.toggle("hide", me.role !== "admin" || !hasShip);
   $("nav-cost").classList.toggle("hide", me.role !== "admin" || !hasCosts);
   $("bag-box").classList.toggle("hide", me.role !== "admin");
@@ -1404,6 +1416,7 @@ document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", 
   if (g === "cost") initCost();
   if (g === "lbl") initLbl();
   if (g === "open") initOpen();
+  if (g === "shein") initShein();
   if (g === "carts") initCarts();
   view(g);
 }));
@@ -3188,6 +3201,66 @@ function lbPrint(){
     const go = () => setTimeout(() => { fr.contentWindow.focus(); fr.contentWindow.print(); }, 150);
     if (img && !img.complete){ img.onload = go; img.onerror = go; } else go();
   };
+}
+
+// ---------- SHEIN email tracking log ----------
+// Every SHEIN notification the Gmail script delivered, and what the database
+// did with it. Unmatched ones are the point of this page: nothing is guessed,
+// so anything the parser could not tie to a bag waits here for a human.
+let seInit = false, seRows = [], seOnlyBad = false;
+const SE_ICON = { confirmed: "🛒", shipped: "📦", out_for_delivery: "🚚", delivered: "✅", other: "·" };
+
+async function initShein(){
+  if (!seInit){ seInit = true; $("se-q").addEventListener("input", renderShein); }
+  await loadShein();
+}
+
+async function loadShein(){
+  $("se-list").innerHTML = '<div style="text-align:center;padding:20px 0"><span class="spin"></span></div>';
+  const { data, error } = await db.from("shein_events").select("*")
+    .order("email_at", { ascending: false }).limit(600);
+  if (error){
+    $("se-list").innerHTML = ""; $("se-sum").innerHTML = "";
+    return say("se-msg", /shein_events/.test(error.message) ? t().sheinNoTable : error.message, "err", 0);
+  }
+  seRows = data || [];
+  renderShein();
+}
+
+function renderShein(){
+  const q = toEn($("se-q").value).trim().toLowerCase();
+  const day = new Date().toISOString().slice(0, 10);
+  const today = seRows.filter(r => String(r.email_at).slice(0, 10) === day);
+  const bad = seRows.filter(r => !r.matched && r.event_type !== "other");
+  const last = seRows[0]?.email_at;
+  const tile = (k, v, col, on, attr) => `<div class="tile" ${attr || ""} style="flex:1;text-align:center;
+      ${attr ? "cursor:pointer;" : ""}border:1px solid ${on ? col : "transparent"}">
+      <div class="k" style="color:${col}">${k}</div><div class="v num" style="color:${col}">${v}</div></div>`;
+  $("se-sum").innerHTML =
+    tile(t().seToday, today.filter(r => r.matched).length, "#2AADA5") +
+    tile(t().seUnmatched, bad.length, "#EF9F27", seOnlyBad, 'data-sebad="1"') +
+    tile(t().seLast, last ? new Date(last).toLocaleString("en-GB", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : "—", "#8FA3A8");
+  const b = $("se-sum").querySelector("[data-sebad]");
+  if (b) b.onclick = () => { seOnlyBad = !seOnlyBad; renderShein(); };
+
+  const rows = (seOnlyBad ? bad : seRows).filter(r => !q ||
+    (r.bag_code || "").toLowerCase().includes(q) || (r.seqs || []).some(s => String(s) === q) ||
+    (r.shein_order_no || "").toLowerCase().includes(q) || (r.to_address || "").includes(q) ||
+    (r.tracking_no || "").toLowerCase().includes(q));
+  $("se-list").innerHTML = rows.length ? rows.slice(0, 200).map(r => {
+    const col = r.matched ? "var(--teal)" : r.event_type === "other" ? "var(--faint)" : "#EF9F27";
+    const when = new Date(r.email_at).toLocaleString("en-GB", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+    return `<div class="row" style="cursor:default;align-items:flex-start">
+      <div style="font-size:18px;flex:0 0 auto;line-height:1.4">${SE_ICON[r.event_type] || "·"}</div>
+      <div class="l">
+        <div class="c num" dir="ltr" style="color:${col}">${lbEsc(r.bag_code || r.greeting || "—")}${
+          (r.seqs || []).length ? ` · ${r.seqs.join(" + ")}` : ""}${r.cycle_code ? ` · ${r.cycle_code}` : ""}</div>
+        <div class="u" style="white-space:normal;font-size:12.5px">${t().seType[r.event_type] || r.event_type} — ${lbEsc(r.result || "")}</div>
+        <div class="num" dir="ltr" style="color:var(--faint);font-size:11px;margin-top:3px">${when}${
+          r.tracking_no ? ` · ${lbEsc(r.carrier || "")} ${lbEsc(r.tracking_no)}` : ""}${
+          r.shein_order_no ? ` · ${lbEsc(r.shein_order_no)}` : ""}</div>
+      </div></div>`;
+  }).join("") : `<div style="color:var(--faint);padding:20px 0;text-align:center">${t().noRes}</div>`;
 }
 
 // ---------- Open-orders board ----------
