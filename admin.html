@@ -141,7 +141,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v116</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v117</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -645,7 +645,7 @@ const T = {
   qtyShip:"بڕی گەیاندن",kg:"کێش",info:"تێبینی",saveFields:"تۆمارکردن",
   badRows:"ڕیزی هەڵە",dashboard:"داشبۆرد",scanBags:"خوێندنەوەی جانتاکان",addBags:"زیادکردنی کۆدی جانتا",
   bagHelp:"لە شیتەکە: کۆدی کڕیار و کۆدی جانتاکان. نموونە: 421 دواتر DDDDDD9+EEEEEE1",
-  bagsFound:"جانتا دۆزرایەوە",bagsOn:"جانتاکانی ئەم داواکارییە",noBags:"هیچ جانتایەک تۆمار نەکراوە",bagItems:"کاڵا",saveBags:"تۆمارکردنی جانتاکان",
+  bagsFound:"جانتا دۆزرایەوە",bagsOn:"جانتاکانی ئەم داواکارییە",noBags:"هیچ جانتایەک تۆمار نەکراوە",saveBags:"تۆمارکردنی جانتاکان",
   scanHelp:"وێنەی لەیبڵەکان هەڵبژێرە. سیستەم کۆدی جانتا و کۆدی کڕیار دەخوێنێتەوە. هیچ وێنەیەک ناچێتە سێرڤەر.",
   typeMissing:"ئەوانەی نەخوێنرانەوە بنووسە — کۆدی جانتا و کۆدی کڕیار لە هەر ڕیزێک",
   applyBags:"تۆمارکردنی جانتاکان",reading:"دەخوێنرێتەوە",
@@ -698,7 +698,7 @@ const T = {
   qtyShip:"كمية الشحن",kg:"الوزن",info:"ملاحظات",saveFields:"حفظ",
   badRows:"صفوف فيها خطأ",dashboard:"لوحة التحكم",scanBags:"قراءة الأكياس",addBags:"إضافة رموز الأكياس",
   bagHelp:"من الشيت: رمز الزبون ورموز الأكياس. مثال: 421 بعدين DDDDDD9+EEEEEE1",
-  bagsFound:"كيس انلكى",bagsOn:"أكياس هذا الطلب",noBags:"ما في أكياس مسجلة",bagItems:"منتج",saveBags:"حفظ الأكياس",
+  bagsFound:"كيس انلكى",bagsOn:"أكياس هذا الطلب",noBags:"ما في أكياس مسجلة",saveBags:"حفظ الأكياس",
   scanHelp:"اختر صور الليبلات. النظام يقرا رمز الكيس ورمز الزبون. ما تنرفع أي صورة للسيرفر.",
   typeMissing:"اكتب اللي ما انقرا — رمز الكيس ورمز الزبون بكل سطر",
   applyBags:"حفظ الأكياس",reading:"يقرا",
@@ -1247,15 +1247,15 @@ async function openOrder(id){
   $("d-admin").classList.toggle("hide", me.role !== "admin");
 
   const { data: bags } = await db.from("bags")
-    .select("id,code,status,items").eq("order_id", id).order("code");
+    .select("id,code,status").eq("order_id", id).order("code");
   $("d-bags").innerHTML = (bags && bags.length)
     ? `<div style="color:var(--mute);font-size:12px;margin-bottom:8px">
          ${t().bagsOn} (${bags.length})</div>` +
-      bags.map(b => `<div style="padding:9px 0;border-bottom:1px solid rgba(44,66,73,.5)">
-        <div style="display:flex;justify-content:space-between;align-items:center">
+      bags.map(b => `<div style="display:flex;justify-content:space-between;
+        align-items:center;padding:9px 0;border-bottom:1px solid rgba(44,66,73,.5)">
         <span class="num" style="color:var(--teal);font-size:13px">${b.code}</span>
         <span class="chip${["delivered","cancelled"].includes(b.status)?" grey":""}">
-          ${t().st[b.status]||b.status}</span></div>${bagItemsHtml(b.items)}</div>`).join("")
+          ${t().st[b.status]||b.status}</span></div>`).join("")
     : `<div style="color:var(--faint);font-size:12.5px">${t().noBags}</div>`;
 
   const { data: ev } = await db.from("order_events")
@@ -2970,17 +2970,6 @@ function lbBarcodeSvg(digits, wmm, hmm){
 
 const lbEsc = v => String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
 
-// What SHEIN packed in a bag, taken from its Order Confirmation email
-// (bags.items: [{name, sku, size, qty}]). Folded by default — names are long.
-function bagItemsHtml(items){
-  if (!Array.isArray(items) || !items.length) return "";
-  const n = items.reduce((s, x) => s + (Number(x.qty) || 1), 0);
-  return `<details style="margin-top:4px"><summary style="cursor:pointer;color:var(--mute);font-size:12px">
-      ${n} ${t().bagItems}</summary><div style="margin-top:4px">${items.map(x =>
-      `<div dir="ltr" style="text-align:left;font-size:12px;line-height:1.35;padding:3px 0;color:var(--ink)">
-        <span class="num" style="color:var(--mute)">${Number(x.qty) || 1}×</span> ${lbEsc(x.name || "")}${
-        x.size ? ` <span style="color:var(--faint)">· ${lbEsc(x.size)}</span>` : ""}</div>`).join("")}</div></details>`;
-}
 const lbFit = (txt, base, steps) => {          // shrink long values instead of clipping
   const n = String(txt || "").length;
   for (const [len, size] of steps) if (n > len) return size;
@@ -3276,7 +3265,7 @@ async function initShein(){
 async function loadShein(){
   $("se-list").innerHTML = '<div style="text-align:center;padding:20px 0"><span class="spin"></span></div>';
   const { data, error } = await db.from("shein_events")
-    .select("id,email_at,event_type,to_address,greeting,bag_code,seqs,cycle_code,shein_order_no,tracking_no,carrier,matched,result,bag_id,items")
+    .select("id,email_at,event_type,to_address,greeting,bag_code,seqs,cycle_code,shein_order_no,tracking_no,carrier,matched,result,bag_id")
     .order("email_at", { ascending: false }).limit(600);
   if (error){
     $("se-list").innerHTML = ""; $("se-sum").innerHTML = "";
@@ -3317,8 +3306,7 @@ function renderShein(){
         <div class="u" style="white-space:normal;font-size:12.5px">${t().seType[r.event_type] || r.event_type} — ${lbEsc(r.result || "")}</div>
         <div class="num" dir="ltr" style="color:var(--faint);font-size:11px;margin-top:3px">${when}${
           r.tracking_no ? ` · ${lbEsc(r.carrier || "")} ${lbEsc(r.tracking_no)}` : ""}${
-          r.shein_order_no ? ` · ${lbEsc(r.shein_order_no)}` : ""}${
-          Array.isArray(r.items) && r.items.length ? ` · ${r.items.length} ${t().bagItems}` : ""}</div>
+          r.shein_order_no ? ` · ${lbEsc(r.shein_order_no)}` : ""}</div>
       </div></div>`;
   }).join("") : `<div style="color:var(--faint);padding:20px 0;text-align:center">${t().noRes}</div>`;
 }
