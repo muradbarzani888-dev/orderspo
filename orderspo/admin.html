@@ -141,7 +141,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v117</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v118</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -885,6 +885,18 @@ async function paintDueBadge(){
   btn.appendChild(b);
 }
 
+// Months that actually contain orders, plus the open one, newest first.
+// Asked per month: one select over all orders stops at the API's 1000-row cap
+// and silently drops the later months.
+async function usedCycles(){
+  let q = db.from("cycles").select("code,label").order("code", { ascending: false });
+  if (cycle) q = q.lte("code", cycle);
+  const { data } = await q;
+  const hit = await Promise.all((data || []).map(c =>
+    db.from("orders").select("id", { count: "exact", head: true }).eq("cycle_code", c.code)));
+  return (data || []).filter((c, i) => c.code === cycle || hit[i].count > 0);
+}
+
 async function loadHome(){
   paintDueBadge();
   const { data: c } = await db.from("cycles").select("code,label").eq("is_open", true).maybeSingle();
@@ -949,8 +961,7 @@ async function initClose(){
     $("cl-a").addEventListener("change", runClose);
     $("cl-b").addEventListener("change", runClose);
   }
-  const { data: used } = await db.from("orders").select("cycle_code");
-  const cycles = [...new Set((used || []).map(o => o.cycle_code))].sort().reverse();
+  const cycles = (await usedCycles()).map(c => c.code);
   const opts = cycles.map(c => `<option value="${c}">${c}</option>`).join("");
   $("cl-a").innerHTML = opts; $("cl-b").innerHTML = opts;
   $("cl-a").value = cycles[0] || "";
@@ -1292,11 +1303,7 @@ function batchRange(q){
 async function fillCycles(){
   const sel = $("b-cycle");
   if (sel.options.length) return;
-  const { data: used } = await db.from("orders").select("cycle_code");
-  const have = [...new Set((used || []).map(o => o.cycle_code))];
-  if (cycle && !have.includes(cycle)) have.push(cycle);
-  const { data } = await db.from("cycles")
-    .select("code,label").in("code", have).order("code", { ascending: false });
+  const data = await usedCycles();
   sel.innerHTML = (data || []).map(c =>
     `<option value="${c.code}">${c.label || c.code}</option>`).join("");
   sel.value = cycle;
@@ -1411,10 +1418,7 @@ $("out").addEventListener("click", async () => { await db.auth.signOut(); locati
   if (current && !$("v-detail").classList.contains("hide")) openOrder(current.id);
 }));
 async function fillAddCycles(){
-  const { data: used } = await db.from("orders").select("cycle_code");
-  const have = [...new Set((used || []).map(o => o.cycle_code))];
-  if (cycle && !have.includes(cycle)) have.push(cycle);
-  have.sort().reverse();
+  const have = (await usedCycles()).map(c => c.code);
   const opts = have.map(c => `<option value="${c}">${c}</option>`).join("");
   ["n-cycle", "p-cycle"].forEach(id => {
     const el = $(id); if (!el) return;
@@ -1719,11 +1723,7 @@ async function initDash(){
   const sel = $("dh-cycle");
   if (!sel.options.length){
     // Only months that actually contain orders, plus the open one.
-    const { data: used } = await db.from("orders").select("cycle_code");
-    const have = [...new Set((used||[]).map(o => o.cycle_code))];
-    if (cycle && !have.includes(cycle)) have.push(cycle);
-    const { data } = await db.from("cycles")
-      .select("code,label").in("code", have).order("code",{ascending:false});
+    const data = await usedCycles();
     sel.innerHTML = (data||[]).map(c=>`<option value="${c.code}">${c.label||c.code}</option>`).join("");
     sel.value = cycle;
     sel.addEventListener("change", loadDash);
@@ -1998,11 +1998,7 @@ function rotSrc(bmp, deg, maxW){
 async function initScan(){
   const sel = $("sc-cycle");
   if (!sel.options.length){
-    const { data: used } = await db.from("orders").select("cycle_code");
-    const have = [...new Set((used||[]).map(o=>o.cycle_code))];
-    if (cycle && !have.includes(cycle)) have.push(cycle);
-    const { data } = await db.from("cycles").select("code,label")
-      .in("code", have).order("code",{ascending:false});
+    const data = await usedCycles();
     sel.innerHTML = (data||[]).map(c=>`<option value="${c.code}">${c.label||c.code}</option>`).join("");
     // Bags arrive a month after they are bought, so the last cycle Xurshid
     // chose is a better default than today's cycle.
@@ -2147,8 +2143,9 @@ function pickCandidate(cands, valid){
 async function loadValidSeqs(cyc){
   const set = new Set();
   const codes = [cyc, prevCycle(cyc)].filter(Boolean);
-  const { data } = await db.from("orders").select("seq").in("cycle_code", codes);
-  (data || []).forEach(o => set.add(Number(o.seq)));
+  // one request per month: two months together pass the 1000-row cap
+  const res = await Promise.all(codes.map(c => db.from("orders").select("seq").eq("cycle_code", c)));
+  res.forEach(r => (r.data || []).forEach(o => set.add(Number(o.seq))));
   return set;
 }
 
@@ -2681,11 +2678,7 @@ async function initShko(){
   if (!skInit){
     skInit = true;
     const sel = $("sk-cycle");
-    const { data: used } = await db.from("orders").select("cycle_code");
-    const have = [...new Set((used || []).map(o => o.cycle_code))];
-    if (cycle && !have.includes(cycle)) have.push(cycle);
-    const { data } = await db.from("cycles").select("code,label")
-      .in("code", have.length ? have : [""]).order("code", { ascending: false });
+    const data = await usedCycles();
     sel.innerHTML = (data || []).map(c => `<option value="${c.code}">${c.label || c.code}</option>`).join("");
     if (cycle && [...sel.options].some(o => o.value === cycle)) sel.value = cycle;
     $("sk-add").addEventListener("click", () => addShko(lbParse($("sk-codes").value)));
@@ -3080,11 +3073,7 @@ async function initLbl(){
   if (!lbInit){
     lbInit = true;
     const sel = $("lb-cycle");
-    const { data: used } = await db.from("orders").select("cycle_code");
-    const have = [...new Set((used || []).map(o => o.cycle_code))];
-    if (cycle && !have.includes(cycle)) have.push(cycle);
-    const { data } = await db.from("cycles").select("code,label")
-      .in("code", have.length ? have : [""]).order("code", { ascending: false });
+    const data = await usedCycles();
     sel.innerHTML = (data || []).map(c => `<option value="${c.code}">${c.label || c.code}</option>`).join("");
     if (cycle && [...sel.options].some(o => o.value === cycle)) sel.value = cycle;
     sel.addEventListener("change", () => { lbSel.clear(); lbRender(); });
@@ -3343,11 +3332,7 @@ async function initOpen(){
   if (!opInit){
     opInit = true;
     const sel = $("op-cycle");
-    const { data: used } = await db.from("orders").select("cycle_code");
-    const have = [...new Set((used || []).map(o => o.cycle_code))];
-    if (cycle && !have.includes(cycle)) have.push(cycle);
-    const { data } = await db.from("cycles").select("code,label")
-      .in("code", have.length ? have : [""]).order("code", { ascending: false });
+    const data = await usedCycles();
     sel.innerHTML = (data || []).map(c => `<option value="${c.code}">${c.label || c.code}</option>`).join("");
     if (cycle && [...sel.options].some(o => o.value === cycle)) sel.value = cycle;
     sel.addEventListener("change", () => { opSel.clear(); opBar(); loadOpen(); });
@@ -3494,7 +3479,7 @@ function renderOpen(){
 }
 
 // ---------- Costs & profit ----------
-let ctInit = false, ctSet = {}, ctExp = [], ctOrders = [];
+let ctInit = false, ctSet = {}, ctExp = [], ctOrders = [], ctOpen = new Set();
 const CT_CATS = ["cards", "agent", "shko", "ads", "fixed", "other"];
 const KRG = new Set(["أربيل", "السليمانية", "دهوك", "حلبجة"]);
 
@@ -3502,11 +3487,7 @@ async function initCost(){
   if (!ctInit){
     ctInit = true;
     const sel = $("ct-cycle");
-    const { data: used } = await db.from("orders").select("cycle_code");
-    const have = [...new Set((used || []).map(o => o.cycle_code))];
-    if (cycle && !have.includes(cycle)) have.push(cycle);
-    const { data } = await db.from("cycles").select("code,label")
-      .in("code", have.length ? have : [""]).order("code", { ascending: false });
+    const data = await usedCycles();
     sel.innerHTML = (data || []).map(c => `<option value="${c.code}">${c.label || c.code}</option>`).join("");
     if (cycle && [...sel.options].some(o => o.value === cycle)) sel.value = cycle;
     sel.addEventListener("change", loadCost);
@@ -3571,13 +3552,25 @@ function renderCost(){
   $("ct-net").style.color = net >= 0 ? "var(--teal)" : "#F09595";
   $("ct-net-sub").textContent = A.revenue ? `${t().margin}: ${Math.round(net / A.revenue * 100)}%` : "";
 
-  const line = (k, v, sub) => `<div style="display:flex;justify-content:space-between;align-items:baseline;
-      padding:9px 0;border-bottom:1px solid rgba(44,66,73,.5)">
-    <div><span style="font-size:13px">${k}</span>${sub ? `<div style="color:var(--faint);font-size:11px">${sub}</div>` : ""}</div>
-    <span class="num" style="color:#F09595">${iqd(v)}</span></div>`;
+  // Each category line opens on tap and lists its own entries underneath.
+  const line = (c, k, v, items) => `<div data-ctcat="${c}" style="display:flex;justify-content:space-between;align-items:baseline;
+      padding:9px 0;border-bottom:1px solid rgba(44,66,73,.5);cursor:pointer">
+    <div><span style="font-size:13px">${k}</span>
+      <span style="color:var(--faint);font-size:11px;margin-inline-start:6px">${items.length} ${ctOpen.has(c) ? "▾" : "▸"}</span></div>
+    <span class="num" style="color:#F09595">${iqd(v)}</span></div>
+  <div class="${ctOpen.has(c) ? "" : "hide"}" style="padding:2px 0 6px;border-bottom:1px solid rgba(44,66,73,.5)">
+    ${items.map(e => `<div style="display:flex;justify-content:space-between;align-items:baseline;padding:5px 14px 5px 0">
+      <div style="font-size:12.5px;color:var(--mute)">${e.label || "—"}${e.qty ? ` <span style="color:var(--faint);font-size:11px">· ${e.qty} × $${e.unit_usd} × ${e.fx_rate}</span>` : ""}</div>
+      <span class="num" style="font-size:13px">${iqd(e.amount_iqd)}</span></div>`).join("")}
+  </div>`;
   let h = "";
-  CT_CATS.forEach(c => { if (manual[c]) h += line(t()["cat" + c[0].toUpperCase() + c.slice(1)], manual[c]); });
+  CT_CATS.forEach(c => { if (manual[c]) h += line(c, t()["cat" + c[0].toUpperCase() + c.slice(1)], manual[c], ctExp.filter(e => e.category === c)); });
   $("ct-break").innerHTML = h;
+  document.querySelectorAll("[data-ctcat]").forEach(el => el.onclick = () => {
+    const c = el.dataset.ctcat;
+    ctOpen.has(c) ? ctOpen.delete(c) : ctOpen.add(c);
+    renderCost();
+  });
 
   $("ct-list").innerHTML = ctExp.map(e => `<div class="row" style="cursor:default">
     <div class="l"><div class="c">${t()["cat" + e.category[0].toUpperCase() + e.category.slice(1)] || e.category}</div>
