@@ -333,15 +333,23 @@ Write every free-text field in Kurdish Sorani with Arabic script: item names, va
 Record only what the conversation supports. Products are often shown as pictures or shared posts rather than named: then name the product from the picture (brand, product type, shade if readable) and point to the picture number. Prices quoted by SHOP are the prices that count. If the customer changed their mind, record the final state. Address and phone are whatever the customer sent last. Put anything unclear in notes rather than guessing, and list truly absent fields in missing."""
 
 
-def load_thread(igsid, until_iso):
-    prior = sb_select("ig_orders", {"select": "to_ts", "igsid": "eq." + igsid,
-                                    "order": "created_at.desc", "limit": "1"})
-    since = prior[0]["to_ts"] if prior and prior[0].get("to_ts") else \
-        (dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=THREAD_DAYS)).isoformat()
+def load_thread(igsid, until_iso, full=False):
+    """The messages Claude reads. A trigger reply reads only what came after
+    the customer's previous order; a manual re-read (admin button) takes the
+    whole recent chat (90 days) so a wrong first reading can be redone."""
+    since = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=90 if full else THREAD_DAYS)).isoformat()
+    if not full:
+        prior = sb_select("ig_orders", {"select": "to_ts", "igsid": "eq." + igsid,
+                                        "order": "created_at.desc", "limit": "1"})
+        if prior and prior[0].get("to_ts"):
+            since = prior[0]["to_ts"]
     params = {"select": "mid,direction,text,media,sent_at", "igsid": "eq." + igsid,
-              "sent_at": "gt." + since, "order": "sent_at.asc", "limit": str(THREAD_LIMIT)}
+              "sent_at": "gt." + since, "order": "sent_at.desc", "limit": str(THREAD_LIMIT)}
+    if until_iso:
+        params["sent_at"] = "gt." + since
+        params["and"] = "(sent_at.lte.%s)" % until_iso
     rows = sb_select("ig_messages", params)
-    rows = [r for r in rows if r["sent_at"] <= until_iso] if until_iso else rows
+    rows.reverse()                                  # newest THREAD_LIMIT, oldest first
     return rows
 
 
@@ -395,7 +403,7 @@ def ask_claude(content):
 
 def extract_order(igsid, trigger_mid, until_iso=None, by=None):
     backfill_thread(igsid)
-    rows = load_thread(igsid, until_iso)
+    rows = load_thread(igsid, until_iso, full=trigger_mid.startswith("manual-"))
     if not rows:
         return {"ok": False, "error": "no messages for this customer"}
     prof = ig_profile(igsid)
