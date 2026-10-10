@@ -141,7 +141,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v118</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v119</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -170,6 +170,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
         <button data-go="open" data-t="openTitle"></button>
         <button data-go="shein" data-t="sheinTitle" id="nav-shein" class="hide"></button>
         <button data-go="carts" data-t="cartTitle" id="nav-carts" class="hide"></button>
+        <button data-go="aura" data-t="auraTitle" id="nav-aura" class="hide"></button>
         <button data-go="lbl" data-t="lblTitle"></button>
         <button data-go="batch" data-t="moveBatch"></button>
         <button data-go="home" data-t="refresh"></button>
@@ -563,6 +564,22 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
       <div id="ca-list" style="margin-top:12px"></div>
     </div>
 
+    <div id="v-aura" class="hide">
+      <button class="back" data-go="home" data-t="back"></button>
+      <h2 data-t="auraTitle"></h2>
+      <div id="au-msg"></div>
+      <p style="color:var(--mute);font-size:12.5px;line-height:1.9;margin-bottom:14px" data-t="auraHelp"></p>
+      <div class="tiles">
+        <div class="tile"><div class="k" data-t="auraNew"></div><div class="v num" id="au-n">—</div></div>
+        <div class="tile"><div class="k" data-t="auraDone"></div><div class="v num" id="au-d" style="color:var(--teal)">—</div></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:4px;align-items:center">
+        <input id="au-q" dir="ltr" autocomplete="off" placeholder="rosse / 0750…" style="flex:1;min-height:44px">
+        <select id="au-f" style="width:auto;min-height:44px;flex:0 0 auto"></select>
+      </div>
+      <div id="au-list" style="margin-top:12px"></div>
+    </div>
+
     <div id="v-batch" class="hide">
       <button class="back" data-go="home" data-t="back"></button>
       <h2 data-t="moveBatch"></h2>
@@ -687,6 +704,9 @@ const T = {
   cartTitle:"لینکی سەبەتەکان",cartHelp:"لینکی سەبەتەی کڕیار لە ئینستاگرام کۆپی بکە و لێرە بیلکێنە، ناوی ئینستاگرامەکەشی بنووسە. کەسی کڕین لیستەکە لێرە دەکاتەوە، لینکەکە دەکاتەوە و دوای کڕین ✓ لێدەدات.",
   cartWait:"چاوەڕوانی کڕین",cartBought:"کڕدراو",cartLink:"لینکی سەبەتە",cartOpen:"کردنەوە",cartCopy:"کۆپی",cartDone:"کڕدرا",cartUndo:"گەڕاندنەوە بۆ چاوەڕوانی",
   cartShowBought:"کڕدراوەکان",cartHideBought:"چاوەڕوانەکان",cartNoLink:"هیچ لینکێک نەدۆزرایەوە — لینکەکە بلکێنە",cartNeedUser:"ناوی ئینستاگرام پێویستە",cartDup:"ئەم لینکە پێشتر تۆمارکراوە",cartBy:"لەلایەن",cartEmpty:"هیچ لینکێک نییە",
+  auraTitle:"داواکاریەکانی Aura",auraHelp:"نامەکانی ئینستاگرامی aura.originall خۆکار دەگەنە ئێرە. کاتێک وەڵامی ئامادەکراوی «تۆمارکرا» بۆ کڕیار دەنێریت، گفتوگۆکە دەخوێنرێتەوە و داواکاریەکە لێرە دەردەکەوێت. دۆخەکە بە دەست بگۆڕە.",
+  auraNew:"نوێ",auraDone:"تەواوکراو",auraItems:"کاڵاکان",auraTotal:"کۆی گشتی",auraDelivery:"گەیاندن",auraMissing:"نەدۆزرایەوە",auraNotes:"تێبینی",auraChat:"چات",auraRedo:"دووبارە خوێندنەوە",auraCopy:"کۆپی ناونیشان",auraEmpty:"هیچ داواکاریەک نییە",auraStaffNote:"تێبینی ستاف",
+  auraSt:{new:"نوێ",confirmed:"پشتڕاستکراوە",bought:"کڕدرا",shipped:"نێردرا",delivered:"گەیەندرا",cancelled:"هەڵوەشێنراوە",all:"هەموو"},
   st:{received:"وەرگیرا",purchased:"کڕدرا",at_dubai:"لە دوبەی",in_transit:"لە ڕێگادایە",
    at_erbil:"لە هەولێر",out_for_delivery:"لە گەیاندندایە",delivered:"گەیەندرا",cancelled:"هەڵوەشێنراوە"}},
  ar:{cycle:"الشهر",orders:"الطلبات",cod:"المبلغ المتبقي للتحصيل",codPending:"المتبقي للتحصيل (بدون المسلَّم)",billed:"مجموع الشهر",paidUp:"المدفوع مقدماً",
@@ -740,6 +760,9 @@ const T = {
   cartTitle:"روابط السلات",cartHelp:"انسخ رابط سلة الزبون من الانستغرام والصقه هنا، واكتب اسم حسابه. المشتري يفتح القائمة من هنا، يفتح الرابط، وبعد الشراء يضغط ✓.",
   cartWait:"بانتظار الشراء",cartBought:"منشتري",cartLink:"رابط السلة",cartOpen:"افتح",cartCopy:"نسخ",cartDone:"انشترى",cartUndo:"رجّعه للانتظار",
   cartShowBought:"المشتراة",cartHideBought:"المنتظرة",cartNoLink:"ما لكيت رابط — الصق الرابط",cartNeedUser:"لازم اسم الانستغرام",cartDup:"هذا الرابط محفوظ من قبل",cartBy:"من قبل",cartEmpty:"ما في روابط",
+  auraTitle:"طلبات Aura",auraHelp:"رسائل انستغرام aura.originall تجي هنا تلقائياً. لما ترسل الرد الجاهز «تم التسجيل» للزبون، تنقرأ المحادثة ويطلع الطلب هنا. غيّر الحالة بيدك.",
+  auraNew:"جديد",auraDone:"منتهي",auraItems:"المنتجات",auraTotal:"المجموع",auraDelivery:"التوصيل",auraMissing:"ناقص",auraNotes:"ملاحظات",auraChat:"المحادثة",auraRedo:"إعادة القراءة",auraCopy:"نسخ العنوان",auraEmpty:"ما في طلبات",auraStaffNote:"ملاحظة الستاف",
+  auraSt:{new:"جديد",confirmed:"مؤكد",bought:"منشتري",shipped:"منرسل",delivered:"تم التسليم",cancelled:"ملغي",all:"الكل"},
   st:{received:"تم الاستلام",purchased:"تم الشراء",at_dubai:"بدبي",in_transit:"بالطريق",
    at_erbil:"بأربيل",out_for_delivery:"قيد التوصيل",delivered:"تم التسليم",cancelled:"ملغي"}}
 };
@@ -753,6 +776,8 @@ let hasShip = false;
 let hasCosts = false;
 // true once the cart_links table exists (cart_links.sql)
 let hasCarts = false;
+// true once the ig_orders table exists (aura_orders.sql)
+let hasAura = false;
 
 const $ = i => document.getElementById(i);
 
@@ -788,7 +813,7 @@ function say(box, text, kind, ms){
   if (text && hold) setTimeout(() => { if ($(box)) $(box).innerHTML = ""; }, hold);
 }
 function view(n){
-  ["home","new","paste","dash","scan","detail","batch","shko","cost","lbl","cust","close","open","carts","shein"].forEach(v => $("v-" + v).classList.toggle("hide", v !== n));
+  ["home","new","paste","dash","scan","detail","batch","shko","cost","lbl","cust","close","open","carts","shein","aura"].forEach(v => $("v-" + v).classList.toggle("hide", v !== n));
   window.scrollTo(0,0);
 }
 function paintLang(){
@@ -918,6 +943,7 @@ async function loadHome(){
   $("bag-box").classList.toggle("hide", me.role !== "admin");
   // every staff member sees the cart queue — the buyer works from it
   $("nav-carts").classList.toggle("hide", !hasCarts);
+  $("nav-aura").classList.toggle("hide", !hasAura);
   if (me.role === "admin"){
     $("h-billed").textContent = iqd(sum("total_iqd"));
     $("h-paid").textContent   = iqd(sum("deposit_iqd"));
@@ -1443,6 +1469,7 @@ document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", 
   if (g === "open") initOpen();
   if (g === "shein") initShein();
   if (g === "carts") initCarts();
+  if (g === "aura") initAura();
   view(g);
 }));
 $("q-go").addEventListener("click", search);
@@ -4559,6 +4586,125 @@ $("ca-add").addEventListener("click", async () => {
   initCarts();
 });
 
+// ---------- Aura orders: Instagram DMs read by Claude ----------
+// api/ig_webhook.py stores every DM of aura.originall and, when staff send
+// the trigger reply, writes the order into ig_orders. This view only shows
+// and edits those rows; nothing here talks to Instagram.
+let auraRows = [], auraFilter = "new";
+const AURA_ST = ["new","confirmed","bought","shipped","delivered","cancelled"];
+const auIqd = v => v == null ? "—" : Number(v).toLocaleString("en-US");
+
+async function initAura(){
+  await freshSession();
+  const sel = $("au-f");
+  if (!sel.options.length){
+    sel.innerHTML = AURA_ST.concat("all").map(v => `<option value="${v}">${t().auraSt[v]}</option>`).join("");
+    sel.value = auraFilter;
+  }
+  const { data, error } = await db.from("ig_orders").select("*").order("created_at", { ascending: false }).limit(400);
+  if (error) return say("au-msg", error.message, "err");
+  auraRows = data || [];
+  renderAura();
+}
+
+function renderAura(){
+  const q = ($("au-q").value || "").trim().toLowerCase().replace(/^@/, "");
+  $("au-n").textContent = auraRows.filter(r => r.status === "new").length;
+  $("au-d").textContent = auraRows.filter(r => r.status === "delivered").length;
+  const rows = auraRows.filter(r => (auraFilter === "all" || r.status === auraFilter) &&
+    (!q || [r.username, r.customer_name, r.phone, r.address, r.city].some(v => (v || "").toLowerCase().includes(q))));
+  const btn = `min-height:38px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:transparent;
+    color:var(--white);font-size:12.5px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px`;
+  $("au-list").innerHTML = rows.map(r => {
+    const items = (r.items || []).map(it => `<div style="display:flex;gap:10px;align-items:center;padding:6px 0;border-top:1px solid var(--line)">
+      ${it.image_url ? `<a href="${escC(it.image_url)}" target="_blank" rel="noopener" style="flex:0 0 auto">
+        <img src="${escC(it.image_url)}" loading="lazy" alt="" style="width:52px;height:52px;object-fit:cover;border-radius:8px;display:block;background:var(--line)"></a>`
+        : `<div style="width:52px;height:52px;border-radius:8px;background:var(--line);flex:0 0 auto"></div>`}
+      <div style="flex:1;min-width:0">
+        <div>${escC(it.name)}${it.variant ? ` <span style="color:var(--mute)">· ${escC(it.variant)}</span>` : ""}</div>
+        <div class="num" style="color:var(--mute);font-size:12px" dir="ltr">${it.qty || 1} × ${auIqd(it.unit_price_iqd)}${it.note ? ` · ${escC(it.note)}` : ""}</div>
+      </div></div>`).join("");
+    const missing = (r.missing || []).length ? `<div style="color:#E8A33D;font-size:12.5px;margin-top:6px">⚠ ${t().auraMissing}: ${escC((r.missing || []).join(", "))}</div>` : "";
+    const addr = [r.city, r.address].filter(Boolean).join(" — ");
+    return `<div class="row" style="cursor:default;flex-direction:column;align-items:stretch;gap:8px" data-id="${r.id}">
+      <div style="display:flex;gap:10px;align-items:center">
+        <div class="l">
+          <div class="u" dir="ltr">${r.username ? "@" + escC(r.username) : escC(r.igsid)}${r.customer_name ? ` · ${escC(r.customer_name)}` : ""}</div>
+          <div class="s num" dir="ltr">${cartWhen(r.created_at)}${r.phone ? ` · ${escC(r.phone)}` : ""}</div>
+        </div>
+        <select class="au-st" data-id="${r.id}" style="width:auto;min-height:38px;flex:0 0 auto">${
+          AURA_ST.map(v => `<option value="${v}"${v === r.status ? " selected" : ""}>${t().auraSt[v]}</option>`).join("")}</select>
+      </div>
+      ${addr ? `<div style="font-size:13.5px">${escC(addr)}</div>` : ""}
+      <div>${items || `<div style="color:var(--mute);font-size:12.5px">${t().auraItems}: —</div>`}</div>
+      <div class="num" dir="ltr" style="font-size:13px">${t().auraTotal}: <b>${auIqd(r.total_iqd)}</b>${r.delivery_iqd != null ? ` · ${t().auraDelivery}: ${auIqd(r.delivery_iqd)}` : ""}</div>
+      ${r.notes ? `<div style="color:var(--mute);font-size:12.5px;line-height:1.7">${escC(r.notes)}</div>` : ""}${missing}
+      <input class="au-note" data-id="${r.id}" value="${escC(r.staff_note || "")}" placeholder="${t().auraStaffNote}" style="min-height:38px;font-size:13px">
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        ${r.username ? `<a href="https://ig.me/m/${escC(r.username)}" target="_blank" rel="noopener" style="${btn}">↗ Instagram</a>` : ""}
+        <button class="au-copy" data-id="${r.id}" style="${btn}">⧉ ${t().auraCopy}</button>
+        <button class="au-chat" data-id="${r.id}" style="${btn}">💬 ${t().auraChat}</button>
+        <button class="au-redo" data-id="${r.id}" style="${btn}">↻ ${t().auraRedo}</button>
+      </div>
+      <div class="au-thread hide" data-id="${r.id}" style="font-size:12.5px;line-height:1.8;max-height:360px;overflow:auto;border-top:1px solid var(--line);padding-top:8px"></div>
+    </div>`;
+  }).join("") || `<div class="empty">${t().auraEmpty}</div>`;
+
+  const byId = id => auraRows.find(x => String(x.id) === id);
+  const save = async (r, upd, el) => {
+    await freshSession();
+    const { error } = await db.from("ig_orders").update({ ...upd, updated_by: me.full_name, updated_at: new Date().toISOString() }).eq("id", r.id);
+    if (error) return say("au-msg", error.message, "err");
+    Object.assign(r, upd);
+    say("au-msg", t().saved, "ok", 1200);
+  };
+  [...$("au-list").querySelectorAll(".au-st")].forEach(s => s.addEventListener("change", () => {
+    const r = byId(s.dataset.id); if (r) save(r, { status: s.value }).then(renderAura);
+  }));
+  [...$("au-list").querySelectorAll(".au-note")].forEach(i => i.addEventListener("change", () => {
+    const r = byId(i.dataset.id); if (r) save(r, { staff_note: i.value.trim() || null });
+  }));
+  [...$("au-list").querySelectorAll(".au-copy")].forEach(b => b.addEventListener("click", async () => {
+    const r = byId(b.dataset.id); if (!r) return;
+    const txt = [r.customer_name, r.phone, [r.city, r.address].filter(Boolean).join(" — "),
+      ...(r.items || []).map(it => `${it.qty || 1}× ${it.name}${it.variant ? " (" + it.variant + ")" : ""} ${auIqd(it.unit_price_iqd)}`),
+      `${t().auraTotal}: ${auIqd(r.total_iqd)}`].filter(Boolean).join("\n");
+    try { await navigator.clipboard.writeText(txt); say("au-msg", t().copied, "ok", 1500); }
+    catch { say("au-msg", txt, "ok", 8000); }
+  }));
+  [...$("au-list").querySelectorAll(".au-chat")].forEach(b => b.addEventListener("click", async () => {
+    const r = byId(b.dataset.id); if (!r) return;
+    const box = $("au-list").querySelector(`.au-thread[data-id="${r.id}"]`);
+    if (!box.classList.contains("hide")){ box.classList.add("hide"); return; }
+    await freshSession();
+    const { data, error } = await db.from("ig_messages").select("direction,text,media,sent_at")
+      .eq("igsid", r.igsid).order("sent_at", { ascending: false }).limit(80);
+    if (error) return say("au-msg", error.message, "err");
+    box.innerHTML = (data || []).reverse().map(m => `<div style="margin:3px 0;${m.direction === "out" ? "color:var(--teal)" : ""}">
+      <span class="num" style="color:var(--mute)">${cartWhen(m.sent_at)}</span> ${m.direction === "out" ? "🏪" : "👤"} ${escC(m.text || "")}
+      ${(m.media || []).map(x => x.stored_url ? `<a href="${escC(x.stored_url)}" target="_blank" rel="noopener"><img src="${escC(x.stored_url)}" loading="lazy" alt="" style="width:44px;height:44px;object-fit:cover;border-radius:6px;vertical-align:middle"></a>` : `[${escC(x.type || "file")}]`).join(" ")}
+    </div>`).join("") || `<div class="empty">—</div>`;
+    box.classList.remove("hide");
+  }));
+  [...$("au-list").querySelectorAll(".au-redo")].forEach(b => b.addEventListener("click", async () => {
+    const r = byId(b.dataset.id); if (!r) return;
+    b.disabled = true;
+    await freshSession();
+    const { data: { session } } = await db.auth.getSession();
+    try {
+      const res = await fetch("/api/ig_webhook?extract=" + encodeURIComponent(r.igsid),
+        { headers: { Authorization: "Bearer " + session.access_token } });
+      const j = await res.json();
+      if (!j.ok) throw new Error(j.error || res.status);
+      say("au-msg", "✓", "ok", 1500);
+      initAura();
+    } catch (e) { say("au-msg", String(e.message || e), "err"); }
+    b.disabled = false;
+  }));
+}
+$("au-q").addEventListener("input", renderAura);
+$("au-f").addEventListener("change", () => { auraFilter = $("au-f").value; renderAura(); });
+
 db.auth.onAuthStateChange(async (_e, session) => {
   if (!session){
     started = false;
@@ -4587,6 +4733,8 @@ db.auth.onAuthStateChange(async (_e, session) => {
   hasCosts = !ce2;
   const { error: ca } = await db.from("cart_links").select("id").limit(1);
   hasCarts = !ca;
+  const { error: au } = await db.from("ig_orders").select("id").limit(1);
+  hasAura = !au;
   $("me").textContent = s.full_name;
   $("login").classList.add("hide");
   $("app").classList.remove("hide");
