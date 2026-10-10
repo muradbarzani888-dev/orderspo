@@ -237,8 +237,12 @@ def backfill_thread(igsid):
             nxt = (page.get("paging") or {}).get("next")
             if not nxt:
                 break
-            with urllib.request.urlopen(nxt, timeout=20) as r:   # Meta's own next link, token included
-                page = json.loads(r.read())
+            try:
+                req = urllib.request.Request(nxt, headers={"User-Agent": "orderspo/1.0"})
+                with urllib.request.urlopen(req, timeout=20) as r:   # Meta's own next link
+                    page = json.loads(r.read())
+            except Exception:                     # older pages are a bonus, never a blocker
+                break
             msgs += page.get("data") or []
     except Exception:
         traceback.print_exc()
@@ -330,6 +334,8 @@ SYSTEM = """You read an Instagram DM conversation between a shop and one custome
 The shop is "Aura Original" in Iraq (Kurdistan region); it sells SHEGLAM make-up and beauty products. Most customers write Kurdish (Sorani) in Latin letters, with no fixed spelling: "slaw", "amam dawaya" / "ama dmawe" (I want this), "nawm Roza ya" (my name is Roza), "zhmaram" / "jmara" (my phone), "nawnishan" / "naw nishan" (address), "Hawler" = Erbil, "Slemani" = Sulaymaniyah, "Dhok" = Duhok, "zhmara" can also mean a shade number, "danayek" = one piece, "du dana" = two, "chand a?" = how much. Others write Kurdish in Arabic script, Arabic, or English, often mixed, often with Arabic-Indic digits. Prices are Iraqi dinar: "25", "٢٥", "25 hazar" or "25 هەزار" in a price context means 25,000 IQD. Delivery is usually 5,000 IQD but only record it if it is mentioned. Keep names, phone numbers and addresses exactly as the customer wrote them (same script, no transliteration). The transcript shows who wrote each line (CUSTOMER or SHOP) and numbers the pictures; the pictures follow the transcript in the same numbering.
 
 Write every free-text field in Kurdish Sorani with Arabic script: item names, variants, item notes, notes and the missing list. For a product, give the Kurdish description first and then the brand and English product name in brackets so staff can find it in the SHEIN app, e.g. "ماسکارای دوو سەرە (SHEGLAM Double-Ended Mascara)". For missing use the words ناو, ژمارەی مۆبایل, ناونیشان, کاڵاکان, نرخ.
+
+The shop's own messages are written by staff. When staff write a summary near the end of the conversation (name, phone, address, items, prices, total), that summary is the final word and overrides anything earlier. Words like "barez", "barezm", "bram", "xoshm", "gyan" are polite address forms, not names; only record a name the customer actually gives.
 
 Record only what the conversation supports. Products are often shown as pictures or shared posts rather than named: then name the product from the picture (brand, product type, shade if readable) and point to the picture number. Prices quoted by SHOP are the prices that count. If the customer changed their mind, record the final state. Address and phone are whatever the customer sent last. Put anything unclear in notes rather than guessing, and list truly absent fields in missing."""
 
