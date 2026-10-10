@@ -188,6 +188,60 @@ def store_event(ev):
     return row, bool(inserted)
 
 
+def graph_get(path, params):
+    params = dict(params, access_token=env("IG_ACCESS_TOKEN"))
+    with urllib.request.urlopen(GRAPH + "/" + path + "?" + urllib.parse.urlencode(params), timeout=20) as r:
+        return json.loads(r.read())
+
+
+def backfill_thread(igsid):
+    """Chats that existed before the webhook went live were never delivered
+    to us. Meta's API returns the last 20 messages of a conversation with
+    their content, so we pull those and store them like webhook events
+    (same message ids, so nothing is stored twice)."""
+    try:
+        conv = graph_get("me/conversations", {"user_id": igsid, "platform": "instagram"})
+        cid = (conv.get("data") or [{}])[0].get("id")
+        if not cid:
+            return 0
+        msgs = graph_get(cid, {"fields": "messages"}).get("messages", {}).get("data") or []
+    except Exception:
+        traceback.print_exc()
+        return 0
+    added = 0
+    for m in msgs[:20]:
+        try:
+            d = graph_get(m["id"], {"fields": "id,created_time,from,to,message,attachments,shares"})
+        except Exception:
+            continue
+        if not d.get("created_time"):
+            continue
+        sender = (d.get("from") or {}).get("id")
+        direction = "in" if sender == igsid else "out"
+        media = []
+        for i, a in enumerate((d.get("attachments") or {}).get("data") or []):
+            url = ((a.get("image_data") or {}).get("url") or (a.get("video_data") or {}).get("url")
+                   or a.get("file_url"))
+            item = {"type": "image" if a.get("image_data") else ("video" if a.get("video_data") else "file"),
+                    "url": url, "title": a.get("name"), "stored_url": None}
+            if url:
+                try:
+                    item["stored_url"] = copy_media(igsid, d["id"], i, url)
+                except Exception as e:
+                    item["error"] = str(e)[:200]
+            media.append(item)
+        for sh in (d.get("shares") or {}).get("data") or []:
+            media.append({"type": "share", "url": sh.get("link"), "title": sh.get("name"), "stored_url": None})
+        ts = dt.datetime.strptime(d["created_time"], "%Y-%m-%dT%H:%M:%S%z").isoformat()
+        row = {"mid": d["id"], "igsid": igsid, "direction": direction, "text": d.get("message"),
+               "media": media, "raw": {"backfill": True}, "sent_at": ts}
+        try:
+            added += len(sb_insert("ig_messages", [row], on_conflict="mid"))
+        except Exception:
+            traceback.print_exc()
+    return added
+
+
 # ---------------------------------------------------------------- Claude
 ORDER_SCHEMA = {
     "type": "object",
@@ -289,6 +343,7 @@ def ask_claude(content):
 
 
 def extract_order(igsid, trigger_mid, until_iso=None, by=None):
+    backfill_thread(igsid)
     rows = load_thread(igsid, until_iso)
     if not rows:
         return {"ok": False, "error": "no messages for this customer"}
