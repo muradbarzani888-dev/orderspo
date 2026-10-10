@@ -47,7 +47,7 @@ MODEL = "claude-opus-5-5"
 MAX_IMAGES = 20          # pictures handed to Claude per extraction
 THREAD_DAYS = 30         # how far back a thread is read when there is no earlier order
 THREAD_LIMIT = 150
-BACKFILL_MAX = int(os.environ.get("IG_BACKFILL_MAX") or 20)   # Meta documents 20; probe tests more
+BACKFILL_MAX = int(os.environ.get("IG_BACKFILL_MAX") or 80)   # Meta documents 20 but returned 48+ in practice
 
 ENV_KEYS = ["IG_VERIFY_TOKEN", "IG_APP_SECRET", "IG_ACCESS_TOKEN", "IG_ORDER_TRIGGER",
             "SUPABASE_URL", "SUPABASE_SERVICE_KEY", "ANTHROPIC_API_KEY"]
@@ -231,17 +231,22 @@ def backfill_thread(igsid):
                 sb("POST", "/rest/v1/ig_customers?on_conflict=igsid",
                    [{"igsid": igsid, "username": p["username"], "name": p.get("name"), "updated_at": now_iso()}],
                    {"Prefer": "resolution=merge-duplicates,return=minimal"})
-        msgs = graph_get(cid, {"fields": "messages"}).get("messages", {}).get("data") or []
+        msgs = graph_get(cid, {"fields": "messages.limit(%d)" % BACKFILL_MAX}).get("messages", {}).get("data") or []
     except Exception:
         traceback.print_exc()
         return 0
-    added = 0
-    for m in msgs[:BACKFILL_MAX]:
+
+    def detail(m):
         try:
-            d = graph_get(m["id"], {"fields": "id,created_time,from,to,message,attachments,shares"})
+            return graph_get(m["id"], {"fields": "id,created_time,from,to,message,attachments,shares"})
         except Exception:
-            continue
-        if not d.get("created_time"):
+            return None
+    from concurrent.futures import ThreadPoolExecutor
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        details = list(pool.map(detail, msgs[:BACKFILL_MAX]))
+    added = 0
+    for d in details:
+        if not d or not d.get("created_time"):
             continue
         sender = (d.get("from") or {}).get("id")
         direction = "in" if sender == igsid else "out"
@@ -432,9 +437,10 @@ class handler(BaseHTTPRequestHandler):
             try:
                 conv = graph_get("me/conversations", {"user_id": g("probe"), "platform": "instagram"})
                 cid = (conv.get("data") or [{}])[0].get("id")
-                msgs = graph_get(cid, {"fields": "messages.limit(60)"}).get("messages", {}).get("data") or []
-                out = []
-                for m in msgs[:60]:
+                mm = graph_get(cid, {"fields": "messages.limit(100)"}).get("messages", {})
+                msgs = mm.get("data") or []
+                out = [{"paging": bool((mm.get("paging") or {}).get("next"))}]
+                for m in msgs[:100]:
                     try:
                         d = graph_get(m["id"], {"fields": "created_time,message,attachments,shares"})
                         out.append({"t": d.get("created_time"), "txt": (d.get("message") or "")[:20],
