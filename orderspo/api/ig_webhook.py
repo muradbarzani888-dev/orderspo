@@ -194,6 +194,25 @@ def graph_get(path, params):
         return json.loads(r.read())
 
 
+def igsid_for_username(username):
+    """Find the customer's Instagram-scoped id by username among the
+    account's conversations (newest first, a few pages)."""
+    want = username.lower().lstrip("@")
+    params = {"platform": "instagram", "fields": "participants", "limit": "50"}
+    path = "me/conversations"
+    for _ in range(8):
+        page = graph_get(path, params)
+        for conv in page.get("data") or []:
+            for p in (conv.get("participants") or {}).get("data") or []:
+                if (p.get("username") or "").lower() == want:
+                    return p.get("id")
+        nxt = (page.get("paging") or {}).get("cursors", {}).get("after")
+        if not nxt:
+            return None
+        params["after"] = nxt
+    return None
+
+
 def backfill_thread(igsid):
     """Chats that existed before the webhook went live were never delivered
     to us. Meta's API returns the last 20 messages of a conversation with
@@ -401,7 +420,13 @@ class handler(BaseHTTPRequestHandler):
             if not who:
                 return self._send(401, {"ok": False, "error": "staff session required"})
             try:
-                res = extract_order(g("extract"), "manual-" + now_iso(), by=who)
+                target = g("extract").strip()
+                if target.startswith("@") or not target.isdigit():
+                    igsid = igsid_for_username(target)
+                    if not igsid:
+                        return self._send(404, {"ok": False, "error": "no chat with @" + target.lstrip("@")})
+                    target = igsid
+                res = extract_order(target, "manual-" + now_iso(), by=who)
             except Exception as e:
                 traceback.print_exc()
                 res = {"ok": False, "error": str(e)[:500]}

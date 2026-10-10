@@ -573,6 +573,10 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
         <div class="tile"><div class="k" data-t="auraNew"></div><div class="v num" id="au-n">—</div></div>
         <div class="tile"><div class="k" data-t="auraDone"></div><div class="v num" id="au-d" style="color:var(--teal)">—</div></div>
       </div>
+      <div style="display:flex;gap:10px;margin-bottom:14px;align-items:center">
+        <input id="au-pull" dir="ltr" autocomplete="off" placeholder="@username" style="flex:1;min-height:44px">
+        <button class="btn" id="au-pull-go" data-t="auraPull" style="width:auto;min-height:44px;padding:0 14px;font-size:12.5px;flex:0 0 auto"></button>
+      </div>
       <div style="display:flex;gap:10px;margin-top:4px;align-items:center">
         <input id="au-q" dir="ltr" autocomplete="off" placeholder="rosse / 0750…" style="flex:1;min-height:44px">
         <select id="au-f" style="width:auto;min-height:44px;flex:0 0 auto"></select>
@@ -705,7 +709,7 @@ const T = {
   cartWait:"چاوەڕوانی کڕین",cartBought:"کڕدراو",cartLink:"لینکی سەبەتە",cartOpen:"کردنەوە",cartCopy:"کۆپی",cartDone:"کڕدرا",cartUndo:"گەڕاندنەوە بۆ چاوەڕوانی",
   cartShowBought:"کڕدراوەکان",cartHideBought:"چاوەڕوانەکان",cartNoLink:"هیچ لینکێک نەدۆزرایەوە — لینکەکە بلکێنە",cartNeedUser:"ناوی ئینستاگرام پێویستە",cartDup:"ئەم لینکە پێشتر تۆمارکراوە",cartBy:"لەلایەن",cartEmpty:"هیچ لینکێک نییە",
   auraTitle:"داواکاریەکانی Aura",auraHelp:"نامەکانی ئینستاگرامی aura.originall خۆکار دەگەنە ئێرە. کاتێک وەڵامی ئامادەکراوی «تۆمارکرا» بۆ کڕیار دەنێریت، گفتوگۆکە دەخوێنرێتەوە و داواکاریەکە لێرە دەردەکەوێت. دۆخەکە بە دەست بگۆڕە.",
-  auraNew:"نوێ",auraDone:"تەواوکراو",auraItems:"کاڵاکان",auraTotal:"کۆی گشتی",auraDelivery:"گەیاندن",auraMissing:"نەدۆزرایەوە",auraNotes:"تێبینی",auraChat:"چات",auraRedo:"دووبارە خوێندنەوە",auraCopy:"کۆپی ناونیشان",auraEmpty:"هیچ داواکاریەک نییە",auraStaffNote:"تێبینی ستاف",
+  auraNew:"نوێ",auraDone:"تەواوکراو",auraItems:"کاڵاکان",auraTotal:"کۆی گشتی",auraDelivery:"گەیاندن",auraMissing:"نەدۆزرایەوە",auraNotes:"تێبینی",auraChat:"چات",auraRedo:"دووبارە خوێندنەوە",auraCopy:"کۆپی ناونیشان",auraEmpty:"هیچ داواکاریەک نییە",auraStaffNote:"تێبینی ستاف",auraPull:"خوێندنەوەی چات",auraPulling:"چاتەکە دەخوێنرێتەوە…",
   auraSt:{new:"نوێ",confirmed:"پشتڕاستکراوە",bought:"کڕدرا",shipped:"نێردرا",delivered:"گەیەندرا",cancelled:"هەڵوەشێنراوە",all:"هەموو"},
   st:{received:"وەرگیرا",purchased:"کڕدرا",at_dubai:"لە دوبەی",in_transit:"لە ڕێگادایە",
    at_erbil:"لە هەولێر",out_for_delivery:"لە گەیاندندایە",delivered:"گەیەندرا",cancelled:"هەڵوەشێنراوە"}},
@@ -761,7 +765,7 @@ const T = {
   cartWait:"بانتظار الشراء",cartBought:"منشتري",cartLink:"رابط السلة",cartOpen:"افتح",cartCopy:"نسخ",cartDone:"انشترى",cartUndo:"رجّعه للانتظار",
   cartShowBought:"المشتراة",cartHideBought:"المنتظرة",cartNoLink:"ما لكيت رابط — الصق الرابط",cartNeedUser:"لازم اسم الانستغرام",cartDup:"هذا الرابط محفوظ من قبل",cartBy:"من قبل",cartEmpty:"ما في روابط",
   auraTitle:"طلبات Aura",auraHelp:"رسائل انستغرام aura.originall تجي هنا تلقائياً. لما ترسل الرد الجاهز «تم التسجيل» للزبون، تنقرأ المحادثة ويطلع الطلب هنا. غيّر الحالة بيدك.",
-  auraNew:"جديد",auraDone:"منتهي",auraItems:"المنتجات",auraTotal:"المجموع",auraDelivery:"التوصيل",auraMissing:"ناقص",auraNotes:"ملاحظات",auraChat:"المحادثة",auraRedo:"إعادة القراءة",auraCopy:"نسخ العنوان",auraEmpty:"ما في طلبات",auraStaffNote:"ملاحظة الستاف",
+  auraNew:"جديد",auraDone:"منتهي",auraItems:"المنتجات",auraTotal:"المجموع",auraDelivery:"التوصيل",auraMissing:"ناقص",auraNotes:"ملاحظات",auraChat:"المحادثة",auraRedo:"إعادة القراءة",auraCopy:"نسخ العنوان",auraEmpty:"ما في طلبات",auraStaffNote:"ملاحظة الستاف",auraPull:"قراءة المحادثة",auraPulling:"جاري قراءة المحادثة…",
   auraSt:{new:"جديد",confirmed:"مؤكد",bought:"منشتري",shipped:"منرسل",delivered:"تم التسليم",cancelled:"ملغي",all:"الكل"},
   st:{received:"تم الاستلام",purchased:"تم الشراء",at_dubai:"بدبي",in_transit:"بالطريق",
    at_erbil:"بأربيل",out_for_delivery:"قيد التوصيل",delivered:"تم التسليم",cancelled:"ملغي"}}
@@ -4688,20 +4692,30 @@ function renderAura(){
   }));
   [...$("au-list").querySelectorAll(".au-redo")].forEach(b => b.addEventListener("click", async () => {
     const r = byId(b.dataset.id); if (!r) return;
-    b.disabled = true;
-    await freshSession();
-    const { data: { session } } = await db.auth.getSession();
-    try {
-      const res = await fetch("/api/ig_webhook?extract=" + encodeURIComponent(r.igsid),
-        { headers: { Authorization: "Bearer " + session.access_token } });
-      const j = await res.json();
-      if (!j.ok) throw new Error(j.error || res.status);
-      say("au-msg", "✓", "ok", 1500);
-      initAura();
-    } catch (e) { say("au-msg", String(e.message || e), "err"); }
-    b.disabled = false;
+    auraPull(r.igsid);
   }));
 }
+// Pull an existing chat into an order by username, without sending anything
+// to the customer: the function reads the last 20 messages via Meta's API.
+async function auraPull(target){
+  const b = $("au-pull-go"); b.disabled = true;
+  say("au-msg", t().auraPulling, "ok", 60000);
+  await freshSession();
+  const { data: { session } } = await db.auth.getSession();
+  try {
+    const res = await fetch("/api/ig_webhook?extract=" + encodeURIComponent(target),
+      { headers: { Authorization: "Bearer " + session.access_token } });
+    const j = await res.json();
+    if (!j.ok) throw new Error(j.error || res.status);
+    say("au-msg", "✓", "ok", 1500);
+    $("au-pull").value = "";
+    auraFilter = "new"; $("au-f").value = "new";
+    initAura();
+  } catch (e) { say("au-msg", String(e.message || e), "err"); }
+  b.disabled = false;
+}
+$("au-pull-go").addEventListener("click", () => { const v = $("au-pull").value.trim(); if (v) auraPull(v); });
+$("au-pull").addEventListener("keydown", e => { if (e.key === "Enter") $("au-pull-go").click(); });
 $("au-q").addEventListener("input", renderAura);
 $("au-f").addEventListener("change", () => { auraFilter = $("au-f").value; renderAura(); });
 
