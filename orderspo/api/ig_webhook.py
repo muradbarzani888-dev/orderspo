@@ -47,7 +47,7 @@ MODEL = "claude-opus-5-5"
 MAX_IMAGES = 20          # pictures handed to Claude per extraction
 THREAD_DAYS = 30         # how far back a thread is read when there is no earlier order
 THREAD_LIMIT = 150
-BACKFILL_MAX = int(os.environ.get("IG_BACKFILL_MAX") or 80)   # Meta documents 20 but returned 48+ in practice
+BACKFILL_MAX = int(os.environ.get("IG_BACKFILL_MAX") or 120)   # Meta documents 20 but returned 48+ in practice
 
 ENV_KEYS = ["IG_VERIFY_TOKEN", "IG_APP_SECRET", "IG_ACCESS_TOKEN", "IG_ORDER_TRIGGER",
             "SUPABASE_URL", "SUPABASE_SERVICE_KEY", "ANTHROPIC_API_KEY"]
@@ -231,7 +231,14 @@ def backfill_thread(igsid):
                 sb("POST", "/rest/v1/ig_customers?on_conflict=igsid",
                    [{"igsid": igsid, "username": p["username"], "name": p.get("name"), "updated_at": now_iso()}],
                    {"Prefer": "resolution=merge-duplicates,return=minimal"})
-        msgs = graph_get(cid, {"fields": "messages.limit(%d)" % BACKFILL_MAX}).get("messages", {}).get("data") or []
+        msgs, params = [], {"limit": "50"}
+        while len(msgs) < BACKFILL_MAX:           # Meta pages the list (48 per page seen)
+            page = graph_get(cid + "/messages", params)
+            msgs += page.get("data") or []
+            after = ((page.get("paging") or {}).get("cursors") or {}).get("after")
+            if not after or not (page.get("paging") or {}).get("next"):
+                break
+            params["after"] = after
     except Exception:
         traceback.print_exc()
         return 0
