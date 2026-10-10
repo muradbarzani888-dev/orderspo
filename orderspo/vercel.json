@@ -4,6 +4,6 @@
     { "source": "/admin", "destination": "/admin.html" }
   ],
   "functions": {
-    "api/ig_webhook.py": { "maxDuration": 60 }
+    "api/ig_webhook.py": { "maxDuration": 300 }
   }
 }

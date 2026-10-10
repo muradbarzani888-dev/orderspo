@@ -243,21 +243,20 @@ def backfill_thread(igsid):
         traceback.print_exc()
         return 0
 
+    # messages already stored (webhook or an earlier backfill) are skipped
+    try:
+        have = {r["mid"] for r in sb_select("ig_messages", {"select": "mid", "igsid": "eq." + igsid, "limit": "2000"})}
+    except Exception:
+        have = set()
+    todo = [m for m in msgs[:BACKFILL_MAX] if m.get("id") not in have]
+
     def detail(m):
         try:
-            return graph_get(m["id"], {"fields": "id,created_time,from,to,message,attachments,shares"})
+            d = graph_get(m["id"], {"fields": "id,created_time,from,to,message,attachments,shares"})
         except Exception:
             return None
-    from concurrent.futures import ThreadPoolExecutor
-    with ThreadPoolExecutor(max_workers=8) as pool:
-        details = list(pool.map(detail, msgs[:BACKFILL_MAX]))
-    added = 0
-    for d in details:
-        if not d or not d.get("created_time"):
-            continue
-        sender = (d.get("from") or {}).get("id")
-        direction = "in" if sender == igsid else "out"
-        media = []
+        # copy pictures inside the worker so downloads run in parallel too
+        d["_media"] = []
         for i, a in enumerate((d.get("attachments") or {}).get("data") or []):
             url = ((a.get("image_data") or {}).get("url") or (a.get("video_data") or {}).get("url")
                    or a.get("file_url"))
@@ -268,7 +267,18 @@ def backfill_thread(igsid):
                     item["stored_url"] = copy_media(igsid, d["id"], i, url)
                 except Exception as e:
                     item["error"] = str(e)[:200]
-            media.append(item)
+            d["_media"].append(item)
+        return d
+    from concurrent.futures import ThreadPoolExecutor
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        details = list(pool.map(detail, todo))
+    added = 0
+    for d in details:
+        if not d or not d.get("created_time"):
+            continue
+        sender = (d.get("from") or {}).get("id")
+        direction = "in" if sender == igsid else "out"
+        media = d["_media"]
         for sh in (d.get("shares") or {}).get("data") or []:
             media.append({"type": "share", "url": sh.get("link"), "title": sh.get("name"), "stored_url": None})
         ts = dt.datetime.strptime(d["created_time"], "%Y-%m-%dT%H:%M:%S%z").isoformat()
