@@ -231,14 +231,15 @@ def backfill_thread(igsid):
                 sb("POST", "/rest/v1/ig_customers?on_conflict=igsid",
                    [{"igsid": igsid, "username": p["username"], "name": p.get("name"), "updated_at": now_iso()}],
                    {"Prefer": "resolution=merge-duplicates,return=minimal"})
-        msgs, params = [], {"limit": "50"}
+        page = graph_get(cid, {"fields": "messages.limit(50)"}).get("messages") or {}
+        msgs = list(page.get("data") or [])
         while len(msgs) < BACKFILL_MAX:           # Meta pages the list (48 per page seen)
-            page = graph_get(cid + "/messages", params)
-            msgs += page.get("data") or []
-            after = ((page.get("paging") or {}).get("cursors") or {}).get("after")
-            if not after or not (page.get("paging") or {}).get("next"):
+            nxt = (page.get("paging") or {}).get("next")
+            if not nxt:
                 break
-            params["after"] = after
+            with urllib.request.urlopen(nxt, timeout=20) as r:   # Meta's own next link, token included
+                page = json.loads(r.read())
+            msgs += page.get("data") or []
     except Exception:
         traceback.print_exc()
         return 0
