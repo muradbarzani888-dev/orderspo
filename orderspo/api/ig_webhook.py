@@ -219,10 +219,17 @@ def backfill_thread(igsid):
     their content, so we pull those and store them like webhook events
     (same message ids, so nothing is stored twice)."""
     try:
-        conv = graph_get("me/conversations", {"user_id": igsid, "platform": "instagram"})
-        cid = (conv.get("data") or [{}])[0].get("id")
+        conv = graph_get("me/conversations", {"user_id": igsid, "platform": "instagram", "fields": "participants"})
+        first = (conv.get("data") or [{}])[0]
+        cid = first.get("id")
         if not cid:
             return 0
+        # the participant list is the reliable source of the username
+        for p in (first.get("participants") or {}).get("data") or []:
+            if p.get("id") == igsid and p.get("username"):
+                sb("POST", "/rest/v1/ig_customers?on_conflict=igsid",
+                   [{"igsid": igsid, "username": p["username"], "name": p.get("name"), "updated_at": now_iso()}],
+                   {"Prefer": "resolution=merge-duplicates,return=minimal"})
         msgs = graph_get(cid, {"fields": "messages"}).get("messages", {}).get("data") or []
     except Exception:
         traceback.print_exc()
