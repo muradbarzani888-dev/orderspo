@@ -47,6 +47,7 @@ MODEL = "claude-opus-5-5"
 MAX_IMAGES = 20          # pictures handed to Claude per extraction
 THREAD_DAYS = 30         # how far back a thread is read when there is no earlier order
 THREAD_LIMIT = 150
+BACKFILL_MAX = int(os.environ.get("IG_BACKFILL_MAX") or 20)   # Meta documents 20; probe tests more
 
 ENV_KEYS = ["IG_VERIFY_TOKEN", "IG_APP_SECRET", "IG_ACCESS_TOKEN", "IG_ORDER_TRIGGER",
             "SUPABASE_URL", "SUPABASE_SERVICE_KEY", "ANTHROPIC_API_KEY"]
@@ -235,7 +236,7 @@ def backfill_thread(igsid):
         traceback.print_exc()
         return 0
     added = 0
-    for m in msgs[:20]:
+    for m in msgs[:BACKFILL_MAX]:
         try:
             d = graph_get(m["id"], {"fields": "id,created_time,from,to,message,attachments,shares"})
         except Exception:
@@ -304,6 +305,8 @@ ORDER_SCHEMA = {
 SYSTEM = """You read an Instagram DM conversation between a shop and one customer and write down the order.
 
 The shop is "Aura Original" in Iraq (Kurdistan region); it sells SHEGLAM make-up and beauty products. Most customers write Kurdish (Sorani) in Latin letters, with no fixed spelling: "slaw", "amam dawaya" / "ama dmawe" (I want this), "nawm Roza ya" (my name is Roza), "zhmaram" / "jmara" (my phone), "nawnishan" / "naw nishan" (address), "Hawler" = Erbil, "Slemani" = Sulaymaniyah, "Dhok" = Duhok, "zhmara" can also mean a shade number, "danayek" = one piece, "du dana" = two, "chand a?" = how much. Others write Kurdish in Arabic script, Arabic, or English, often mixed, often with Arabic-Indic digits. Prices are Iraqi dinar: "25", "٢٥", "25 hazar" or "25 هەزار" in a price context means 25,000 IQD. Delivery is usually 5,000 IQD but only record it if it is mentioned. Keep names, phone numbers and addresses exactly as the customer wrote them (same script, no transliteration). The transcript shows who wrote each line (CUSTOMER or SHOP) and numbers the pictures; the pictures follow the transcript in the same numbering.
+
+Write every free-text field in Kurdish Sorani with Arabic script: item names, variants, item notes, notes and the missing list. For a product, give the Kurdish description first and then the brand and English product name in brackets so staff can find it in the SHEIN app, e.g. "ماسکارای دوو سەرە (SHEGLAM Double-Ended Mascara)". For missing use the words ناو, ژمارەی مۆبایل, ناونیشان, کاڵاکان, نرخ.
 
 Record only what the conversation supports. Products are often shown as pictures or shared posts rather than named: then name the product from the picture (brand, product type, shade if readable) and point to the picture number. Prices quoted by SHOP are the prices that count. If the customer changed their mind, record the final state. Address and phone are whatever the customer sent last. Put anything unclear in notes rather than guessing, and list truly absent fields in missing."""
 
@@ -422,6 +425,26 @@ class handler(BaseHTTPRequestHandler):
             if env("IG_VERIFY_TOKEN") and hmac.compare_digest(g("hub.verify_token"), env("IG_VERIFY_TOKEN")):
                 return self._send(200, g("hub.challenge"), "text/plain")
             return self._send(403, "verify token mismatch", "text/plain")
+        if g("probe"):
+            who = staff_from_jwt(self.headers.get("Authorization") or "")
+            if not who:
+                return self._send(401, {"ok": False, "error": "staff session required"})
+            try:
+                conv = graph_get("me/conversations", {"user_id": g("probe"), "platform": "instagram"})
+                cid = (conv.get("data") or [{}])[0].get("id")
+                msgs = graph_get(cid, {"fields": "messages.limit(60)"}).get("messages", {}).get("data") or []
+                out = []
+                for m in msgs[:60]:
+                    try:
+                        d = graph_get(m["id"], {"fields": "created_time,message,attachments,shares"})
+                        out.append({"t": d.get("created_time"), "txt": (d.get("message") or "")[:20],
+                                    "att": len((d.get("attachments") or {}).get("data") or []),
+                                    "sh": len((d.get("shares") or {}).get("data") or [])})
+                    except urllib.error.HTTPError as e:
+                        out.append({"err": e.code})
+                return self._send(200, {"ok": True, "n": len(msgs), "msgs": out})
+            except Exception as e:
+                return self._send(500, {"ok": False, "error": str(e)[:300]})
         if g("extract"):
             who = staff_from_jwt(self.headers.get("Authorization") or "")
             if not who:
