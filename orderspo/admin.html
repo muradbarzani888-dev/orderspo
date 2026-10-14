@@ -141,7 +141,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v119</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v120</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -3274,18 +3274,36 @@ function lbPrint(){
 // Every SHEIN notification the Gmail script delivered, and what the database
 // did with it. Unmatched ones are the point of this page: nothing is guessed,
 // so anything the parser could not tie to a bag waits here for a human.
-let seInit = false, seRows = [], seOnlyBad = false;
+let seInit = false, seRows = [], seOnlyBad = false, seHit = [], seHitQ = "", seTimer = null;
+const SE_COLS = "id,email_at,event_type,to_address,greeting,bag_code,seqs,cycle_code,shein_order_no,tracking_no,carrier,matched,result,bag_id";
 const SE_ICON = { confirmed: "🛒", shipped: "📦", out_for_delivery: "🚚", delivered: "✅", other: "·" };
 
 async function initShein(){
-  if (!seInit){ seInit = true; $("se-q").addEventListener("input", renderShein); }
+  if (!seInit){
+    seInit = true;
+    $("se-q").addEventListener("input", () => { clearTimeout(seTimer); seTimer = setTimeout(searchShein, 250); });
+  }
   await loadShein();
+}
+
+// The page holds only the newest 600 emails (about four days of mail), so a
+// typed search asks the server for every email that matches instead of
+// filtering what happens to be loaded.
+async function searchShein(){
+  const q = toEn($("se-q").value).trim();
+  if (!q){ seHit = []; seHitQ = ""; return renderShein(); }
+  const like = "%" + q.replace(/[%_,()]/g, "") + "%";
+  const ors = ["bag_code", "tracking_no", "shein_order_no", "to_address", "greeting"].map(c => `${c}.ilike.${like}`);
+  if (/^\d+$/.test(q)) ors.push(`seqs.cs.{${q}}`);
+  const { data } = await db.from("shein_events").select(SE_COLS)
+    .or(ors.join(",")).order("email_at", { ascending: false }).limit(300);
+  if (toEn($("se-q").value).trim() !== q) return;   // user kept typing
+  seHit = data || []; seHitQ = q; renderShein();
 }
 
 async function loadShein(){
   $("se-list").innerHTML = '<div style="text-align:center;padding:20px 0"><span class="spin"></span></div>';
-  const { data, error } = await db.from("shein_events")
-    .select("id,email_at,event_type,to_address,greeting,bag_code,seqs,cycle_code,shein_order_no,tracking_no,carrier,matched,result,bag_id")
+  const { data, error } = await db.from("shein_events").select(SE_COLS)
     .order("email_at", { ascending: false }).limit(600);
   if (error){
     $("se-list").innerHTML = ""; $("se-sum").innerHTML = "";
@@ -3311,10 +3329,12 @@ function renderShein(){
   const b = $("se-sum").querySelector("[data-sebad]");
   if (b) b.onclick = () => { seOnlyBad = !seOnlyBad; renderShein(); };
 
-  const rows = (seOnlyBad ? bad : seRows).filter(r => !q ||
+  const isBad = r => !r.matched && r.event_type !== "other";
+  const pool = (q && seHitQ === q) ? seHit : seRows;
+  const rows = (seOnlyBad ? pool.filter(isBad) : pool).filter(r => !q ||
     (r.bag_code || "").toLowerCase().includes(q) || (r.seqs || []).some(s => String(s) === q) ||
     (r.shein_order_no || "").toLowerCase().includes(q) || (r.to_address || "").includes(q) ||
-    (r.tracking_no || "").toLowerCase().includes(q));
+    (r.tracking_no || "").toLowerCase().includes(q) || (r.greeting || "").toLowerCase().includes(q));
   $("se-list").innerHTML = rows.length ? rows.slice(0, 200).map(r => {
     const col = r.matched ? "var(--teal)" : r.event_type === "other" ? "var(--faint)" : "#EF9F27";
     const when = new Date(r.email_at).toLocaleString("en-GB", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
