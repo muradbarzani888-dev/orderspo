@@ -83,7 +83,9 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 .nav{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
 .nav button{background:var(--deep);border:1px solid var(--line);border-radius:12px;
- padding:16px 12px;color:var(--white);font:500 14px inherit;cursor:pointer;min-height:62px}
+ padding:16px 12px;color:var(--white);font:500 14px inherit;cursor:pointer;min-height:62px;position:relative}
+.nav .bdg{position:absolute;top:7px;inset-inline-start:8px;min-width:22px;height:22px;padding:0 7px;border-radius:11px;
+ background:#E8A33D;color:#1A1200;font:600 12px "Archivo",sans-serif;display:inline-flex;align-items:center;justify-content:center}
 
 .row{display:flex;align-items:center;gap:12px;background:var(--deep);border-radius:12px;
  padding:13px 14px;margin-bottom:8px;cursor:pointer;border:1px solid transparent}
@@ -141,7 +143,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v120</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v121</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -171,6 +173,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
         <button data-go="shein" data-t="sheinTitle" id="nav-shein" class="hide"></button>
         <button data-go="carts" data-t="cartTitle" id="nav-carts" class="hide"></button>
         <button data-go="aura" data-t="auraTitle" id="nav-aura" class="hide"></button>
+        <button data-go="dep" id="nav-dep" class="hide"><span data-t="depTitle"></span><span class="bdg hide" id="nav-dep-n"></span></button>
         <button data-go="lbl" data-t="lblTitle"></button>
         <button data-go="batch" data-t="moveBatch"></button>
         <button data-go="home" data-t="refresh"></button>
@@ -584,6 +587,22 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
       <div id="au-list" style="margin-top:12px"></div>
     </div>
 
+    <div id="v-dep" class="hide">
+      <button class="back" data-go="home" data-t="back"></button>
+      <h2 data-t="depTitle"></h2>
+      <div id="dp-msg"></div>
+      <p style="color:var(--mute);font-size:12.5px;line-height:1.9;margin-bottom:14px" data-t="depHelp"></p>
+      <div class="tiles">
+        <div class="tile"><div class="k" data-t="depPending"></div><div class="v num" id="dp-n">—</div></div>
+        <div class="tile"><div class="k" data-t="depToday"></div><div class="v num" id="dp-today" style="color:var(--teal)">—</div></div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <input id="dp-q" dir="ltr" autocomplete="off" placeholder="312 / rosse / 0750…" style="flex:1;min-height:44px">
+        <button class="btn ghost" id="dp-toggle" style="width:auto;min-height:44px;padding:0 14px;font-size:12.5px;flex:0 0 auto;margin:0"></button>
+      </div>
+      <div id="dp-list" style="margin-top:12px"></div>
+    </div>
+
     <div id="v-batch" class="hide">
       <button class="back" data-go="home" data-t="back"></button>
       <h2 data-t="moveBatch"></h2>
@@ -711,6 +730,10 @@ const T = {
   auraTitle:"داواکاریەکانی Aura",auraHelp:"نامەکانی ئینستاگرامی aura.originall خۆکار دەگەنە ئێرە. کاتێک وەڵامی ئامادەکراوی «تۆمارکرا» بۆ کڕیار دەنێریت، گفتوگۆکە دەخوێنرێتەوە و داواکاریەکە لێرە دەردەکەوێت. دۆخەکە بە دەست بگۆڕە.",
   auraNew:"نوێ",auraDone:"تەواوکراو",auraItems:"کاڵاکان",auraTotal:"کۆی گشتی",auraDelivery:"گەیاندن",auraMissing:"نەدۆزرایەوە",auraNotes:"تێبینی",auraChat:"چات",auraRedo:"دووبارە خوێندنەوە",auraCopy:"کۆپی ناونیشان",auraEmpty:"هیچ داواکاریەک نییە",auraStaffNote:"تێبینی ستاف",auraPull:"خوێندنەوەی چات",auraPulling:"چاتەکە دەخوێنرێتەوە…",
   auraSt:{new:"نوێ",confirmed:"پشتڕاستکراوە",bought:"کڕدرا",shipped:"نێردرا",delivered:"گەیەندرا",cancelled:"هەڵوەشێنراوە",all:"هەموو"},
+  depTitle:"وەسڵە چاوەڕوانەکان",depHelp:"کڕیار وەسڵی پێشەکی لە پەیجی بەدواداچوون دەنێرێت و لێرە دەردەکەوێت. وێنەکە لەگەڵ هەژماری بانک بەراورد بکە: «پشتڕاستکردنەوە» بڕەکە وەک پێشەکی لەسەر داواکاریەکە تۆمار دەکات، «ڕەتکردنەوە» هۆکارێکی دەوێت و کڕیار دەیبینێت. دۆخی داواکاری لێرە ناگۆڕدرێت.",
+  depPending:"چاوەڕوان",depToday:"پشتڕاستکراوی ئەمڕۆ",depClaimed:"نێردراو",depExpected:"پێویست",depCurrent:"تۆمارکراو",depConfirm:"پشتڕاستکردنەوە",depReject:"ڕەتکردنەوە",
+  depReasonAsk:"هۆکاری ڕەتکردنەوە (کڕیار دەیبینێت):",depEmpty:"هیچ وەسڵێکی چاوەڕوان نییە ✓",depShowDone:"پێداچوونەوەکان",depHideDone:"چاوەڕوانەکان",depGone:"پێشتر پێداچوونەوەی بۆ کراوە",depAmtNeed:"بڕەکە بنووسە",depNoImg:"بێ وێنە",depBy:"لەلایەن",
+  depSt:{confirmed:"پشتڕاستکراوە",rejected:"ڕەتکراوە"},
   st:{received:"وەرگیرا",purchased:"کڕدرا",at_dubai:"لە دوبەی",in_transit:"لە ڕێگادایە",
    at_erbil:"لە هەولێر",out_for_delivery:"لە گەیاندندایە",delivered:"گەیەندرا",cancelled:"هەڵوەشێنراوە"}},
  ar:{cycle:"الشهر",orders:"الطلبات",cod:"المبلغ المتبقي للتحصيل",codPending:"المتبقي للتحصيل (بدون المسلَّم)",billed:"مجموع الشهر",paidUp:"المدفوع مقدماً",
@@ -767,6 +790,10 @@ const T = {
   auraTitle:"طلبات Aura",auraHelp:"رسائل انستغرام aura.originall تجي هنا تلقائياً. لما ترسل الرد الجاهز «تم التسجيل» للزبون، تنقرأ المحادثة ويطلع الطلب هنا. غيّر الحالة بيدك.",
   auraNew:"جديد",auraDone:"منتهي",auraItems:"المنتجات",auraTotal:"المجموع",auraDelivery:"التوصيل",auraMissing:"ناقص",auraNotes:"ملاحظات",auraChat:"المحادثة",auraRedo:"إعادة القراءة",auraCopy:"نسخ العنوان",auraEmpty:"ما في طلبات",auraStaffNote:"ملاحظة الستاف",auraPull:"قراءة المحادثة",auraPulling:"جاري قراءة المحادثة…",
   auraSt:{new:"جديد",confirmed:"مؤكد",bought:"منشتري",shipped:"منرسل",delivered:"تم التسليم",cancelled:"ملغي",all:"الكل"},
+  depTitle:"الوصولات المعلقة",depHelp:"الزبون يرسل وصل المقدم من صفحة التتبع ويطلع هنا. قارن الصورة مع حساب البنك: «تأكيد» يسجل المبلغ كمقدم على الطلب، «رفض» يحتاج سبب والزبون يشوفه. حالة الطلب ما تتغير من هنا.",
+  depPending:"معلق",depToday:"مؤكد اليوم",depClaimed:"المرسل",depExpected:"المطلوب",depCurrent:"المسجل",depConfirm:"تأكيد",depReject:"رفض",
+  depReasonAsk:"سبب الرفض (الزبون يشوفه):",depEmpty:"ما في وصولات معلقة ✓",depShowDone:"المراجَعة",depHideDone:"المعلقة",depGone:"تمت مراجعته من قبل",depAmtNeed:"اكتب المبلغ",depNoImg:"بدون صورة",depBy:"من قبل",
+  depSt:{confirmed:"مؤكد",rejected:"مرفوض"},
   st:{received:"تم الاستلام",purchased:"تم الشراء",at_dubai:"بدبي",in_transit:"بالطريق",
    at_erbil:"بأربيل",out_for_delivery:"قيد التوصيل",delivered:"تم التسليم",cancelled:"ملغي"}}
 };
@@ -782,6 +809,8 @@ let hasCosts = false;
 let hasCarts = false;
 // true once the ig_orders table exists (aura_orders.sql)
 let hasAura = false;
+// true once the deposit_proofs table exists (deposit_proofs.sql)
+let hasDep = false;
 
 const $ = i => document.getElementById(i);
 
@@ -817,7 +846,7 @@ function say(box, text, kind, ms){
   if (text && hold) setTimeout(() => { if ($(box)) $(box).innerHTML = ""; }, hold);
 }
 function view(n){
-  ["home","new","paste","dash","scan","detail","batch","shko","cost","lbl","cust","close","open","carts","shein","aura"].forEach(v => $("v-" + v).classList.toggle("hide", v !== n));
+  ["home","new","paste","dash","scan","detail","batch","shko","cost","lbl","cust","close","open","carts","shein","aura","dep"].forEach(v => $("v-" + v).classList.toggle("hide", v !== n));
   window.scrollTo(0,0);
 }
 function paintLang(){
@@ -948,6 +977,9 @@ async function loadHome(){
   // every staff member sees the cart queue — the buyer works from it
   $("nav-carts").classList.toggle("hide", !hasCarts);
   $("nav-aura").classList.toggle("hide", !hasAura);
+  // every staff member sees the deposit proofs — whoever can see the bank account confirms
+  $("nav-dep").classList.toggle("hide", !hasDep);
+  dpBadge();
   if (me.role === "admin"){
     $("h-billed").textContent = iqd(sum("total_iqd"));
     $("h-paid").textContent   = iqd(sum("deposit_iqd"));
@@ -1474,6 +1506,7 @@ document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", 
   if (g === "shein") initShein();
   if (g === "carts") initCarts();
   if (g === "aura") initAura();
+  if (g === "dep") initDep();
   view(g);
 }));
 $("q-go").addEventListener("click", search);
@@ -4739,6 +4772,138 @@ $("au-pull").addEventListener("keydown", e => { if (e.key === "Enter") $("au-pul
 $("au-q").addEventListener("input", renderAura);
 $("au-f").addEventListener("change", () => { auraFilter = $("au-f").value; renderAura(); });
 
+// ---------- Deposit proofs: wasl screenshots sent from the tracking page ----
+// index.html uploads the picture into the private bucket deposit-proofs and
+// inserts one pending row (deposit_proofs.sql). Confirm writes the amount into
+// orders.deposit_iqd and marks the row with the reviewer; Reject needs a
+// reason, which the customer sees on the tracking page. The order's STATUS is
+// never touched here — a human moves it, as everywhere else.
+let dpRows = [], dpDone = false, dpUrls = {};
+// Deposit rule: 10,000 under 100,000 total, 25,000 from 100,000 up.
+const WASL = total => Number(total) >= 100000 ? 25000 : 10000;
+const dpTodayIso = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d.toISOString(); };
+
+async function dpBadge(){
+  if (!hasDep) return 0;
+  const { count } = await db.from("deposit_proofs").select("id", { count: "exact", head: true }).eq("status", "pending");
+  const n = count || 0;
+  $("nav-dep-n").textContent = n;
+  $("nav-dep-n").classList.toggle("hide", !n);
+  if (dpDone) $("dp-n").textContent = n;
+  return n;
+}
+
+async function initDep(){
+  await freshSession();
+  $("dp-toggle").textContent = dpDone ? t().depHideDone : t().depShowDone;
+  let q = db.from("deposit_proofs")
+    .select("*,orders(id,order_code,total_iqd,deposit_iqd,status,customers(instagram_username,phone))")
+    .order("created_at", { ascending: false });
+  q = dpDone ? q.neq("status", "pending").limit(100) : q.eq("status", "pending").limit(200);
+  const [{ data, error }, { data: today }] = await Promise.all([q,
+    db.from("deposit_proofs").select("confirmed_iqd").eq("status", "confirmed").gte("reviewed_at", dpTodayIso())]);
+  if (error) return say("dp-msg", error.message, "err");
+  dpRows = data || [];
+  $("dp-today").textContent = iqd((today || []).reduce((a, r) => a + Number(r.confirmed_iqd || 0), 0));
+  // the bucket is private: one signed link per picture, fetched in one call
+  const paths = dpRows.map(r => r.image_path).filter(p => p && !dpUrls[p]);
+  if (paths.length){
+    const { data: su } = await db.storage.from("deposit-proofs").createSignedUrls(paths, 3600);
+    (su || []).forEach(x => { if (x.signedUrl) dpUrls[x.path] = x.signedUrl; });
+  }
+  dpBadge();
+  renderDep();
+}
+
+function renderDep(){
+  const q = ($("dp-q").value || "").trim().toLowerCase().replace(/^@/, "");
+  const rows = dpRows.filter(r => !q || [r.order_code, r.orders?.customers?.instagram_username, r.orders?.customers?.phone]
+    .some(v => String(v || "").toLowerCase().includes(q)));
+  if (!dpDone) $("dp-n").textContent = dpRows.length;
+  const ok = `min-height:42px;padding:0 14px;border-radius:10px;border:0;background:var(--teal);color:#06282B;font-weight:600;font-size:13px;cursor:pointer;font-family:inherit`;
+  const no = `min-height:42px;padding:0 12px;border-radius:10px;border:1px solid rgba(226,75,74,.5);background:transparent;color:#F09595;font-size:13px;cursor:pointer;flex:0 0 auto;font-family:inherit`;
+  $("dp-list").innerHTML = rows.map(r => {
+    const o = r.orders || {}, c = o.customers || {};
+    const exp = WASL(o.total_iqd), diff = Number(r.claimed_iqd) !== exp;
+    const img = dpUrls[r.image_path];
+    const pending = r.status === "pending";
+    return `<div class="row" style="cursor:default;align-items:flex-start;gap:12px" data-id="${r.id}">
+      ${img ? `<a href="${escC(img)}" target="_blank" rel="noopener" style="flex:0 0 auto">
+          <img src="${escC(img)}" loading="lazy" alt="" style="width:74px;height:74px;object-fit:cover;border-radius:10px;display:block;background:var(--line)"></a>`
+        : `<div style="width:74px;height:74px;border-radius:10px;background:var(--line);flex:0 0 auto;display:flex;align-items:center;justify-content:center;color:var(--mute);font-size:11px;text-align:center">${t().depNoImg}</div>`}
+      <div class="l">
+        <div class="c num" style="cursor:pointer;font-size:14px" data-open="${o.id || ""}">${escC(r.order_code)}</div>
+        <div class="u" dir="ltr">${c.instagram_username ? "@" + escC(c.instagram_username) : "—"}${c.phone ? ` · ${escC(c.phone)}` : ""}</div>
+        <div class="s num" dir="ltr">${cartWhen(r.created_at)}${o.status ? ` · ${t().st[o.status] || o.status}` : ""}</div>
+        <div style="font-size:13px;margin-top:6px">${t().depClaimed}: <b class="num" style="color:${diff ? "#E8A33D" : "var(--teal)"}">${iqd(r.claimed_iqd)}</b>
+          · ${t().depExpected}: <span class="num">${iqd(exp)}</span>${Number(o.deposit_iqd) > 0 ? ` · ${t().depCurrent}: <span class="num">${iqd(o.deposit_iqd)}</span>` : ""}</div>
+        ${r.note ? `<div style="color:var(--mute);font-size:12.5px;margin-top:4px">${escC(r.note)}</div>` : ""}
+        ${pending ? `<input class="dp-amt num" data-id="${r.id}" inputmode="numeric" dir="ltr" value="${r.claimed_iqd}" style="margin-top:10px;min-height:42px;font-size:15px;padding:0 12px">
+        <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+          <button class="dp-ok" data-id="${r.id}" style="${ok};flex:1">✓ ${t().depConfirm}</button>
+          <button class="dp-no" data-id="${r.id}" style="${no}">✕ ${t().depReject}</button>
+        </div>` : `<div style="margin-top:8px;font-size:12.5px;color:${r.status === "confirmed" ? "var(--teal)" : "#F09595"}">
+          ${t().depSt[r.status] || r.status}${r.status === "confirmed" ? ` <span class="num">${iqd(r.confirmed_iqd)}</span>` : ""}${r.reject_reason ? ` — ${escC(r.reject_reason)}` : ""}
+          <span style="color:var(--mute)"> · ${t().depBy} ${escC(r.reviewed_by || "")}${r.reviewed_at ? ` · <span class="num">${cartWhen(r.reviewed_at)}</span>` : ""}</span></div>`}
+      </div></div>`;
+  }).join("") || `<div class="empty">${t().depEmpty}</div>`;
+
+  const L = $("dp-list"), byId = id => dpRows.find(x => String(x.id) === id);
+  L.querySelectorAll("[data-open]").forEach(el => el.onclick = () => { if (el.dataset.open) openOrder(+el.dataset.open); });
+  L.querySelectorAll(".dp-amt").forEach(i => i.addEventListener("input", () => {
+    const v = toEn(i.value); if (v !== i.value) i.value = v;
+  }));
+  L.querySelectorAll(".dp-ok").forEach(b => b.onclick = async () => {
+    const r = byId(b.dataset.id); if (!r) return;
+    const amt = Number(toEn(L.querySelector(`.dp-amt[data-id="${r.id}"]`).value).replace(/\D/g, ""));
+    if (!amt) return say("dp-msg", t().depAmtNeed, "err");
+    b.disabled = true;
+    await dpConfirm(r, amt);
+    b.disabled = false;
+  });
+  L.querySelectorAll(".dp-no").forEach(b => b.onclick = async () => {
+    const r = byId(b.dataset.id); if (!r) return;
+    b.disabled = true;
+    await dpReject(r);
+    b.disabled = false;
+  });
+}
+
+async function dpConfirm(r, amt){
+  await freshSession();
+  const now = new Date().toISOString();
+  // claim the row first (status must still be pending), so two staff tapping
+  // at once cannot both write the order
+  const { data: got, error: e1 } = await db.from("deposit_proofs")
+    .update({ status: "confirmed", confirmed_iqd: amt, reviewed_by: me.full_name, reviewed_at: now })
+    .eq("id", r.id).eq("status", "pending").select("id");
+  if (e1) return say("dp-msg", e1.message, "err");
+  if (!got || !got.length){ say("dp-msg", t().depGone, "err"); return initDep(); }
+  const { error: e2 } = await db.from("orders").update({ deposit_iqd: amt }).eq("id", r.order_id);
+  if (e2){
+    await db.from("deposit_proofs").update({ status: "pending", confirmed_iqd: null, reviewed_by: null, reviewed_at: null }).eq("id", r.id);
+    return say("dp-msg", e2.message, "err");
+  }
+  say("dp-msg", `${t().saved} — ${escC(r.order_code)}: <span class="num">${iqd(amt)}</span>`, "ok", 2500);
+  initDep();
+}
+
+async function dpReject(r){
+  const why = prompt(t().depReasonAsk);
+  if (why === null) return;
+  const reason = why.trim();
+  if (!reason) return say("dp-msg", t().depReasonAsk, "err");
+  await freshSession();
+  const { data: got, error } = await db.from("deposit_proofs")
+    .update({ status: "rejected", reject_reason: reason, reviewed_by: me.full_name, reviewed_at: new Date().toISOString() })
+    .eq("id", r.id).eq("status", "pending").select("id");
+  if (error) return say("dp-msg", error.message, "err");
+  if (!got || !got.length) say("dp-msg", t().depGone, "err");
+  initDep();
+}
+$("dp-q").addEventListener("input", renderDep);
+$("dp-toggle").addEventListener("click", () => { dpDone = !dpDone; initDep(); });
+
 db.auth.onAuthStateChange(async (_e, session) => {
   if (!session){
     started = false;
@@ -4769,6 +4934,8 @@ db.auth.onAuthStateChange(async (_e, session) => {
   hasCarts = !ca;
   const { error: au } = await db.from("ig_orders").select("id").limit(1);
   hasAura = !au;
+  const { error: dpe } = await db.from("deposit_proofs").select("id").limit(1);
+  hasDep = !dpe;
   $("me").textContent = s.full_name;
   $("login").classList.add("hide");
   $("app").classList.remove("hide");

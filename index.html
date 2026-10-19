@@ -104,6 +104,29 @@ button.go:disabled{opacity:.5;cursor:default}
 .money .due .val{font-size:23px;font-weight:600;color:var(--teal)}
 .money .note{color:var(--faint);font-size:11.5px;margin-top:4px}
 
+/* deposit proof: the customer attaches the bank screenshot to the order */
+.proof{background:var(--ink-deep);border-radius:14px;padding:16px;margin-bottom:20px;border:1px solid var(--ink-line)}
+.proof h3{font-size:14px;font-weight:600;margin-bottom:4px}
+.proof .p{color:var(--mute);font-size:12.5px;line-height:1.8;margin-bottom:12px}
+.proof label{display:block;color:var(--mute);font-size:12px;margin-bottom:6px}
+.proof input[type=text]{height:46px;font-size:16px}
+.proof .pick{display:flex;align-items:center;justify-content:center;gap:8px;min-height:46px;border:1px dashed var(--ink-line);
+  border-radius:var(--radius);color:var(--teal);font-size:13.5px;cursor:pointer;margin-bottom:16px;padding:0 12px;text-align:center}
+.proof .pick input{display:none}
+.proof .pick img{width:40px;height:40px;object-fit:cover;border-radius:6px;flex:0 0 auto}
+.proof .pick.has{border-style:solid;border-color:var(--teal);justify-content:flex-start;color:#C9D6D9}
+.proof button.go{height:46px}
+.proof .fb{color:var(--faint);font-size:11.5px;line-height:1.8;margin-top:12px;text-align:center}
+.proof .fb a{color:var(--mute)}
+.proof .err{margin:0 0 12px}
+.proof.wait{border-color:rgba(239,159,39,.4);background:rgba(239,159,39,.07)}
+.proof.wait h3{color:#F2B85C}
+.proof.ok{border-color:rgba(42,173,165,.45);background:rgba(42,173,165,.08);padding:12px 16px;margin-top:-10px}
+.proof.ok h3{color:var(--teal);margin:0}
+.proof.bad{border-color:rgba(226,75,74,.4)}
+.proof.bad h3{color:#F09595}
+.proof .why{background:rgba(226,75,74,.1);color:#F09595;font-size:13px;border-radius:var(--radius);padding:10px 12px;margin-bottom:14px;line-height:1.7}
+
 .tl{padding-inline-start:3px}
 .step{display:flex;gap:13px}
 .step .gut{display:flex;flex-direction:column;align-items:center;width:14px;flex-shrink:0}
@@ -161,7 +184,7 @@ button.go:disabled{opacity:.5;cursor:default}
     </div>
     <button class="go" id="submit" data-t="cta"></button>
     <p class="hint" data-t="hint"></p>
-    <p style="text-align:center;color:#3E545B;font-size:10px;margin-top:22px;font-family:Archivo,sans-serif">v19</p>
+    <p style="text-align:center;color:#3E545B;font-size:10px;margin-top:22px;font-family:Archivo,sans-serif">v20</p>
   </section>
 
   <section id="result-view" class="hidden">
@@ -179,6 +202,7 @@ button.go:disabled{opacity:.5;cursor:default}
       </div>
       <p class="note" id="r-note"></p>
     </div>
+    <div id="r-proof"></div>
     <div class="scene" id="r-scene"></div>
   <div class="tl" id="r-timeline"></div>
     <div id="r-late" class="hidden"></div>
@@ -301,7 +325,25 @@ const T = {
     },
     shippedStop:"لە شەین نێردرا — لە ڕێگایە بۆ دوبەی",
     erbilStop:"گەیشتە هەولێر — لە گەیاندندایە",
-    now:"ئێستا"
+    now:"ئێستا",
+    pfTitle:"ناردنی وەسڵی پێشەکی",
+    pfHelp:"پێشەکیەکە بە بانک یان Qi بنێرە، پاشان وێنەی وەسڵەکە لێرە دابنێ. پاش پشتڕاستکردنەوە داواکاریەکەت دەکڕدرێت.",
+    pfAmount:"بڕی نێردراو (دینار)",
+    pfPick:"📷 وێنەی وەسڵەکە هەڵبژێرە",
+    pfPicked:"وێنە هەڵبژێردرا — دەتوانیت بیگۆڕیت",
+    pfSend:"ناردنی وەسڵ",
+    pfNeedImg:"تکایە وێنەی وەسڵەکە هەڵبژێرە.",
+    pfNeedAmt:"تکایە بڕی نێردراو بنووسە.",
+    pfFail:"نەنێردرا. تکایە دووبارە هەوڵ بدەرەوە یان لە واتسئاپ بینێرە.",
+    pfFallback:"یان لە واتسئاپ بینێرە بۆ <a href=\"{wa}\" target=\"_blank\" rel=\"noopener\" dir=\"ltr\">0750 385 6449</a> لەگەڵ کۆدەکەت",
+    pfWaitT:"وەسڵەکەت گەیشت — چاوەڕوانی پشتڕاستکردنەوە",
+    pfWaitP:"بڕی {amt} دینار نێردراوە. دوای پشکنینی هەژمارەکە لێرە پشتڕاست دەکرێتەوە.",
+    pfOkT:"✓ پێشەکیەکەت پشتڕاستکرایەوە",
+    pfBadT:"وەسڵەکە پەسەند نەکرا",
+    pfBadP:"تکایە دووبارە بینێرەوە یان لە واتسئاپ پەیوەندیمان پێوە بکە.",
+    pfReason:"هۆکار: ",
+    pfSentAt:"نێردرا",
+    pfWaMsg:"سڵاو، وەسڵی پێشەکی بۆ کۆدی "
   },
   ar: {
     title:"تتبع طلبك",
@@ -344,7 +386,25 @@ const T = {
     },
     shippedStop:"انشحن من شي إن — بالطريق إلى دبي",
     erbilStop:"وصل أربيل — قيد التوصيل",
-    now:"الآن"
+    now:"الآن",
+    pfTitle:"إرسال وصل المقدم",
+    pfHelp:"حوّل المقدم بالبنك أو Qi، وبعدين حط صورة الوصل هنا. بعد التأكيد ينشرى طلبك.",
+    pfAmount:"المبلغ المحوَّل (دينار)",
+    pfPick:"📷 اختر صورة الوصل",
+    pfPicked:"الصورة مختارة — تكدر تغيّرها",
+    pfSend:"إرسال الوصل",
+    pfNeedImg:"اختر صورة الوصل.",
+    pfNeedAmt:"اكتب المبلغ المحوَّل.",
+    pfFail:"ما انرسل. جرب مرة ثانية أو ابعثه بالواتساب.",
+    pfFallback:"أو ابعثه بالواتساب على <a href=\"{wa}\" target=\"_blank\" rel=\"noopener\" dir=\"ltr\">0750 385 6449</a> مع رمزك",
+    pfWaitT:"وصلك وصل — بانتظار التأكيد",
+    pfWaitP:"انرسل مبلغ {amt} دينار. بعد فحص الحساب ينأكد هنا.",
+    pfOkT:"✓ تأكد مقدمك",
+    pfBadT:"الوصل ما انقبل",
+    pfBadP:"ابعثه مرة ثانية أو راسلنا بالواتساب.",
+    pfReason:"السبب: ",
+    pfSentAt:"انرسل",
+    pfWaMsg:"مرحباً، وصل المقدم للرمز "
   }
 };
 
@@ -352,6 +412,13 @@ let lang = localStorage.getItem("spo_lang") === "ar" ? "ar" : "ku";
 
 const $ = id => document.getElementById(id);
 const iqd = n => Number(n).toLocaleString("en-US");
+const esc = v => String(v == null ? "" : v).replace(/[&<>"']/g,
+  c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[c]);
+// Arabic-Indic and Persian numerals -> 0-9 (JavaScript's \d only matches 0-9)
+const AR = "٠١٢٣٤٥٦٧٨٩", FA = "۰۱۲۳۴۵۶۷۸۹";
+const toEn = t => String(t == null ? "" : t).replace(/[٠-٩۰-۹]/g, d => {
+  const i = AR.indexOf(d); return i > -1 ? i : FA.indexOf(d);
+});
 
 function applyLang(){
   const t = T[lang];
@@ -402,6 +469,129 @@ async function fetchTier(code, last4){
   } catch (e) {}
 }
 
+// ---------- Deposit proof (wasl) ----------
+// The customer pays by bank / Qi and attaches the screenshot here, so the
+// proof lands on the order instead of travelling WhatsApp -> Ahmed -> chat ->
+// admin. Staff confirm it in admin (deposit_proofs.sql); nothing here changes
+// the order itself — the page only uploads a picture and inserts one row.
+// Deposit rule: 10,000 under 100,000 total, 25,000 from 100,000 up.
+const WASL = total => Number(total) >= 100000 ? 25000 : 10000;
+const PF_WA = "https://wa.me/9647503856449?text=";
+let pf = { loaded: false, proof: null, file: null, preview: "", amount: "", busy: false, err: "" };
+
+async function fetchProof(code, last4){
+  pf = { loaded: false, proof: null, file: null, preview: "", amount: "", busy: false, err: "" };
+  paintProof();
+  try {
+    const res = await fetch(SUPABASE_URL + "/rest/v1/rpc/track_deposit_proof", {
+      method: "POST",
+      headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY,
+                 "Content-Type": "application/json" },
+      body: JSON.stringify({ p_code: code, p_last4: last4 })
+    });
+    if (res.ok){ const rows = await res.json(); pf.proof = (rows && rows[0]) || null; }
+  } catch (e) {}
+  pf.loaded = true;
+  paintProof();
+}
+
+function paintProof(){
+  const box = $("r-proof"), o = window._last, t = T[lang], p = pf.proof;
+  if (!o || !pf.loaded){ box.innerHTML = ""; return; }
+  const active = !["delivered", "cancelled"].includes(o.status);
+  if (p && p.status === "confirmed"){
+    box.innerHTML = `<div class="proof ok"><h3>${t.pfOkT}</h3></div>`; return;
+  }
+  if (p && p.status === "pending"){
+    box.innerHTML = `<div class="proof wait"><h3>${t.pfWaitT}</h3>
+      <div class="p" style="margin:0">${t.pfWaitP.replace("{amt}", iqd(p.claimed_iqd))}<br>
+      <span class="num">${t.pfSentAt}: ${fmtDate(p.created_at)}</span></div></div>`;
+    return;
+  }
+  const rejected = p && p.status === "rejected";
+  // the form: deposit not recorded yet on an open order, or a rejected proof to redo
+  if (!active || Number(o.deposit_iqd) > 0){ box.innerHTML = ""; return; }
+  const wa = PF_WA + encodeURIComponent(t.pfWaMsg + o.order_code);
+  const amount = pf.amount !== "" ? pf.amount : String(WASL(o.total_iqd));
+  box.innerHTML = `<div class="proof${rejected ? " bad" : ""}">
+    <h3>${rejected ? t.pfBadT : t.pfTitle}</h3>
+    ${rejected ? `<div class="why">${p.reject_reason ? t.pfReason + esc(p.reject_reason) + "<br>" : ""}${t.pfBadP}</div>`
+               : `<div class="p">${t.pfHelp}</div>`}
+    <div id="pf-err" class="err${pf.err ? "" : " hidden"}">${pf.err}</div>
+    <label for="pf-amt">${t.pfAmount}</label>
+    <div class="field"><input id="pf-amt" type="text" inputmode="numeric" autocomplete="off" value="${esc(amount)}"></div>
+    <label class="pick${pf.file ? " has" : ""}" id="pf-pick">${pf.preview ? `<img src="${pf.preview}" alt="">` : ""}
+      <span>${pf.file ? t.pfPicked : t.pfPick}</span>
+      <input type="file" id="pf-file" accept="image/*"></label>
+    <button class="go" id="pf-go"${pf.busy ? " disabled" : ""}>${pf.busy ? '<span class="spin"></span>' : t.pfSend}</button>
+    <div class="fb">${t.pfFallback.replace("{wa}", wa)}</div>
+  </div>`;
+  $("pf-amt").addEventListener("input", e => {
+    const v = toEn(e.target.value);
+    if (v !== e.target.value) e.target.value = v;
+    pf.amount = v;
+  });
+  $("pf-file").addEventListener("change", e => {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    if (pf.preview) URL.revokeObjectURL(pf.preview);
+    pf.file = f; pf.preview = URL.createObjectURL(f); pf.err = "";
+    paintProof();
+  });
+  $("pf-go").addEventListener("click", submitProof);
+}
+
+// Bank screenshots are 2-4 MB PNGs; a 1600 px JPEG is plenty to read a
+// transfer and uploads in a second on mobile data. Falls back to the raw file.
+function shrinkImage(file){
+  return new Promise(resolve => {
+    const url = URL.createObjectURL(file), img = new Image();
+    const done = v => { URL.revokeObjectURL(url); resolve(v || file); };
+    img.onload = () => {
+      try {
+        const k = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight));
+        const c = document.createElement("canvas");
+        c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+        c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+        c.toBlob(b => done(b), "image/jpeg", 0.85);
+      } catch (e) { done(null); }
+    };
+    img.onerror = () => done(null);
+    img.src = url;
+  });
+}
+
+async function submitProof(){
+  const t = T[lang], o = window._last;
+  const amt = Number(toEn(pf.amount !== "" ? pf.amount : String(WASL(o.total_iqd))).replace(/\D/g, ""));
+  if (!pf.file){ pf.err = t.pfNeedImg; paintProof(); return; }
+  if (!amt){ pf.err = t.pfNeedAmt; paintProof(); return; }
+  pf.err = ""; pf.busy = true; paintProof();
+  try {
+    const blob = await shrinkImage(pf.file);
+    const path = `${o.order_code}/${Date.now()}.jpg`;
+    const H = { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY };
+    let res = await fetch(`${SUPABASE_URL}/storage/v1/object/deposit-proofs/${encodeURI(path)}`, {
+      method: "POST", body: blob,
+      headers: { ...H, "Content-Type": blob.type || "image/jpeg", "x-upsert": "false" }
+    });
+    if (!res.ok) throw new Error("upload " + res.status);
+    res = await fetch(SUPABASE_URL + "/rest/v1/deposit_proofs", {
+      method: "POST",
+      headers: { ...H, "Content-Type": "application/json", "Prefer": "return=minimal" },
+      body: JSON.stringify({ order_code: o.order_code, claimed_iqd: amt, image_path: path })
+    });
+    if (!res.ok) throw new Error("insert " + res.status);
+    if (pf.preview) URL.revokeObjectURL(pf.preview);
+    pf.proof = { status: "pending", claimed_iqd: amt, created_at: new Date().toISOString() };
+    pf.file = null; pf.preview = ""; pf.amount = "";
+  } catch (e) {
+    pf.err = t.pfFail;
+  }
+  pf.busy = false;
+  paintProof();
+}
+
 function render(o){
   window._last = o;
   const t = T[lang];
@@ -439,6 +629,7 @@ function render(o){
     $("r-note").textContent = o.balance_iqd > 0 ? t.cash : t.settled;
     $("r-note").style.color = "";
   }
+  paintProof();
 
   const seen = {};
   (o.history || []).forEach(h => { if (!seen[h.status]) seen[h.status] = h.at; });
@@ -528,12 +719,8 @@ async function lookup(){
   const t = T[lang];
   $("err").classList.add("hidden");
 
-  const AR = "٠١٢٣٤٥٦٧٨٩", FA = "۰۱۲۳۴۵۶۷۸۹";
-  const en = t => String(t).replace(/[٠-٩۰-۹]/g, d => {
-    const i = AR.indexOf(d); return i > -1 ? i : FA.indexOf(d);
-  });
-  let code = en($("code").value.trim());
-  let last4 = en($("last4").value.trim());
+  let code = toEn($("code").value.trim());
+  let last4 = toEn($("last4").value.trim());
 
   if (!code || last4.length !== 4){ showError(t.empty); return; }
 
@@ -557,6 +744,7 @@ async function lookup(){
     try { localStorage.setItem("spo_track", JSON.stringify({ code, last4 })); } catch (e) {}
     render(rows[0]);
     fetchTier(code, last4);
+    fetchProof(rows[0].order_code, last4);
   } catch (e) {
     showError(t.neterr);
   } finally {
