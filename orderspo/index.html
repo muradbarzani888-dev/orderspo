@@ -80,6 +80,15 @@ button.go:disabled{opacity:.5;cursor:default}
   padding:12px 14px;margin-bottom:16px;line-height:1.7;
 }
 .hidden{display:none}
+
+/* v21: order without Instagram — WhatsApp or the web form (order.html) */
+.order2{display:flex;gap:10px;margin-bottom:26px}
+.order2 a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  min-height:68px;border-radius:12px;text-decoration:none;font-weight:600;font-size:14px;padding:10px 8px;text-align:center;line-height:1.4}
+.order2 a .s{font-size:11px;font-weight:400;opacity:.75}
+.order2 .wa{background:#25D366;color:#06282B}
+.order2 .web{background:var(--teal);color:#06282B}
+.order2 a:hover{filter:brightness(1.05)}
 @keyframes spo-fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
 @keyframes spo-dr{0%{transform:translateX(0)}100%{transform:translateX(400px)}}
 @keyframes spo-rl{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
@@ -171,6 +180,10 @@ button.go:disabled{opacity:.5;cursor:default}
   </div>
 
   <section id="form-view">
+    <div class="order2">
+      <a class="wa" id="o-wa" target="_blank" rel="noopener"><span data-t="orderWa"></span><span class="s" dir="ltr">0750 385 6449</span></a>
+      <a class="web" href="/order"><span data-t="orderWeb"></span><span class="s" data-t="orderWebS"></span></a>
+    </div>
     <h2 data-t="title"></h2>
     <p class="sub" data-t="sub"></p>
     <div id="err" class="err hidden"></div>
@@ -184,7 +197,7 @@ button.go:disabled{opacity:.5;cursor:default}
     </div>
     <button class="go" id="submit" data-t="cta"></button>
     <p class="hint" data-t="hint"></p>
-    <p style="text-align:center;color:#3E545B;font-size:10px;margin-top:22px;font-family:Archivo,sans-serif">v20</p>
+    <p style="text-align:center;color:#3E545B;font-size:10px;margin-top:22px;font-family:Archivo,sans-serif">v21</p>
   </section>
 
   <section id="result-view" class="hidden">
@@ -285,6 +298,8 @@ const TIER_SVG = {
 
 const T = {
   ku: {
+    orderWa:"داواکاری لە واتسئاپ",orderWeb:"داواکاری لێرە",orderWebS:"لینکەکان بنێرە لە ماڵپەڕ",
+    orderWaMsg:"سڵاو، دەمەوێت داواکاری بکەم",
     title:"بەدواداچوونی داواکاریەکەت",
     sub:"کۆدەکەت بنووسە و ببینە لە کوێیە",
     codeLabel:"کۆدی داواکاری",
@@ -346,6 +361,8 @@ const T = {
     pfWaMsg:"سڵاو، وەسڵی پێشەکی بۆ کۆدی "
   },
   ar: {
+    orderWa:"اطلب بالواتساب",orderWeb:"اطلب من هنا",orderWebS:"ابعث الروابط من الموقع",
+    orderWaMsg:"مرحباً، أريد أطلب",
     title:"تتبع طلبك",
     sub:"اكتب رمزك وشوف وين وصل طلبك",
     codeLabel:"رمز الطلب",
@@ -429,6 +446,7 @@ function applyLang(){
   });
   $("ku").setAttribute("aria-pressed", lang === "ku");
   $("ar").setAttribute("aria-pressed", lang === "ar");
+  $("o-wa").href = PF_WA + encodeURIComponent(t.orderWaMsg);
   if (!$("result-view").classList.contains("hidden") && window._last){ render(window._last); paintTier(); }
 }
 

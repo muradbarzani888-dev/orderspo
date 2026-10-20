@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Orderspo — داواکاری لە ماڵپەڕ</title>
+<meta name="description" content="لینکی کاڵاکانت بنێرە و داواکاریەکەت لە Orderspo تۆمار بکە">
+<meta name="theme-color" content="#172B31">
+<link rel="icon" href="/logo.png">
+<link rel="apple-touch-icon" href="/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Noto+Kufi+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#172B31;
+  --ink-deep:#0F1F24;
+  --ink-line:#2C4249;
+  --teal:#2AADA5;
+  --teal-dark:#248782;
+  --white:#FFFFFF;
+  --mute:#8FA3A8;
+  --faint:#5C7178;
+  --radius:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--ink);
+  color:var(--white);
+  font-family:"Noto Kufi Arabic","Archivo",system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  min-height:100dvh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:24px 18px 40px;
+}
+.num{font-family:"Archivo",sans-serif;direction:ltr;unicode-bidi:isolate;font-variant-numeric:tabular-nums}
+.wrap{width:100%;max-width:420px;margin:auto 0}
+
+.langbar{width:100%;max-width:420px;display:flex;justify-content:flex-end;gap:4px;margin-bottom:20px}
+.langbar button{
+  background:none;border:0;color:var(--faint);font:500 12px "Archivo",sans-serif;
+  padding:6px 10px;border-radius:6px;cursor:pointer;font-family:inherit;
+}
+.langbar button[aria-pressed="true"]{color:var(--teal);background:var(--ink-deep)}
+
+.brand{text-align:center;padding:18px 0 26px}
+.brand h1{font:600 21px "Archivo",sans-serif;letter-spacing:1.5px;color:var(--white)}
+.brand h1 a{color:inherit;text-decoration:none}
+.brand .rule{width:30px;height:2px;background:var(--teal);margin:11px auto 0}
+
+h2{font-size:17px;font-weight:500;text-align:center;margin-bottom:7px;line-height:1.5}
+.sub{color:var(--mute);font-size:13px;text-align:center;line-height:1.8;margin-bottom:26px}
+
+label{display:block;color:var(--mute);font-size:12px;margin-bottom:6px}
+input,textarea{
+  width:100%;height:46px;background:var(--ink-deep);
+  border:1px solid var(--ink-line);border-radius:var(--radius);
+  color:var(--white);font:500 16px "Archivo",sans-serif;
+  padding:0 14px;outline:none;transition:border-color .15s;font-family:inherit;
+}
+input:focus,textarea:focus{border-color:var(--teal)}
+input::placeholder,textarea::placeholder{color:#3E545B}
+textarea{height:auto;min-height:112px;padding:12px 14px;line-height:1.7;resize:vertical}
+#links{direction:ltr;text-align:left;font-family:"Archivo",monospace;font-size:13.5px}
+#phone{direction:ltr;text-align:left;font-family:"Archivo",sans-serif}
+.field{margin-bottom:16px}
+.field .sm{color:var(--faint);font-size:11.5px;margin-top:5px;line-height:1.7}
+
+button.go{
+  width:100%;height:48px;background:var(--teal);border:0;border-radius:var(--radius);
+  color:#06282B;font:600 15px inherit;cursor:pointer;transition:background .15s;
+  font-family:inherit;
+}
+button.go:hover:not(:disabled){background:var(--teal-dark)}
+button.go:disabled{opacity:.5;cursor:default}
+
+.hint{color:var(--faint);font-size:12px;text-align:center;margin-top:16px;line-height:1.8}
+.hint a{color:var(--mute)}
+.err{
+  background:rgba(226,75,74,.1);border:1px solid rgba(226,75,74,.35);
+  color:#F09595;font-size:13px;border-radius:var(--radius);
+  padding:12px 14px;margin-bottom:16px;line-height:1.7;
+}
+.hidden{display:none}
+
+/* after submit */
+.done{background:rgba(42,173,165,.08);border:1px solid rgba(42,173,165,.45);border-radius:14px;padding:18px 16px;margin-bottom:18px;text-align:center}
+.done .big{font-size:34px;font-weight:600;color:var(--teal);font-family:"Archivo",sans-serif}
+.done h3{font-size:15px;font-weight:600;margin:6px 0 4px}
+.done .p{color:var(--mute);font-size:12.5px;line-height:1.8}
+a.wa{
+  display:flex;align-items:center;justify-content:center;gap:9px;width:100%;height:48px;
+  background:#25D366;border-radius:var(--radius);color:#06282B;font-weight:600;font-size:15px;
+  text-decoration:none;margin-bottom:12px;
+}
+a.wa svg{width:20px;height:20px;flex:0 0 auto}
+.foot{border-top:1px solid var(--ink-line);margin-top:20px;padding-top:14px;text-align:center}
+.foot button{background:none;border:0;color:var(--teal);font:500 13px inherit;cursor:pointer;font-family:inherit}
+
+.spin{display:inline-block;width:15px;height:15px;border:2px solid rgba(6,40,43,.3);
+  border-top-color:#06282B;border-radius:50%;animation:sp .7s linear infinite;vertical-align:-3px}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation-duration:2s}}
+</style>
+</head>
+<body>
+
+<div class="langbar">
+  <button id="ku" aria-pressed="true">کوردی</button>
+  <button id="ar" aria-pressed="false">عربي</button>
+</div>
+
+<div class="wrap">
+  <div class="brand">
+    <h1><a href="/">ORDERSPO</a></h1>
+    <div class="rule"></div>
+  </div>
+
+  <section id="form-view">
+    <h2 data-t="title"></h2>
+    <p class="sub" data-t="sub"></p>
+    <div id="err" class="err hidden"></div>
+    <div class="field">
+      <label for="links" data-t="linksLabel"></label>
+      <textarea id="links" autocomplete="off" spellcheck="false" placeholder="https://shein.top/..."></textarea>
+      <div class="sm" data-t="linksHelp"></div>
+    </div>
+    <div class="field">
+      <label for="name" data-t="nameLabel"></label>
+      <input id="name" autocomplete="name" maxlength="80">
+    </div>
+    <div class="field">
+      <label for="phone" data-t="phoneLabel"></label>
+      <input id="phone" inputmode="tel" autocomplete="tel" placeholder="0750 123 4567" maxlength="20">
+    </div>
+    <div class="field">
+      <label for="city" data-t="cityLabel"></label>
+      <input id="city" autocomplete="address-level2" maxlength="60" list="cities">
+      <datalist id="cities"></datalist>
+    </div>
+    <div class="field">
+      <label for="note" data-t="noteLabel"></label>
+      <textarea id="note" maxlength="500" style="min-height:70px"></textarea>
+    </div>
+    <button class="go" id="submit" data-t="cta"></button>
+    <p class="hint" id="hint"></p>
+    <p style="text-align:center;color:#3E545B;font-size:10px;margin-top:22px;font-family:Archivo,sans-serif">v1</p>
+  </section>
+
+  <section id="done-view" class="hidden">
+    <div class="done">
+      <div class="big num" id="d-n"></div>
+      <h3 data-t="doneT"></h3>
+      <p class="p" data-t="doneP"></p>
+    </div>
+    <a class="wa" id="d-wa" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2zm0 1.8a8.2 8.2 0 0 1 0 16.4 8.1 8.1 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 0 1 12 3.8zm-3.3 4.4c-.2 0-.5 0-.7.3-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.2 5 4.4 2.5 1 3 .8 3.5.7.5 0 1.7-.7 2-1.4.2-.7.2-1.2.1-1.3l-.5-.3-1.9-.9c-.3-.1-.5-.2-.6.1l-.9 1.1c-.2.2-.3.2-.6.1-.3-.2-1.2-.5-2.3-1.5-.9-.8-1.5-1.7-1.6-2-.2-.3 0-.5.1-.6l.4-.5.3-.5v-.5l-.9-2.1c-.2-.5-.4-.5-.6-.5z"/></svg>
+      <span data-t="waBtn"></span>
+    </a>
+    <p class="hint" data-t="waHint"></p>
+    <div class="foot"><button id="again" data-t="again"></button></div>
+  </section>
+</div>
+
+<script>
+const SUPABASE_URL = "https://bucrapapzgyqxfqdnyaz.supabase.co";
+const SUPABASE_KEY = "sb_publishable_bf3Rs0aaLbxji2WHfy9A7Q_jSw20oma";
+const WA_NUM = "9647503856449";       // business WhatsApp +964 750 385 6449
+const MAX_LINKS = 20;                  // same cap as the hourly limit in cart_links_web.sql
+
+const T = {
+  ku: {
+    title:"داواکاری لە ماڵپەڕ",
+    sub:"لینکی کاڵاکانت بنێرە، ئێمە بۆت دەکڕین و دەیگەیەنین",
+    linksLabel:"لینکی کاڵاکان",
+    linksHelp:"هەر لینکێک لە دێڕێکی جیا. لە شەین: کاڵاکە بکەرەوە ← Share ← Copy link",
+    nameLabel:"ناوت",
+    phoneLabel:"ژمارەی مۆبایل",
+    cityLabel:"شار",
+    noteLabel:"تێبینی (ئارەزوومەندانە)",
+    cta:"ناردنی داواکاری",
+    hint:"دوای ناردن لە واتسئاپ پەیوەندیت پێوە دەکەین بۆ کۆی گشتی و پێشەکی. پرسیارت هەیە؟ <a href=\"{wa}\" target=\"_blank\" rel=\"noopener\" dir=\"ltr\">0750 385 6449</a>",
+    needLinks:"تکایە لانیکەم لینکێکی کاڵا بنووسە.",
+    badLinks:"ئەم دێڕە لینک نییە: {x}",
+    manyLinks:"زۆرترین {n} لینک لە جارێکدا.",
+    needName:"تکایە ناوت بنووسە.",
+    badPhone:"ژمارەی مۆبایل بە شێوەی 07xxxxxxxxx بنووسە (١١ ژمارە).",
+    needCity:"تکایە شارەکەت بنووسە.",
+    rate:"زۆر لینک لە کاتژمێرێکدا نێردراوە بۆ ئەم ژمارەیە. تکایە دواتر هەوڵ بدەرەوە یان لە واتسئاپ بینێرە.",
+    neterr:"نەنێردرا. تکایە دووبارە هەوڵ بدەرەوە یان لینکەکان لە واتسئاپ بنێرە.",
+    doneT:"لینک تۆمارکرا ✓",
+    doneP:"داواکاریەکەت گەیشتە لیستی کڕین. بۆ پشتڕاستکردنەوە لە واتسئاپ پەیاممان بۆ بنێرە.",
+    waBtn:"پشتڕاستکردنەوە لە واتسئاپ",
+    waHint:"پەیامەکە ئامادەیە — تەنها Send لێبدە",
+    waMsg:"سڵاو، داواکاریم لە ماڵپەڕ نارد، ژمارەم: ",
+    again:"داواکارییەکی تر",
+    cities:["هەولێر","سلێمانی","دهۆک","کەرکوک","بەغدا","مووسڵ","بەسرە","زاخۆ","هەڵەبجە","ڕانیە","کۆیە","سۆران"]
+  },
+  ar: {
+    title:"اطلب من الموقع",
+    sub:"ابعث روابط المنتجات، واحنا نشتريها ونوصلها إلك",
+    linksLabel:"روابط المنتجات",
+    linksHelp:"كل رابط بسطر لحاله. من شي إن: افتح المنتج ← Share ← Copy link",
+    nameLabel:"اسمك",
+    phoneLabel:"رقم الموبايل",
+    cityLabel:"المدينة",
+    noteLabel:"ملاحظة (اختياري)",
+    cta:"إرسال الطلب",
+    hint:"بعد الإرسال نراسلك بالواتساب بالمجموع والمقدم. عندك سؤال؟ <a href=\"{wa}\" target=\"_blank\" rel=\"noopener\" dir=\"ltr\">0750 385 6449</a>",
+    needLinks:"اكتب رابط منتج واحد على الأقل.",
+    badLinks:"هذا السطر مو رابط: {x}",
+    manyLinks:"أقصى حد {n} رابط بالمرة الوحدة.",
+    needName:"اكتب اسمك.",
+    badPhone:"اكتب رقم الموبايل بصيغة 07xxxxxxxxx (١١ رقم).",
+    needCity:"اكتب مدينتك.",
+    rate:"انبعثت روابط هواي بساعة وحدة من هذا الرقم. جرب بعدين أو ابعثها بالواتساب.",
+    neterr:"ما انرسل. جرب مرة ثانية أو ابعث الروابط بالواتساب.",
+    doneT:"رابط انحفظ ✓",
+    doneP:"طلبك وصل قائمة الشراء. حتى نأكده، ابعثلنا رسالة بالواتساب.",
+    waBtn:"التأكيد بالواتساب",
+    waHint:"الرسالة جاهزة — بس اضغط إرسال",
+    waMsg:"مرحباً، أرسلت طلبي من الموقع، رقمي: ",
+    again:"طلب ثاني",
+    cities:["أربيل","السليمانية","دهوك","كركوك","بغداد","الموصل","البصرة","زاخو","حلبجة","رانية","كويسنجق","سوران"]
+  }
+};
+
+let lang = localStorage.getItem("spo_lang") === "ar" ? "ar" : "ku";
+const $ = id => document.getElementById(id);
+const esc = v => String(v == null ? "" : v).replace(/[&<>"']/g,
+  c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[c]);
+// Arabic-Indic and Persian numerals -> 0-9 (JavaScript's \d only matches 0-9)
+const AR = "٠١٢٣٤٥٦٧٨٩", FA = "۰۱۲۳۴۵۶۷۸۹";
+const toEn = t => String(t == null ? "" : t).replace(/[٠-٩۰-۹]/g, d => {
+  const i = AR.indexOf(d); return i > -1 ? i : FA.indexOf(d);
+});
+// "0750 123 4567", "+964 750 123 4567", "00964750…" -> "07501234567" (or "" when it is not one)
+function normPhone(v){
+  let p = toEn(v).replace(/\D/g, "").replace(/^(00)?964/, "0");
+  return /^07\d{9}$/.test(p) ? p : "";
+}
+const waLink = msg => `https://wa.me/${WA_NUM}?text=${encodeURIComponent(msg)}`;
+
+function applyLang(){
+  const t = T[lang];
+  document.documentElement.lang = lang === "ar" ? "ar" : "ckb";
+  document.querySelectorAll("[data-t]").forEach(el => {
+    const v = t[el.dataset.t];
+    if (v) el.textContent = v;
+  });
+  $("hint").innerHTML = t.hint.replace("{wa}", waLink(""));
+  $("cities").innerHTML = t.cities.map(c => `<option value="${esc(c)}">`).join("");
+  $("ku").setAttribute("aria-pressed", lang === "ku");
+  $("ar").setAttribute("aria-pressed", lang === "ar");
+  if (window._sent) paintDone();
+}
+
+function showError(msg){
+  const e = $("err");
+  e.textContent = msg;
+  e.classList.remove("hidden");
+  e.scrollIntoView({ block: "nearest" });
+}
+
+function paintDone(){
+  const t = T[lang], s = window._sent;
+  $("d-n").textContent = s.n;
+  $("d-wa").href = waLink(t.waMsg + s.phone);
+}
+
+async function send(){
+  const t = T[lang];
+  $("err").classList.add("hidden");
+
+  const lines = $("links").value.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  // one link per line, but a line pasted from the SHEIN share sheet may carry text around it
+  const links = [];
+  for (const l of lines){
+    const m = l.match(/https?:\/\/[^\s<>"'،]+/i);
+    if (!m){ showError(t.badLinks.replace("{x}", l.slice(0, 40))); return; }
+    if (!links.includes(m[0])) links.push(m[0]);
+  }
+  if (!links.length){ showError(t.needLinks); return; }
+  if (links.length > MAX_LINKS){ showError(t.manyLinks.replace("{n}", MAX_LINKS)); return; }
+  const name = $("name").value.trim();
+  if (!name){ showError(t.needName); return; }
+  const phone = normPhone($("phone").value);
+  if (!phone){ showError(t.badPhone); return; }
+  const city = $("city").value.trim();
+  if (!city){ showError(t.needCity); return; }
+  const note = $("note").value.trim();
+
+  const btn = $("submit");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span>';
+  try {
+    const res = await fetch(SUPABASE_URL + "/rest/v1/cart_links", {
+      method: "POST",
+      headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY,
+                 "Content-Type": "application/json", "Prefer": "return=minimal" },
+      body: JSON.stringify(links.map(url => ({
+        source: "web", url, username: phone, customer_name: name, phone, city, note: note || null
+      })))
+    });
+    if (!res.ok){
+      let msg = "";
+      try { msg = (await res.json()).message || ""; } catch (e) {}
+      showError(/rate limit/i.test(msg) ? t.rate : t.neterr);
+      return;
+    }
+    window._sent = { n: links.length, phone };
+    try { localStorage.setItem("spo_order", JSON.stringify({ name, phone, city })); } catch (e) {}
+    paintDone();
+    $("form-view").classList.add("hidden");
+    $("done-view").classList.remove("hidden");
+    window.scrollTo(0, 0);
+  } catch (e) {
+    showError(t.neterr);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = t.cta;
+  }
+}
+
+// a returning customer does not retype name / phone / city
+try {
+  const prev = JSON.parse(localStorage.getItem("spo_order") || "null");
+  if (prev){ $("name").value = prev.name || ""; $("phone").value = prev.phone || ""; $("city").value = prev.city || ""; }
+} catch (e) {}
+
+$("submit").addEventListener("click", send);
+$("again").addEventListener("click", () => {
+  window._sent = null;
+  $("done-view").classList.add("hidden");
+  $("form-view").classList.remove("hidden");
+  $("links").value = ""; $("note").value = "";
+  $("links").focus();
+});
+["ku","ar"].forEach(l => $(l).addEventListener("click", () => {
+  lang = l; localStorage.setItem("spo_lang", l); applyLang();
+}));
+
+applyLang();
+</script>
+</body>
+</html>
