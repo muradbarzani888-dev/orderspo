@@ -94,6 +94,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 .row .c{color:var(--teal);font-size:13px}
 .row .u{font-size:14px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .row .s{font-size:11.5px;color:var(--faint);margin-top:3px}
+.au-lbt.on{border-color:var(--teal)!important;background:var(--teal)!important;color:#06171C!important}
 .row .b{text-align:left;font-size:15px;font-weight:600;flex-shrink:0}
 
 .kv{display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--line);font-size:14px}
@@ -143,7 +144,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v123</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v124</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -585,9 +586,21 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
         <input id="au-pull" dir="ltr" autocomplete="off" placeholder="@username" style="flex:1;min-height:44px">
         <button class="btn" id="au-pull-go" data-t="auraPull" style="width:auto;min-height:44px;padding:0 14px;font-size:12.5px;flex:0 0 auto"></button>
       </div>
+      <button class="btn ghost" id="au-new" data-t="auraNewOrder" style="margin:0 0 14px"></button>
+      <div id="au-form" class="hide" style="margin-bottom:14px"></div>
       <div style="display:flex;gap:10px;margin-top:4px;align-items:center">
         <input id="au-q" dir="ltr" autocomplete="off" placeholder="rosse / 0750…" style="flex:1;min-height:44px">
         <select id="au-f" style="width:auto;min-height:44px;flex:0 0 auto"></select>
+      </div>
+      <button id="au-lb-all" data-t="auraLbAll" style="margin-top:10px;min-height:38px;padding:0 12px;border-radius:10px;border:1px solid var(--line);
+        background:transparent;color:var(--white);font-size:12.5px;cursor:pointer"></button>
+      <div id="au-lb" class="hide" style="margin-top:12px">
+        <div style="display:flex;gap:10px">
+          <button class="btn" id="au-lb-print" style="flex:2;margin:0"></button>
+          <button class="btn ghost" id="au-lb-pdf" style="flex:1;margin:0">PDF</button>
+          <button class="btn" id="au-lb-clear" style="flex:0 0 52px;margin:0;background:transparent;
+            border:1px solid var(--line);color:var(--mute)">✕</button>
+        </div>
       </div>
       <div id="au-list" style="margin-top:12px"></div>
     </div>
@@ -734,6 +747,7 @@ const T = {
   cartShowBought:"کڕدراوەکان",cartHideBought:"چاوەڕوانەکان",cartNoLink:"هیچ لینکێک نەدۆزرایەوە — لینکەکە بلکێنە",cartNeedUser:"ناوی ئینستاگرام پێویستە",cartDup:"ئەم لینکە پێشتر تۆمارکراوە",cartBy:"لەلایەن",cartEmpty:"هیچ لینکێک نییە",cartWeb:"ماڵپەڕ",
   auraTitle:"داواکاریەکانی Aura",auraHelp:"نامەکانی ئینستاگرامی aura.originall خۆکار دەگەنە ئێرە. کاتێک وەڵامی ئامادەکراوی «تۆمارکرا» بۆ کڕیار دەنێریت، گفتوگۆکە دەخوێنرێتەوە و داواکاریەکە لێرە دەردەکەوێت. دۆخەکە بە دەست بگۆڕە.",
   auraNew:"نوێ",auraDone:"تەواوکراو",auraItems:"کاڵاکان",auraTotal:"کۆی گشتی",auraDelivery:"گەیاندن",auraMissing:"نەدۆزرایەوە",auraNotes:"تێبینی",auraChat:"چات",auraRedo:"دووبارە خوێندنەوە",auraCopy:"کۆپی ناونیشان",auraEmpty:"هیچ داواکاریەک نییە",auraStaffNote:"تێبینی ستاف",auraPull:"خوێندنەوەی چات",auraPulling:"چاتەکە دەخوێنرێتەوە…",
+  auraEdit:"دەستکاری",auraNewOrder:"+ داواکاری نوێ بە دەست",auraFItems:"کاڵاکان (هەر دێڕێک یەک کاڵا)",auraFUser:"یوزەرنەیمی ئینستاگرام (ئارەزوومەندانە)",auraNeedOne:"ناو یان مۆبایل بنووسە",auraSavePrint:"تۆمارکردن و چاپکردنی لەیبڵ",auraLbAll:"🏷 هەڵبژاردنی هەموو ئەوانەی دەرکەوتوون بۆ لەیبڵ",auraLbMissing:"ئەمانە مۆبایل یان ناونیشانیان نییە — سەرەتا دەستکاری بکە",
   auraSt:{new:"نوێ",confirmed:"پشتڕاستکراوە",bought:"کڕدرا",shipped:"نێردرا",delivered:"گەیەندرا",cancelled:"هەڵوەشێنراوە",all:"هەموو"},
   depTitle:"وەسڵە چاوەڕوانەکان",depHelp:"کڕیار وەسڵی پێشەکی لە پەیجی بەدواداچوون دەنێرێت و لێرە دەردەکەوێت. وێنەکە لەگەڵ هەژماری بانک بەراورد بکە: «پشتڕاستکردنەوە» بڕەکە وەک پێشەکی لەسەر داواکاریەکە تۆمار دەکات، «ڕەتکردنەوە» هۆکارێکی دەوێت و کڕیار دەیبینێت. دۆخی داواکاری لێرە ناگۆڕدرێت.",
   depPending:"چاوەڕوان",depToday:"پشتڕاستکراوی ئەمڕۆ",depClaimed:"نێردراو",depExpected:"پێویست",depCurrent:"تۆمارکراو",depConfirm:"پشتڕاستکردنەوە",depReject:"ڕەتکردنەوە",
@@ -794,6 +808,7 @@ const T = {
   cartShowBought:"المشتراة",cartHideBought:"المنتظرة",cartNoLink:"ما لكيت رابط — الصق الرابط",cartNeedUser:"لازم اسم الانستغرام",cartDup:"هذا الرابط محفوظ من قبل",cartBy:"من قبل",cartEmpty:"ما في روابط",cartWeb:"الموقع",
   auraTitle:"طلبات Aura",auraHelp:"رسائل انستغرام aura.originall تجي هنا تلقائياً. لما ترسل الرد الجاهز «تم التسجيل» للزبون، تنقرأ المحادثة ويطلع الطلب هنا. غيّر الحالة بيدك.",
   auraNew:"جديد",auraDone:"منتهي",auraItems:"المنتجات",auraTotal:"المجموع",auraDelivery:"التوصيل",auraMissing:"ناقص",auraNotes:"ملاحظات",auraChat:"المحادثة",auraRedo:"إعادة القراءة",auraCopy:"نسخ العنوان",auraEmpty:"ما في طلبات",auraStaffNote:"ملاحظة الستاف",auraPull:"قراءة المحادثة",auraPulling:"جاري قراءة المحادثة…",
+  auraEdit:"تعديل",auraNewOrder:"+ طلب جديد يدوي",auraFItems:"المنتجات (كل سطر منتج)",auraFUser:"يوزر انستغرام (اختياري)",auraNeedOne:"اكتب الاسم أو الموبايل",auraSavePrint:"حفظ وطباعة الليبل",auraLbAll:"🏷 اختيار كل الظاهر للطباعة",auraLbMissing:"هذول ما عندهم موبايل أو عنوان — عدّلهم أولاً",
   auraSt:{new:"جديد",confirmed:"مؤكد",bought:"منشتري",shipped:"منرسل",delivered:"تم التسليم",cancelled:"ملغي",all:"الكل"},
   depTitle:"الوصولات المعلقة",depHelp:"الزبون يرسل وصل المقدم من صفحة التتبع ويطلع هنا. قارن الصورة مع حساب البنك: «تأكيد» يسجل المبلغ كمقدم على الطلب، «رفض» يحتاج سبب والزبون يشوفه. حالة الطلب ما تتغير من هنا.",
   depPending:"معلق",depToday:"مؤكد اليوم",depClaimed:"المرسل",depExpected:"المطلوب",depCurrent:"المسجل",depConfirm:"تأكيد",depReject:"رفض",
@@ -3008,6 +3023,8 @@ async function skUpload(e){
 // Barcode number = cycle + zero-padded customer code (26080398), so the last
 // four digits always identify the customer at a glance or a scan.
 let lbInit = false, lbSel = new Map();
+// The print frame must not sit inside a hidden view: Aura prints from its own page.
+document.body.appendChild($("lb-frame"));
 
 const C128 = ["212222","222122","222221","121223","121322","131222","122213","122312","132212","221213",
 "221312","231212","112232","122132","122231","113222","123122","123221","223211","221132",
@@ -3101,6 +3118,8 @@ body{font-family:"Tahoma","Arial","Noto Naskh Arabic","Geeza Pro",sans-serif;col
 .lb{width:100mm;height:100mm;padding:2.6mm 3mm;display:flex;flex-direction:column;
   gap:1.4mm;background:#fff;overflow:hidden;page-break-after:always;break-after:page}
 .lb:last-child{page-break-after:auto;break-after:auto}
+.wm{display:inline-block;border:0.45mm solid #0A4184;border-radius:2.2mm;padding:0.8mm 2mm;
+  font-size:3.4mm;font-weight:700;line-height:1.15;letter-spacing:0.5mm;text-align:center;direction:ltr}
 .top{display:flex;align-items:center;justify-content:space-between;flex:0 0 auto}
 .top img{height:8.8mm}
 .pills{display:flex;flex-direction:column;gap:0.8mm}
@@ -3258,14 +3277,20 @@ async function lbPdf(){
   const rows = [...lbSel.values()].sort((a, b) => a.seq - b.seq);
   if (!rows.length) return;
   const b = $("lb-pdf"); b.disabled = true;
+  const cyc = $("lb-cycle").value;
+  await lbPdfDoc(lbDoc(rows, cyc), rows.length, `labels_${cyc}_${rows[0].seq}-${rows[rows.length - 1].seq}.pdf`, "lb-msg");
+  b.disabled = false;
+}
+
+// Shared by Sheinspo and Aura: any label sheet (n labels) → one PDF file.
+async function lbPdfDoc(html, n, file, msg){
   try {
     if (!window.jspdf) await lbScript("https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js");
-    const cyc = $("lb-cycle").value;
     // Capture happens INSIDE the same isolated iframe the print path uses —
     // rendered by its own stylesheet, untouched by the RTL admin page.
     const fr = $("lb-frame");
     fr.style.cssText = "position:fixed;left:-10000px;top:0;width:420px;height:460px;visibility:visible;border:0";
-    await new Promise(r => { fr.onload = r; fr.srcdoc = lbDoc(rows, cyc); });
+    await new Promise(r => { fr.onload = r; fr.srcdoc = html; });
     const cd = fr.contentDocument, cw = fr.contentWindow;
     await new Promise((res, rej) => {
       const sc = cd.createElement("script");
@@ -3284,9 +3309,9 @@ async function lbPdf(){
     };
     const doc = new window.jspdf.jsPDF({ unit: "mm", format: [100, 100] });
     const els = [...cd.querySelectorAll(".lb")];
-    if (els.length !== rows.length) throw new Error(`render ${els.length}/${rows.length}`);
+    if (els.length !== n) throw new Error(`render ${els.length}/${n}`);
     for (let i = 0; i < els.length; i++){
-      say("lb-msg", `PDF ${i + 1} / ${els.length}`, "ok", 0);
+      say(msg, `PDF ${i + 1} / ${els.length}`, "ok", 0);
       let cv = await cw.html2canvas(els[i], { scale: 4, backgroundColor: "#ffffff", logging: false });
       if (blank(cv)){
         await new Promise(r => setTimeout(r, 350));
@@ -3296,20 +3321,22 @@ async function lbPdf(){
       if (i) doc.addPage([100, 100]);
       doc.addImage(cv.toDataURL("image/jpeg", 0.92), "JPEG", 0, 0, 100, 100);
     }
-    doc.save(`labels_${cyc}_${rows[0].seq}-${rows[rows.length - 1].seq}.pdf`);
-    say("lb-msg", `✓ PDF · ${rows.length}`, "ok");
+    doc.save(file);
+    say(msg, `✓ PDF · ${n}`, "ok");
     fr.style.cssText = "display:none";
-  } catch (e){ say("lb-msg", e.message, "err"); }
-  b.disabled = false;
+  } catch (e){ say(msg, e.message, "err"); }
 }
 
 function lbPrint(){
   const rows = [...lbSel.values()].sort((a, b) => a.seq - b.seq);
   if (!rows.length) return;
-  const cyc = $("lb-cycle").value;
+  lbPrintDoc(lbDoc(rows, $("lb-cycle").value));
+}
+
+function lbPrintDoc(html){
   const fr = $("lb-frame");
   fr.style.cssText = "display:none";
-  fr.srcdoc = lbDoc(rows, cyc);
+  fr.srcdoc = html;
   fr.onload = () => {
     const img = fr.contentDocument.querySelector("img");
     const go = () => setTimeout(() => { fr.contentWindow.focus(); fr.contentWindow.print(); }, 150);
@@ -4710,12 +4737,14 @@ function renderAura(){
       </div></div>`).join("");
     const missing = (r.missing || []).length ? `<div style="color:#E8A33D;font-size:12.5px;margin-top:6px">⚠ ${t().auraMissing}: ${escC((r.missing || []).join(", "))}</div>` : "";
     const addr = [r.city, r.address].filter(Boolean).join(" — ");
+    const manual = auManual(r), picked = auraSel.has(r.id);
     return `<div class="row" style="cursor:default;flex-direction:column;align-items:stretch;gap:8px" data-id="${r.id}">
       <div style="display:flex;gap:10px;align-items:center">
         <div class="l">
-          <div class="u" dir="ltr">${r.username ? "@" + escC(r.username) : escC(r.igsid)}${r.customer_name ? ` · ${escC(r.customer_name)}` : ""}</div>
-          <div class="s num" dir="ltr">${cartWhen(r.created_at)}${r.phone ? ` · ${escC(r.phone)}` : ""}</div>
+          <div class="u" dir="ltr">${r.username ? "@" + escC(r.username) : manual ? "✍" : escC(r.igsid)}${r.customer_name ? ` · ${escC(r.customer_name)}` : ""}</div>
+          <div class="s num" dir="ltr">A-${r.id} · ${cartWhen(r.created_at)}${r.phone ? ` · ${escC(r.phone)}` : ""}</div>
         </div>
+        <button class="au-lbt${picked ? " on" : ""}" data-id="${r.id}" title="${t().lblPrint}" style="${btn};flex:0 0 auto;padding:0 10px">🏷</button>
         <select class="au-st" data-id="${r.id}" style="width:auto;min-height:38px;flex:0 0 auto">${
           AURA_ST.map(v => `<option value="${v}"${v === r.status ? " selected" : ""}>${t().auraSt[v]}</option>`).join("")}</select>
       </div>
@@ -4726,13 +4755,16 @@ function renderAura(){
       <input class="au-note" data-id="${r.id}" value="${escC(r.staff_note || "")}" placeholder="${t().auraStaffNote}" style="min-height:38px;font-size:13px">
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         ${r.username ? `<a href="https://ig.me/m/${escC(r.username)}" target="_blank" rel="noopener" style="${btn}">↗ Instagram</a>` : ""}
+        <button class="au-edit" data-id="${r.id}" style="${btn}">✎ ${t().auraEdit}</button>
         <button class="au-copy" data-id="${r.id}" style="${btn}">⧉ ${t().auraCopy}</button>
-        <button class="au-chat" data-id="${r.id}" style="${btn}">💬 ${t().auraChat}</button>
-        <button class="au-redo" data-id="${r.id}" style="${btn}">↻ ${t().auraRedo}</button>
+        ${manual ? "" : `<button class="au-chat" data-id="${r.id}" style="${btn}">💬 ${t().auraChat}</button>
+        <button class="au-redo" data-id="${r.id}" style="${btn}">↻ ${t().auraRedo}</button>`}
       </div>
+      <div class="au-ed hide" data-id="${r.id}" style="border-top:1px solid var(--line);padding-top:10px"></div>
       <div class="au-thread hide" data-id="${r.id}" style="font-size:12.5px;line-height:1.8;max-height:360px;overflow:auto;border-top:1px solid var(--line);padding-top:8px"></div>
     </div>`;
   }).join("") || `<div class="empty">${t().auraEmpty}</div>`;
+  auLbBar();
 
   const byId = id => auraRows.find(x => String(x.id) === id);
   const save = async (r, upd, el) => {
@@ -4774,7 +4806,191 @@ function renderAura(){
     const r = byId(b.dataset.id); if (!r) return;
     auraPull(r.igsid);
   }));
+  [...$("au-list").querySelectorAll(".au-lbt")].forEach(b => b.addEventListener("click", () => {
+    const id = +b.dataset.id;
+    auraSel.has(id) ? auraSel.delete(id) : auraSel.add(id);
+    auLbPaint();
+  }));
+  [...$("au-list").querySelectorAll(".au-edit")].forEach(b => b.addEventListener("click", () => {
+    const r = byId(b.dataset.id); if (!r) return;
+    const box = $("au-list").querySelector(`.au-ed[data-id="${r.id}"]`);
+    if (!box.classList.contains("hide")){ box.classList.add("hide"); return; }
+    box.innerHTML = auForm(r);
+    box.classList.remove("hide");
+    box.querySelector(".au-f-cancel").onclick = () => box.classList.add("hide");
+    box.querySelector(".au-f-save").onclick = async () => {
+      const upd = auFormRead(box);
+      if (!upd.customer_name && !upd.phone) return say("au-msg", t().auraNeedOne, "err");
+      await save(r, { ...upd, missing: [] });
+      renderAura();
+    };
+  }));
 }
+
+// Hand-made orders (WhatsApp, a call) have no Instagram chat behind them.
+const auManual = r => String(r.igsid || "").startsWith("manual");
+const auNum = v => { const n = toEn(v).replace(/[^\d]/g, ""); return n ? +n : null; };
+
+// One form for both: fixing what Claude read on a card, and typing a new order.
+function auForm(r){
+  const f = (k, lbl, v, extra) => `<div class="f" style="margin-bottom:8px"><label>${lbl}</label>
+    <input class="au-i" data-k="${k}" value="${escC(v ?? "")}" ${extra || ""} style="min-height:42px;font-size:13.5px"></div>`;
+  const isNew = !r;
+  r = r || {};
+  return (isNew ? f("username", t().auraFUser, "", 'dir="ltr" placeholder="@"') : "") +
+    f("customer_name", t().lblName, r.customer_name) +
+    f("phone", t().lblPhone, r.phone, 'dir="ltr" inputmode="tel" placeholder="0750…"') +
+    f("city", t().lblCity, r.city) +
+    f("address", t().lblAddr, r.address) +
+    (isNew ? `<div class="f" style="margin-bottom:8px"><label>${t().auraFItems}</label>
+      <textarea class="au-i" data-k="items" rows="3" style="font-size:13.5px"></textarea></div>` : "") +
+    `<div style="display:flex;gap:10px">
+      <div style="flex:1">${f("total_iqd", t().auraTotal, r.total_iqd, 'dir="ltr" inputmode="numeric"')}</div>
+      <div style="flex:1">${f("delivery_iqd", t().auraDelivery, r.delivery_iqd, 'dir="ltr" inputmode="numeric"')}</div>
+    </div>
+    ${isNew ? `<button class="btn au-f-print" style="margin:0 0 10px">🏷 ${t().auraSavePrint}</button>` : ""}
+    <div style="display:flex;gap:10px">
+      <button class="btn${isNew ? " ghost" : ""} au-f-save" style="flex:2;margin:0">${t().save}</button>
+      <button class="btn ghost au-f-cancel" style="flex:1;margin:0">✕</button>
+    </div>`;
+}
+
+function auFormRead(box){
+  const v = k => { const el = box.querySelector(`.au-i[data-k="${k}"]`); return el ? el.value.trim() : undefined; };
+  const out = {
+    customer_name: v("customer_name") || null, phone: toEn(v("phone")) || null,
+    city: v("city") || null, address: v("address") || null,
+    total_iqd: auNum(v("total_iqd")), delivery_iqd: auNum(v("delivery_iqd"))
+  };
+  if (v("username") !== undefined) out.username = v("username").replace(/^@/, "") || null;
+  if (v("items") !== undefined) out.items = v("items").split("\n").map(s => s.trim()).filter(Boolean)
+    .map(name => ({ name, variant: null, qty: 1, unit_price_iqd: null, image_url: null, note: null }));
+  return out;
+}
+
+$("au-new").addEventListener("click", () => {
+  const box = $("au-form");
+  if (!box.classList.contains("hide")){ box.classList.add("hide"); return; }
+  box.innerHTML = `<div class="row" style="cursor:default;display:block">${auForm(null)}</div>`;
+  box.classList.remove("hide");
+  box.querySelector(".au-f-cancel").onclick = () => box.classList.add("hide");
+  // Typed by hand → saved as an Aura order, optionally straight onto a label.
+  const add = async print => {
+    const row = auFormRead(box);
+    if (!row.customer_name && !row.phone) return say("au-msg", t().auraNeedOne, "err");
+    if (print && (!row.phone || !(row.address || row.city))) return say("au-msg", t().auraLbMissing, "err");
+    await freshSession();
+    const now = new Date().toISOString();
+    const { data, error } = await db.from("ig_orders").insert({ ...row, igsid: "manual", status: "new",
+      trigger_mid: "hand-" + now, model: null, updated_by: me.full_name, updated_at: now }).select().single();
+    if (error) return say("au-msg", error.message, "err");
+    if (print) lbPrintDoc(auLbDoc([data]));
+    box.classList.add("hide");
+    say("au-msg", t().saved, "ok", 1500);
+    auraFilter = "new"; $("au-f").value = "new";
+    initAura();
+  };
+  box.querySelector(".au-f-save").onclick = () => add(false);
+  box.querySelector(".au-f-print").onclick = () => add(true);
+});
+
+// ---------- Aura labels: the same 100x100 SHKO sheet as Sheinspo ----------
+// Barcode = 9 + the order id padded to 7 digits (90000012), so it never
+// collides with a Sheinspo cycle+seq number (26080398). Customer code = A-<id>.
+const AURA_PAGE = { name: "aura.originall", phone: "", branch: "هةولير" };
+let auraSel = new Set();
+
+// Phones as customers type them ("750 775 6138", "+964 750…") → 07501234567
+function auPhone(p){
+  let d = toEn(p).replace(/[^\d]/g, "");
+  if (d.startsWith("00964")) d = d.slice(5); else if (d.startsWith("964")) d = d.slice(3);
+  if (d.length === 10 && d[0] === "7") d = "0" + d;
+  return d || "—";
+}
+
+function lbAura(o){
+  const wb = "9" + String(o.id).padStart(7, "0");
+  const name = o.customer_name || (o.username ? "@" + o.username : "—");
+  const addr = ([o.city, o.address].filter(Boolean).join(" — ") || "—").replace(/\s+/g, " ").trim();
+  const due = (o.total_iqd || 0) + (o.delivery_iqd || 0);
+  const today = new Date().toLocaleDateString("en-GB").replace(/\//g, "-");
+  const nameF = lbFit(name, "4mm", [[21, "2.2mm"], [17, "2.5mm"], [14, "2.8mm"], [11, "3.1mm"], [9, "3.5mm"]]);
+  const addrF = lbFit(addr, "4mm", [[55, "2.7mm"], [38, "3.1mm"], [24, "3.6mm"]]);
+  return `<div class="lb">
+    <div class="top">
+      <span style="display:flex;align-items:center;gap:2.2mm">
+        <img src="${LB_SKO}" alt="SKO POST">
+        <span class="wm">AURA<br>ORIGINAL</span>
+      </span>
+      <div class="pills">
+        <div class="pill">التاريخ: <span class="ltr">${today}</span></div>
+        <div class="pill">رقم الشاحنة: <span class="ltr">${wb}</span></div>
+      </div>
+    </div>
+    <div class="box cust">
+      <div class="cap">معلومات الزبون</div>
+      <div class="bcwrap"><div class="bc">${lbBarcodeSvg(wb, 40, 8)}<div class="n">${wb}</div></div></div>
+      <div class="rows">
+        <div class="r"><span class="k">اسم الزبون</span><span class="v" style="font-size:${nameF}">${lbEsc(name)}</span></div>
+        <div class="r"><span class="k">رقم الهاتف</span><span class="v ltr">${lbEsc(auPhone(o.phone))}</span></div>
+      </div>
+      <div class="addr"><span class="k">العنوان</span>
+        <span class="v" style="font-size:${addrF}">${lbEsc(addr)}</span></div>
+    </div>
+    <div class="box page">
+      <div class="cap">معلومات الصفحة</div>
+      <div class="rows">
+        <div class="r"><span class="k">اسم الصفحة</span><span class="v ltr">${AURA_PAGE.name}</span></div>
+        ${AURA_PAGE.phone ? `<div class="r"><span class="k">رقم الهاتف</span><span class="v ltr">${AURA_PAGE.phone}</span></div>` : ""}
+        <div class="r"><span class="k">الفرع</span><span class="v">${AURA_PAGE.branch}</span></div>
+      </div>
+    </div>
+    <div class="code"><div class="k">رمز الزبون</div><div class="v num">A-${o.id}</div></div>
+    <div class="total"><div class="k">السعر الكلي</div><div class="v num">${iqd(due)}</div></div>
+  </div>`;
+}
+
+function auLbRows(){
+  return auraRows.filter(r => auraSel.has(r.id)).sort((a, b) => a.id - b.id);
+}
+
+// Repaint the 🏷 buttons in place: a full re-render would close open edit forms.
+function auLbPaint(){
+  [...$("au-list").querySelectorAll(".au-lbt")].forEach(b => b.classList.toggle("on", auraSel.has(+b.dataset.id)));
+  auLbBar();
+}
+
+function auLbBar(){
+  const n = auLbRows().length;
+  $("au-lb").classList.toggle("hide", !n);
+  $("au-lb-print").textContent = `${t().lblPrint} (${n})`;
+}
+
+// Refuse to print a label the courier cannot deliver.
+function auLbReady(){
+  const rows = auLbRows();
+  const bad = rows.filter(r => !r.phone || !(r.address || r.city));
+  if (bad.length){ say("au-msg", `${t().auraLbMissing}: ${bad.map(r => "A-" + r.id).join(" ")}`, "err"); return null; }
+  return rows.length ? rows : null;
+}
+
+const auLbDoc = rows => `<!doctype html><html><head><meta charset="utf-8"><style>${LB_CSS}</style></head><body>` +
+  rows.map(lbAura).join("") + "</body></html>";
+
+$("au-lb-all").addEventListener("click", () => {
+  [...$("au-list").querySelectorAll(".au-lbt")].forEach(b => auraSel.add(+b.dataset.id));
+  auLbPaint();
+});
+$("au-lb-clear").addEventListener("click", () => { auraSel.clear(); auLbPaint(); });
+$("au-lb-print").addEventListener("click", () => {
+  const rows = auLbReady(); if (rows) lbPrintDoc(auLbDoc(rows));
+});
+$("au-lb-pdf").addEventListener("click", async () => {
+  const rows = auLbReady(); if (!rows) return;
+  const b = $("au-lb-pdf"); b.disabled = true;
+  await lbPdfDoc(auLbDoc(rows), rows.length, `aura_labels_A${rows[0].id}-A${rows[rows.length - 1].id}.pdf`, "au-msg");
+  b.disabled = false;
+});
 // Pull an existing chat into an order by username, without sending anything
 // to the customer: the function reads the last 20 messages via Meta's API.
 async function auraPull(target){
