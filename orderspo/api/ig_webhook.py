@@ -22,7 +22,9 @@ Routes
 
 Environment (set in Vercel → Project → Settings → Environment Variables)
   IG_VERIFY_TOKEN        any string; the same string goes into Meta's "Verify token"
-  IG_APP_SECRET          Meta app → App settings → Basic → App secret
+  IG_APP_SECRET          the *Instagram* app secret (Use cases → Instagram API → API setup
+                         with Instagram login), not App settings → Basic; Meta signs
+                         the webhooks with it
   IG_ACCESS_TOKEN        the Instagram user token generated for aura.originall
   IG_ORDER_TRIGGER       optional; phrases separated by "|" (default "#order")
   SUPABASE_URL           https://….supabase.co
