@@ -125,6 +125,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 .spin{display:inline-block;width:15px;height:15px;border:2px solid rgba(6,40,43,.3);
  border-top-color:#06282B;border-radius:50%;animation:s .7s linear infinite;vertical-align:-3px}
 @keyframes s{to{transform:rotate(360deg)}}
+.dtable tfoot .tot td{font-weight:800;border-top:2px solid rgba(42,173,165,.5);background:rgba(42,173,165,.06);padding-top:12px;padding-bottom:12px}
 </style>
 </head>
 <body>
@@ -144,7 +145,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v124</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v125</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -1916,7 +1917,7 @@ function renderDash(){
       <td><span class="chip${r.status==="delivered"||r.status==="cancelled"?" grey":""}">${t().st[r.status]||r.status}</span></td>
       <td class="num money">${r.items_count ?? "—"}</td>
     </tr>`).join("") +
-    `</tbody></table></div>`;
+    `</tbody>${dashTotals(rows)}</table></div>`;
 
   document.querySelectorAll("#dh-table th").forEach(th =>
     th.addEventListener("click", () => {
@@ -1926,6 +1927,25 @@ function renderDash(){
     }));
   document.querySelectorAll("#dh-table tbody tr").forEach(tr =>
     tr.addEventListener("click", () => openOrder(tr.dataset.id)));
+}
+
+// Totals line under the table for whatever is listed (status chip + search),
+// so filtering to one stage shows that stage's money. Cancelled rows are
+// counted but their money is left out.
+function dashTotals(rows){
+  const live = rows.filter(r => r.status !== "cancelled");
+  const sum = k => live.reduce((a, r) => a + Number(r[k] || 0), 0);
+  const items = live.reduce((a, r) => a + Number(r.items_count || 0), 0);
+  return `<tfoot><tr class="tot">
+    <td class="num">${rows.length}</td>
+    <td>${t().orders}${live.length !== rows.length ? ` · ${live.length}` : ""}</td>
+    <td></td>
+    <td class="num money">${iqd(sum("total_iqd"))}</td>
+    <td class="num money">${iqd(sum("deposit_iqd"))}</td>
+    <td class="num money bal" style="color:var(--teal)">${iqd(sum("balance_iqd"))}</td>
+    <td></td>
+    <td class="num money">${items || "—"}</td>
+  </tr></tfoot>`;
 }
 
 // Iraqi governorates, Arabic plus the Latin/Kurdish spellings the sheet uses.
