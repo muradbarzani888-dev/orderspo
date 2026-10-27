@@ -145,7 +145,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v125</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v126</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -1562,6 +1562,11 @@ function splitTsv(text){
   return rows.filter(r => r.some(x => x.trim()));
 }
 
+// A sheet row whose name is just "Cancel" (customer backed out before buying)
+// is kept as a placeholder so the month's codes stay continuous: total 0,
+// status cancelled. It never counts in the money totals.
+const isCancelName = n => /^(cancel+ed|cancel|canceled|cancelled|کەنسڵ|ملغي|ملغى)$/i.test(String(n || "").trim());
+
 function parsePaste(){
   const out = [], bad = [];
   splitTsv($("p-box").value).forEach((c, i) => {
@@ -1579,7 +1584,9 @@ function parsePaste(){
     phone = phone.replace(/^00964/, "").replace(/^964/, "").replace(/^0+/, "");
     if (phone.length !== 10) phone = null;
 
-    if (!seq || !name || !total){ bad.push(seq || (i + 1)); return; }
+    const cancelled = isCancelName(name) && !total;
+    if (!seq || !name || (!total && !cancelled)){ bad.push(seq || (i + 1)); return; }
+    if (cancelled){ out.push({ seq, name: "Cancel", phone: null, address: "", total: 0, deposit: 0, bags: [], cancelled: true }); return; }
     // optional 6th column: the sheet's bag codes (XXXXX4+XXXXX5 / A1)
     const bags = (String(c[5] || "").toUpperCase().match(/[A-Z]{1,8}[0-9]{1,3}/g)) || [];
     out.push({ seq, name, phone, address, total, deposit: Math.min(dep, total), bags });
@@ -1658,10 +1665,16 @@ $("p-go").addEventListener("click", async () => {
   const b = $("p-go"); b.disabled = true; b.innerHTML = '<span class="spin"></span>';
   const addCyc = $("p-cycle").value || cycle;
   const { data, error } = await db.rpc("bulk_add_orders",
-    { p_cycle: addCyc, p_rows: rows.map(({ bags, ...rest }) => rest) });
+    { p_cycle: addCyc, p_rows: rows.map(({ bags, cancelled, ...rest }) => rest) });
   b.disabled = false; b.textContent = t().addAll;
   if (error) return say("p-msg", error.message, "err");
   const r = data[0];
+  // "Cancel" placeholders go straight to cancelled. Only rows with a zero total
+  // are touched, so an existing real order at that code is never cancelled.
+  const cancSeqs = rows.filter(x => x.cancelled).map(x => x.seq);
+  if (cancSeqs.length)
+    await db.from("orders").update({ status: "cancelled" })
+      .eq("cycle_code", addCyc).in("seq", cancSeqs).eq("total_iqd", 0).neq("status", "cancelled");
   // rows that carried a bags column register their bag list in the same paste
   const bagRows = rows.filter(x => x.bags.length)
     .map(x => ({ seq: x.seq, codes: [...new Set(x.bags)], note: null }));
@@ -1705,7 +1718,8 @@ $("d-c-save").addEventListener("click", async () => {
 
 $("n-go").addEventListener("click", async () => {
   const user = $("n-user").value.trim(), total = Number(toEn($("n-total").value).replace(/\D/g,""));
-  if (!user || !total) return say("n-msg", t().need, "err");
+  const cancelled = isCancelName(user) && !total;   // placeholder for a cancelled code
+  if (!user || (!total && !cancelled)) return say("n-msg", t().need, "err");
   const b = $("n-go"); b.disabled = true;
   try {
     let phone = toEn($("n-phone").value).replace(/\D/g,"")
@@ -1727,8 +1741,9 @@ $("n-go").addEventListener("click", async () => {
     if (se) throw se;
     const { error: oe } = await db.from("orders").insert({
       cycle_code: addCyc, seq, customer_id: cid, total_iqd: total,
-      deposit_iqd: Number(toEn($("n-dep").value).replace(/\D/g,"")) || 0,
-      items_count: Number(toEn($("n-items").value).replace(/\D/g,"")) || null
+      deposit_iqd: cancelled ? 0 : (Number(toEn($("n-dep").value).replace(/\D/g,"")) || 0),
+      items_count: Number(toEn($("n-items").value).replace(/\D/g,"")) || null,
+      ...(cancelled ? { status: "cancelled" } : {})
     });
     if (oe) throw oe;
     say("n-msg", `${t().saved} — ${addCyc}-${String(seq).padStart(4,"0")}`);
