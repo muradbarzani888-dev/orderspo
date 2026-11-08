@@ -145,7 +145,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v128</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v129</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -3727,7 +3727,8 @@ function ctToday(){ const d = new Date(); $("ct-date").value = `${d.getFullYear(
 const ctDay = e => {
   if (!e.created_at) return "";
   const d = new Date(e.created_at), dm = `${d.getDate()}/${d.getMonth() + 1}`;
-  return d.getFullYear() === new Date().getFullYear() ? dm : `${dm}/${d.getFullYear()}`;
+  const hm = `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+  return (d.getFullYear() === new Date().getFullYear() ? dm : `${dm}/${d.getFullYear()}`) + " " + hm;
 };
 // the dollar formula only when there was a dollar price; otherwise just the count
 const ctNote = e => e.unit_usd ? `${e.qty || 1} × $${e.unit_usd} × ${e.fx_rate || ""}` : (e.qty ? `${e.qty}` : "");
@@ -3941,7 +3942,7 @@ async function addCost(){
     qty, unit_usd: usd, fx_rate: usd ? fx : null,
     amount_iqd: amount, note: null
   };
-  if (day) row.created_at = `${day}T12:00:00`;
+  if (day){ const n = new Date(); row.created_at = `${day}T${String(n.getHours()).padStart(2,"0")}:${String(n.getMinutes()).padStart(2,"0")}:00`; }
   const { error } = await db.from("expenses").insert(row);
   if (error) return say("ct-msg", error.message, "err");
   ["ct-label", "ct-qty", "ct-usd", "ct-iqd"].forEach(i => $(i).value = "");
