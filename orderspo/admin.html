@@ -145,7 +145,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
 
 <div id="app" class="hide">
   <header>
-    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v127</span></span>
+    <span class="who">بەخێربێیت <b id="me"></b> <span style="color:#3E545B;font-size:10px">v128</span></span>
     <button id="l-ku" class="on">KU</button>
     <button id="l-ar">AR</button>
     <button id="out">دەرچوون</button>
@@ -435,6 +435,7 @@ textarea{min-height:72px;font-family:"Noto Kufi Arabic",sans-serif;resize:vertic
         <div style="display:flex;gap:10px">
           <div class="f" style="flex:1"><label data-t="costCat"></label><select id="ct-cat"></select></div>
           <div class="f" style="flex:1"><label data-t="costLabel"></label><input id="ct-label"></div>
+          <div class="f" style="flex:0 0 150px"><label data-t="costDate"></label><input id="ct-date" type="date" dir="ltr"></div>
         </div>
         <div style="display:flex;gap:10px" id="ct-usd-row">
           <div class="f" style="flex:1"><label data-t="costQty"></label><input id="ct-qty" inputmode="decimal" dir="ltr" placeholder="10"></div>
@@ -738,7 +739,7 @@ const T = {
   wcSheetOnly:"لە شیتدایە، لە سیستەمدا نییە",wcSysOnly:"لە سیستەمدایە، لە شیتدا نییە",
   wcSheet:"شیت",wcSystem:"سیستەم",wcTotal:"کۆ",wcDep:"وەصڵ",
   vipTag:"— بە باشی مامەڵە بکە",
-  tier:{bronze:"برۆنز",silver:"زیو",gold:"ئاڵتوون",platinum:"پلاتینیۆم",diamond:"دایمۆند",top:"TOP"},costTitle:"کۆست و قازانج",revenue:"داهاتی مانگ",totalCost:"کۆی کۆستەکان",netProfit:"قازانجی سافی",margin:"ڕێژەی قازانج",seedFixed:"زیادکردنی کۆستە جێگیرەکانی مانگ",addCost:"زیادکردنی کۆست",costCat:"جۆر",costLabel:"ناو",costQty:"ژمارە",costUsd:"نرخ بە دۆلار",costFx:"نرخی دۆلار",costIqd:"یان بڕ بە دینار",saveCost:"تۆمارکردن",costSettings:"ڕێکخستنەکانی کۆست",perKg:"دۆلار بۆ کیلۆ",baghdad:"بەغدا",south:"باشوور",saveSettings:"پاشەکەوتکردن",catFixed:"جێگیر",catCards:"کارتی شەین",catAds:"ڕیکلامی مێتا",catAgent:"ئاژانسی دوبەی",catShko:"گەیاندنی SHKO",catOther:"کۆستی تر",autoCalc:"خۆکار",kgRec:"کیلۆی تۆمارکراو",deliv:"گەیەندراو",unknownGov:"نادیار",shkoFile:"فایلی SHKO بار بکە",pickCol:"ستوونی کرێی گەیاندن هەڵبژێرە ⬇",rowsN:"ڕیز",shkoMoved:"گۆڕدرا بۆ «لە گەیاندندایە»",delivDebt:"قەرزی گەیەندراو (کۆنەکراوەتەوە)",saveAmounts:"تۆمارکردنی پێشەکی",saveTotal:"تۆمارکردنی کۆی گشتی",totalNeeded:"کۆی گشتی بنووسە",from:"لە دۆخی",to:"بۆ دۆخی",month:"مانگ",codeFrom:"لە کۆدی",codeTo:"بۆ کۆدی",
+  tier:{bronze:"برۆنز",silver:"زیو",gold:"ئاڵتوون",platinum:"پلاتینیۆم",diamond:"دایمۆند",top:"TOP"},costTitle:"کۆست و قازانج",revenue:"داهاتی مانگ",totalCost:"کۆی کۆستەکان",netProfit:"قازانجی سافی",margin:"ڕێژەی قازانج",seedFixed:"زیادکردنی کۆستە جێگیرەکانی مانگ",addCost:"زیادکردنی کۆست",costCat:"جۆر",costLabel:"ناو",costDate:"بەروار",costQty:"ژمارە",costUsd:"نرخ بە دۆلار",costFx:"نرخی دۆلار",costIqd:"یان بڕ بە دینار",saveCost:"تۆمارکردن",costSettings:"ڕێکخستنەکانی کۆست",perKg:"دۆلار بۆ کیلۆ",baghdad:"بەغدا",south:"باشوور",saveSettings:"پاشەکەوتکردن",catFixed:"جێگیر",catCards:"کارتی شەین",catAds:"ڕیکلامی مێتا",catAgent:"ئاژانسی دوبەی",catShko:"گەیاندنی SHKO",catOther:"کۆستی تر",autoCalc:"خۆکار",kgRec:"کیلۆی تۆمارکراو",deliv:"گەیەندراو",unknownGov:"نادیار",shkoFile:"فایلی SHKO بار بکە",pickCol:"ستوونی کرێی گەیاندن هەڵبژێرە ⬇",rowsN:"ڕیز",shkoMoved:"گۆڕدرا بۆ «لە گەیاندندایە»",delivDebt:"قەرزی گەیەندراو (کۆنەکراوەتەوە)",saveAmounts:"تۆمارکردنی پێشەکی",saveTotal:"تۆمارکردنی کۆی گشتی",totalNeeded:"کۆی گشتی بنووسە",from:"لە دۆخی",to:"بۆ دۆخی",month:"مانگ",codeFrom:"لە کۆدی",codeTo:"بۆ کۆدی",
   rangeHint:"بەتاڵی بهێڵەرەوە بۆ هەمووی",
   willMove:"داواکاری دەگوازرێتەوە",moveAll:"گواستنەوەی هەموویان",noRes:"هیچ نەدۆزرایەوە",
   codesLbl:"کۆدەکان (بە کۆمەڵ)",codesHint:"کۆدەکان بنووسە یان بلکێنە — ئەوسا «لە دۆخی» و مەودا پشتگوێ دەخرێن. گەیەندراو و هەڵوەشێنراوەکان ناگۆڕدرێن.",skipped:"پشتگوێخراو (گەیەندراو/هەڵوەشێنراو)",
@@ -799,7 +800,7 @@ const T = {
   wcSheetOnly:"موجود بالشيت، مو بالنظام",wcSysOnly:"موجود بالنظام، مو بالشيت",
   wcSheet:"الشيت",wcSystem:"النظام",wcTotal:"المجموع",wcDep:"الوصل",
   vipTag:"— عامله زين",
-  tier:{bronze:"برونز",silver:"فضة",gold:"ذهب",platinum:"بلاتينيوم",diamond:"دايموند",top:"TOP"},costTitle:"التكاليف والأرباح",revenue:"دخل الشهر",totalCost:"مجموع التكاليف",netProfit:"صافي الربح",margin:"نسبة الربح",seedFixed:"إضافة التكاليف الثابتة للشهر",addCost:"إضافة تكلفة",costCat:"النوع",costLabel:"الاسم",costQty:"العدد",costUsd:"السعر بالدولار",costFx:"سعر الدولار",costIqd:"أو المبلغ بالدينار",saveCost:"حفظ",costSettings:"إعدادات التكاليف",perKg:"دولار للكيلو",baghdad:"بغداد",south:"الجنوب",saveSettings:"حفظ",catFixed:"ثابتة",catCards:"كارتات شي إن",catAds:"إعلانات ميتا",catAgent:"وكيل دبي",catShko:"توصيل SHKO",catOther:"تكاليف أخرى",autoCalc:"تلقائي",kgRec:"كيلو مسجّل",deliv:"مسلَّم",unknownGov:"غير معروف",shkoFile:"ارفع ملف SHKO",pickCol:"اختر عمود أجرة التوصيل ⬇",rowsN:"صف",shkoMoved:"تحوّلت إلى «قيد التوصيل»",delivDebt:"دين المسلَّم (غير مستلم)",saveAmounts:"حفظ العربون",saveTotal:"حفظ المجموع",totalNeeded:"اكتب المجموع",from:"من حالة",to:"إلى حالة",month:"الشهر",codeFrom:"من رمز",codeTo:"إلى رمز",
+  tier:{bronze:"برونز",silver:"فضة",gold:"ذهب",platinum:"بلاتينيوم",diamond:"دايموند",top:"TOP"},costTitle:"التكاليف والأرباح",revenue:"دخل الشهر",totalCost:"مجموع التكاليف",netProfit:"صافي الربح",margin:"نسبة الربح",seedFixed:"إضافة التكاليف الثابتة للشهر",addCost:"إضافة تكلفة",costCat:"النوع",costLabel:"الاسم",costDate:"التاريخ",costQty:"العدد",costUsd:"السعر بالدولار",costFx:"سعر الدولار",costIqd:"أو المبلغ بالدينار",saveCost:"حفظ",costSettings:"إعدادات التكاليف",perKg:"دولار للكيلو",baghdad:"بغداد",south:"الجنوب",saveSettings:"حفظ",catFixed:"ثابتة",catCards:"كارتات شي إن",catAds:"إعلانات ميتا",catAgent:"وكيل دبي",catShko:"توصيل SHKO",catOther:"تكاليف أخرى",autoCalc:"تلقائي",kgRec:"كيلو مسجّل",deliv:"مسلَّم",unknownGov:"غير معروف",shkoFile:"ارفع ملف SHKO",pickCol:"اختر عمود أجرة التوصيل ⬇",rowsN:"صف",shkoMoved:"تحوّلت إلى «قيد التوصيل»",delivDebt:"دين المسلَّم (غير مستلم)",saveAmounts:"حفظ العربون",saveTotal:"حفظ المجموع",totalNeeded:"اكتب المجموع",from:"من حالة",to:"إلى حالة",month:"الشهر",codeFrom:"من رمز",codeTo:"إلى رمز",
   rangeHint:"خليها فارغة للكل",
   willMove:"طلب راح ينتقل",moveAll:"حدث الكل",noRes:"ما لكيت شي",
   codesLbl:"الرموز (دفعة)",codesHint:"اكتب أو الصق الرموز — عندها «من حالة» والمدى ينتجاهلون. المسلَّم والملغي ما يتغيرون.",skipped:"متجاوَز (مسلَّم/ملغي)",
@@ -3710,6 +3711,7 @@ async function loadCost(){
       }
     }
   }
+  if (!$("ct-date").value) ctToday();
   $("ct-fx").value = ctSet.fx_usd_iqd || 1400;
   $("ct-s-fx").value = ctSet.fx_usd_iqd || 1400;
   $("ct-s-kg").value = ctSet.agent_per_kg_usd || 1.25;
@@ -3719,6 +3721,16 @@ async function loadCost(){
   $("ct-s-sth").value = fees.south ?? 6000;
   renderCost();
 }
+
+function ctToday(){ const d = new Date(); $("ct-date").value = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
+// "29/10" for a cost line; the year only when it is not this year.
+const ctDay = e => {
+  if (!e.created_at) return "";
+  const d = new Date(e.created_at), dm = `${d.getDate()}/${d.getMonth() + 1}`;
+  return d.getFullYear() === new Date().getFullYear() ? dm : `${dm}/${d.getFullYear()}`;
+};
+// the dollar formula only when there was a dollar price; otherwise just the count
+const ctNote = e => e.unit_usd ? `${e.qty || 1} × $${e.unit_usd} × ${e.fx_rate || ""}` : (e.qty ? `${e.qty}` : "");
 
 // Costs are what the receipts say, nothing estimated: every line is typed in
 // (or imported from the courier's file). The only computed figure is revenue.
@@ -3746,7 +3758,7 @@ function renderCost(){
     <span class="num" style="color:#F09595">${iqd(v)}</span></div>
   <div class="${ctOpen.has(c) ? "" : "hide"}" style="padding:2px 0 6px;border-bottom:1px solid rgba(44,66,73,.5)">
     ${items.map(e => `<div style="display:flex;justify-content:space-between;align-items:baseline;padding:5px 14px 5px 0">
-      <div style="font-size:12.5px;color:var(--mute)">${e.label || "—"}${e.qty ? ` <span style="color:var(--faint);font-size:11px">· ${e.qty} × $${e.unit_usd} × ${e.fx_rate}</span>` : ""}</div>
+      <div style="font-size:12.5px;color:var(--mute)">${e.label || "—"}<span style="color:var(--faint);font-size:11px" class="num"> · ${ctDay(e)}${ctNote(e) ? ` · ${ctNote(e)}` : ""}</span></div>
       <span class="num" style="font-size:13px">${iqd(e.amount_iqd)}</span></div>`).join("")}
   </div>`;
   let h = "";
@@ -3760,7 +3772,7 @@ function renderCost(){
 
   $("ct-list").innerHTML = ctExp.map(e => `<div class="row" style="cursor:default">
     <div class="l"><div class="c">${t()["cat" + e.category[0].toUpperCase() + e.category.slice(1)] || e.category}</div>
-      <div class="u">${e.label || ""}${e.qty ? ` · ${e.qty} × $${e.unit_usd} × ${e.fx_rate}` : ""}</div></div>
+      <div class="u"><span class="num">${ctDay(e)}</span>${e.label ? ` · ${e.label}` : ""}${ctNote(e) ? ` · <span class="num">${ctNote(e)}</span>` : ""}</div></div>
     <div style="display:flex;align-items:center;gap:12px">
       <span class="num">${iqd(e.amount_iqd)}</span>
       <button data-ctdel="${e.id}" style="width:32px;height:32px;border-radius:10px;
@@ -3922,14 +3934,18 @@ async function addCost(){
   let amount = parseInt(toEn($("ct-iqd").value).replace(/[^\d]/g, ""), 10) || 0;
   if (!amount && usd) amount = Math.round((qty || 1) * usd * fx);
   if (!amount) return say("ct-msg", t().need, "err");
-  const { error } = await db.from("expenses").insert({
+  const day = $("ct-date").value;
+  const row = {
     cycle_code: cyc, category: $("ct-cat").value,
     label: $("ct-label").value.trim() || null,
     qty, unit_usd: usd, fx_rate: usd ? fx : null,
     amount_iqd: amount, note: null
-  });
+  };
+  if (day) row.created_at = `${day}T12:00:00`;
+  const { error } = await db.from("expenses").insert(row);
   if (error) return say("ct-msg", error.message, "err");
   ["ct-label", "ct-qty", "ct-usd", "ct-iqd"].forEach(i => $(i).value = "");
+  ctToday();
   say("ct-msg", t().saved, "ok");
   loadCost();
 }
